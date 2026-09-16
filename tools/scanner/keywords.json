@@ -1,0 +1,87 @@
+{
+  "_comment": "Search terms for the auction scanner. models = high-precision, low-volume, product names. designers = surnames — each with a plain-ASCII/no-hyphen variant too, since sellers on different platforms (Tradera vs Auctionet vs dba.dk) spell the same name differently: 'Carl-Axel Acking' on one, 'Carl Axel Acking' on another, diacritics dropped on a third. lazy_listing_terms = the alpha list, words a seller uses when they don't know what they have. no_designer_items = from research/itens.md section 2, style/wood/type searches without a designer name. woods = valuable/distinctive woods worth searching alone or combined with a seating type. exclude = negative filter, drop any lot whose title matches these. Source: research/itens.md, research/auction-scanner.md section 3, designer research 2026-09-16.",
+  "models": [
+    "Bodö", "F60", "Mondo", "TeVe", "TeVe-Stolen", "Contour", "Adam", "Eva",
+    "Cavelli", "Sälen", "Salen", "Kandidaten", "Lamino", "Pernilla", "Colonial OW149",
+    "OW149", "Krobo", "Minerva", "AP26", "Fried Egg", "Sirocco", "Inca",
+    "Ari", "Vaxholmaren", "Profil", "USA 75", "model 519", "Bow Chair",
+    "Little Petra", "Lilla Sällskapet", "Lilla Sallskapet", "Lani"
+  ],
+  "designers": [
+    "Sam Larsson",
+    "Alf Svensson",
+    "Esbjerg",
+    "Børge Mogensen", "Borge Mogensen",
+    "Niels Otto Møller", "Niels Otto Moller",
+    "Arne Vodder",
+    "Kai Kristiansen",
+    "Illum Wikkelsø", "Illum Wikkelso",
+    "Erik Buch",
+    "H.W. Klein", "HW Klein",
+    "Poul Volther",
+    "Hans Wegner",
+    "Poul Kjærholm", "Poul Kjaerholm",
+    "Finn Juhl",
+    "Johannes Andersen",
+    "Svend Åge Eriksen", "Svend Age Eriksen",
+    "Josef Frank",
+    "Carl-Axel Acking", "Carl Axel Acking",
+    "Axel Larsson",
+    "Elias Svedberg",
+    "Carl Malmsten",
+    "Gio Ponti",
+    "Ico Parisi",
+    "Franco Albini",
+    "Carlo Mollino",
+    "Osvaldo Borsani",
+    "Ignazio Gardella"
+  ],
+  "lazy_listing_terms": [
+    "retro fåtölj", "gammal fåtölj", "dansk fåtölj", "teakstol", "äldre fåtölj",
+    "loppis", "dödsbo", "flyttar", "måste bort", "retro stol", "70-tals",
+    "danish design", "teak chair", "ohne Angabe", "Dachboden", "Nachlass",
+    "retro Sessel",
+    "1800-talets", "1800-tal", "talets mitt", "1950-tal", "1950/60-tal", "1960-tal",
+    "Stolar 2 st", "Stolar 4 st", "Stolar ett par", "ett par",
+    "Fåtöljer ett par", "Ställbar fåtölj", "Soffgrupp", "Fåtölj", "Fåtöljer",
+    "Hallmöbel", "Karmstolar", "Karmstol", "Pallar", "Pall", "Canapé", "Schäslong"
+  ],
+  "no_designer_items": [
+    "Miranda chair of Sweden", "Miranda style", "Banquet stool",
+    "Armchair danish", "Emmafåtölj", "kids high chair oak", "danish designer",
+    "19th century armchair", "armchair Karl Johan style", "armchair la concha",
+    "birch chair", "birch armchair", "birch stool",
+    "burl chair", "burl armchair", "burl stool",
+    "beech chair", "beech armchair", "beech stool",
+    "mahogany chair", "mahogany armchair", "mahogany stool",
+    "teak chair set", "teak armchair", "teak stool",
+    "piano stool", "pianopall", "round stool",
+    "Swedish modern", "Swedish Grace", "Gripsholm chair", "ottoman",
+    "Swedish Biedermeier stool",
+    "Louis XV armchair", "Niels Kofoed chair",
+    "Art Deco armchair", "Rainer Daumiller Gubi", "antique bench",
+    "Alf Svensson armchair", "chaise longue", "canapé", "spindle bench",
+    "spisestol", "skammel", "tremmestol",
+    "liggstol", "daybed teak", "divan", "Svanhalsstolar"
+  ],
+  "woods": [
+    "jakaranda stol", "jakaranda fåtölj", "jakaranda chair",
+    "palisander stol", "palisander fåtölj",
+    "afrormosia chair", "afrormosia armchair", "afromosia stol",
+    "valnöt fåtölj", "walnut armchair",
+    "alm stol", "elm chair"
+  ],
+  "exclude": [
+    "chesterfield", "club armchair", "trasig", "broken", "butterfly chair"
+  ],
+  "seating_only": true,
+  "seating_type_words": [
+    "stol", "fåtölj", "pall", "bänk", "soffa", "karmstol", "fotpall",
+    "taburett", "chair", "armchair", "stool", "bench", "sofa", "ottoman"
+  ],
+  "non_seating_type_words": [
+    "bord", "skänk", "skåp", "hylla", "bokhylla", "byrå", "spegel", "lampa",
+    "matta", "tavla", "vas", "skulptur", "servis", "table", "cabinet",
+    "shelf", "mirror", "lamp", "rug", "painting", "vase", "sculpture"
+  ]
+}

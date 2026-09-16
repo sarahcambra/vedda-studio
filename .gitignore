@@ -1,0 +1,31 @@
+# Default: everything ignored. Only the explicit allow-list below is tracked.
+# This repo is public — anything not allow-listed here is data/research that
+# must never be committed: buy strategy, supplier prices, piece costings,
+# competitor research, inventory photos/receipts, finance records.
+*
+
+!/.gitignore
+!/README.md
+
+# The published GitHub Pages site — sourcing/scan-results only.
+!/docs/
+!/docs/**
+
+# Scanner + dashboard-builder source code. Not the data it produces.
+!/tools/
+!/tools/build-dashboard.py
+!/tools/build-public-dashboard.py
+!/tools/scanner/
+!/tools/scanner/*.py
+!/tools/scanner/keywords.json
+
+# Never these, even though they live under an allowed folder above.
+# fetch_siko.py: Sikö's robots.txt explicitly names and blocks this bot —
+# not publishing a scraper built to evade that.
+/tools/scanner/fetch_siko.py
+/tools/scanner/scanner.db
+/tools/scanner/report.html
+/tools/scanner/.venv/
+/tools/scanner/__pycache__/
+/tools/__pycache__/
+**/.DS_Store
