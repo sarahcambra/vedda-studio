@@ -783,7 +783,8 @@ TEMPLATE = r"""<!doctype html>
         if (!target || target < 1) return;
         currentPage = target;
         applyFilters();
-        pagerEl.scrollIntoView({ block: 'nearest' });
+        var gridEl = document.getElementById('scan-grid');
+        if (gridEl) gridEl.scrollIntoView({ block: 'start', behavior: 'smooth' });
       });
     });
   }
