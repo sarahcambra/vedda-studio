@@ -107,7 +107,7 @@ def normalise(raw, source_query, kind):
         "estimate_low": None,   # Tradera has no pre-sale estimate, unlike Auctionet
         "estimate_high": None,
         "ends_at": raw.get("EndDate"),
-        "image_url": raw.get("ThumbnailLink"),
+        "image_url": raw.get("ThumbnailLink", "").replace("/thumbs/", "/large/") or raw.get("ThumbnailLink"),
         "has_image": raw.get("Thumbnail") == "true",
         "matched_keyword": source_query,
         "matched_kind": kind,

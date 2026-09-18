@@ -45,6 +45,12 @@ def load_scan_results(limit=2000):
     return [dict(r) for r in rows], total
 
 
+def money(v, dash="—"):
+    if v is None:
+        return dash
+    return "{:,.0f} kr".format(v)
+
+
 def render(tpl, **kw):
     out = tpl
     for k, v in kw.items():
@@ -61,11 +67,13 @@ TEMPLATE = """<!doctype html>
 <link rel="stylesheet" href="dashboard.css">
 </head>
 <body>
-<div class="page" style="max-width:1100px; margin:0 auto; padding-left:var(--space-6); padding-right:var(--space-6);">
+<div class="page">
+  <div class="nav">
+    <span class="nav-brand">Vedda Studio</span>
+    <span class="text-muted" style="margin-right:auto;">sourcing — public view</span>
+  </div>
 
-  <div class="hero-block">
-    <span class="kicker">Vedda Studio</span>
-    <h1 class="hero-value" style="font-size:32px;">Sourcing</h1>
+  <div style="padding:var(--space-6) 0;">
     <p class="text-muted">Auction scan results and the manual Facebook Marketplace checklist. Nothing else from the internal dashboard is published here — no costings, no supplier prices, no buy-strategy notes.</p>
   </div>
 
@@ -74,7 +82,7 @@ TEMPLATE = """<!doctype html>
     <p class="text-muted">
       Auctionet, Tradera, Bukowskis, Haraldssons.
       <strong>{scan_total} lots archived</strong>, {scan_count} shown here, ranked by bad-listing score (🚩 = ≥3, worth reading first). New and loved shown; discarded is out of the way.
-      Saved in this browser only.
+      Shared with everyone who opens this page.
       <a href="#" id="scan-show-discarded" class="btn-link scan-discarded-link"><span id="scan-link-label">Show discarded</span> (<span id="scan-discarded-count">0</span>)</a>
     </p>
     <div class="scangrid" id="scan-grid">{scan_cards_html}</div>
@@ -98,7 +106,7 @@ TEMPLATE = """<!doctype html>
 </div>
 
 <script>
-(function () {{
+(function () {
   var cards = Array.prototype.slice.call(document.querySelectorAll('.scancard'));
   if (!cards.length) return;
   var showDiscardedLink = document.getElementById('scan-show-discarded');
@@ -108,20 +116,39 @@ TEMPLATE = """<!doctype html>
   var PAGE_SIZE = 36;
   var currentPage = 1;
 
-  function storeKey(lotKey) {{ return 'vs-scan-' + lotKey; }}
+  var SUPABASE_URL = 'https://rnquevahynifwpyynrbd.supabase.co';
+  var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJucXVldmFoeW5pZndweXlucmJkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk2MDQ5NDIsImV4cCI6MjEwNTE4MDk0Mn0.2xIZMYpxk-c6_xt7x8J0EkzRMWyRRRu4gy4kIEtLy1U';
 
-  function applyFilters() {{
+  function sbHeaders() {
+    return { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY, 'Content-Type': 'application/json' };
+  }
+
+  function sbPatch(lotKey, fields) {
+    return fetch(SUPABASE_URL + '/rest/v1/lots?lot_key=eq.' + encodeURIComponent(lotKey), {
+      method: 'PATCH',
+      headers: Object.assign(sbHeaders(), { 'Prefer': 'return=minimal' }),
+      body: JSON.stringify(fields)
+    }).catch(function (e) { console.warn('Supabase sync failed', e); });
+  }
+
+  function loadStates() {
+    return fetch(SUPABASE_URL + '/rest/v1/lots?select=lot_key,state,discard_reason,bought_price,bought_date&state=neq.new', {
+      headers: sbHeaders()
+    }).then(function (r) { return r.ok ? r.json() : []; }).catch(function () { return []; });
+  }
+
+  function applyFilters() {
     var discardedCount = 0;
     var eligible = [];
-    cards.forEach(function (card) {{
+    cards.forEach(function (card) {
       var state = card.getAttribute('data-state') || 'new';
-      if (state === 'discarded') {{
+      if (state === 'discarded') {
         discardedCount++;
         if (discardedVisible) eligible.push(card);
-      }} else {{
+      } else {
         eligible.push(card);
-      }}
-    }});
+      }
+    });
     if (discardedCountEl) discardedCountEl.textContent = discardedCount;
 
     var pageCount = Math.max(1, Math.ceil(eligible.length / PAGE_SIZE));
@@ -129,123 +156,144 @@ TEMPLATE = """<!doctype html>
     var start = (currentPage - 1) * PAGE_SIZE;
     var end = start + PAGE_SIZE;
 
-    cards.forEach(function (card) {{ card.hidden = true; }});
-    eligible.slice(start, end).forEach(function (card) {{ card.hidden = false; }});
+    cards.forEach(function (card) { card.hidden = true; });
+    eligible.slice(start, end).forEach(function (card) { card.hidden = false; });
 
     renderPager(pageCount);
-  }}
+  }
 
-  function renderPager(pageCount) {{
+  function renderPager(pageCount) {
     if (!pagerEl) return;
-    if (pageCount <= 1) {{ pagerEl.innerHTML = ''; return; }}
+    if (pageCount <= 1) { pagerEl.innerHTML = ''; return; }
     var out = '';
     out += '<button type="button" class="btn btn-secondary scanpage-btn" data-page="' + (currentPage - 1) + '"' + (currentPage === 1 ? ' disabled' : '') + '>‹ Prev</button>';
     out += '<span class="scanpage-status">Page ' + currentPage + ' of ' + pageCount + '</span>';
     out += '<button type="button" class="btn btn-secondary scanpage-btn" data-page="' + (currentPage + 1) + '"' + (currentPage === pageCount ? ' disabled' : '') + '>Next ›</button>';
     pagerEl.innerHTML = out;
-    pagerEl.querySelectorAll('.scanpage-btn').forEach(function (btn) {{
-      btn.addEventListener('click', function () {{
+    pagerEl.querySelectorAll('.scanpage-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
         var target = parseInt(btn.getAttribute('data-page'), 10);
         if (!target || target < 1) return;
         currentPage = target;
         applyFilters();
         var gridEl = document.getElementById('scan-grid');
-        if (gridEl) gridEl.scrollIntoView({{ block: 'start', behavior: 'smooth' }});
-      }});
-    }});
-  }}
+        if (gridEl) gridEl.scrollIntoView({ block: 'start', behavior: 'smooth' });
+      });
+    });
+  }
 
-  cards.forEach(function (card) {{
+  var STATE_MAP = { love: 'loved', bought: 'bought', discard: 'discarded' };
+
+  cards.forEach(function (card) {
     var lotKey = card.getAttribute('data-lot-key');
-    var saved = null;
-    try {{ saved = localStorage.getItem(storeKey(lotKey)); }} catch (e) {{}}
-    if (saved) card.setAttribute('data-state', saved);
 
-    card.querySelectorAll('.scanbtn').forEach(function (btn) {{
-      btn.addEventListener('click', function () {{
+    card.querySelectorAll('.scanbtn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
         var action = btn.getAttribute('data-action');
+        var targetState = STATE_MAP[action];
         var current = card.getAttribute('data-state') || 'new';
-        var next = current === action + 'd' || current === action ? 'new' : (action === 'love' ? 'loved' : 'discarded');
+        var next = current === targetState ? 'new' : targetState;
+
+        var fields = { state: next };
+        if (next === 'discarded') {
+          var reason = window.prompt('Why discard this one? (optional — helps refine the buy filter later)', '');
+          fields.discard_reason = reason || null;
+        } else if (next === 'bought') {
+          var price = window.prompt('Price paid (kr)?', '');
+          var date = window.prompt('Purchase date (YYYY-MM-DD)?', new Date().toISOString().slice(0, 10));
+          fields.bought_price = price ? parseFloat(price) : null;
+          fields.bought_date = date || null;
+        } else {
+          fields.discard_reason = null;
+        }
+
         card.setAttribute('data-state', next);
-        try {{
-          if (next === 'new') localStorage.removeItem(storeKey(lotKey));
-          else localStorage.setItem(storeKey(lotKey), next);
-        }} catch (e) {{}}
         applyFilters();
-      }});
-    }});
-  }});
+        sbPatch(lotKey, fields);
+      });
+    });
+  });
 
   var linkLabel = document.getElementById('scan-link-label');
-  if (showDiscardedLink) {{
-    showDiscardedLink.addEventListener('click', function (e) {{
+  if (showDiscardedLink) {
+    showDiscardedLink.addEventListener('click', function (e) {
       e.preventDefault();
       discardedVisible = !discardedVisible;
       if (linkLabel) linkLabel.textContent = discardedVisible ? 'Hide discarded' : 'Show discarded';
       currentPage = 1;
       applyFilters();
-    }});
-  }}
+    });
+  }
+
+  loadStates().then(function (rows) {
+    var byKey = {};
+    rows.forEach(function (r) { byKey[r.lot_key] = r; });
+    cards.forEach(function (card) {
+      var row = byKey[card.getAttribute('data-lot-key')];
+      if (row && row.state) card.setAttribute('data-state', row.state);
+    });
+    applyFilters();
+  });
 
   applyFilters();
-}})();
+})();
 
-(function () {{
+(function () {
   var boxes = document.querySelectorAll('.chk-row input[type="checkbox"]');
   var progressEl = document.getElementById('chk-progress');
   var resetBtn = document.getElementById('chk-reset');
   if (!boxes.length) return;
 
-  function storeKey(term) {{ return 'vs-chk-' + term; }}
+  function storeKey(term) { return 'vs-chk-' + term; }
 
-  function updateProgress() {{
+  function updateProgress() {
     var checked = 0;
-    boxes.forEach(function (b) {{ if (b.checked) checked++; }});
+    boxes.forEach(function (b) { if (b.checked) checked++; });
     if (progressEl) progressEl.textContent = checked;
-  }}
+  }
 
-  boxes.forEach(function (box) {{
+  boxes.forEach(function (box) {
     var term = box.getAttribute('data-term');
     var row = box.closest('.chk-row');
-    try {{
-      if (localStorage.getItem(storeKey(term)) === '1') {{
+    try {
+      if (localStorage.getItem(storeKey(term)) === '1') {
         box.checked = true;
         row.classList.add('is-checked');
-      }}
-    }} catch (e) {{}}
-    box.addEventListener('change', function () {{
+      }
+    } catch (e) {}
+    box.addEventListener('change', function () {
       row.classList.toggle('is-checked', box.checked);
-      try {{ localStorage.setItem(storeKey(term), box.checked ? '1' : '0'); }} catch (e) {{}}
+      try { localStorage.setItem(storeKey(term), box.checked ? '1' : '0'); } catch (e) {}
       updateProgress();
-    }});
-  }});
+    });
+  });
 
-  document.querySelectorAll('.chk-term').forEach(function (span) {{
-    span.addEventListener('click', function () {{
+  document.querySelectorAll('.chk-term').forEach(function (span) {
+    span.addEventListener('click', function () {
       var text = span.getAttribute('data-copy');
-      try {{ navigator.clipboard.writeText(text); }} catch (e) {{}}
+      try { navigator.clipboard.writeText(text); } catch (e) {}
       var row = span.closest('.chk-row');
       var box = row.querySelector('input[type="checkbox"]');
       box.checked = true;
       row.classList.add('is-checked');
-      try {{ localStorage.setItem(storeKey(box.getAttribute('data-term')), '1'); }} catch (e) {{}}
+      try { localStorage.setItem(storeKey(box.getAttribute('data-term')), '1'); } catch (e) {}
       updateProgress();
-    }});
-  }});
+    });
+  });
 
-  if (resetBtn) {{
-    resetBtn.addEventListener('click', function () {{
-      boxes.forEach(function (box) {{
+  if (resetBtn) {
+    resetBtn.addEventListener('click', function () {
+      boxes.forEach(function (box) {
         box.checked = false;
         box.closest('.chk-row').classList.remove('is-checked');
-        try {{ localStorage.removeItem(storeKey(box.getAttribute('data-term'))); }} catch (e) {{}}
-      }});
+        try { localStorage.removeItem(storeKey(box.getAttribute('data-term'))); } catch (e) {}
+      });
       updateProgress();
-    }});
-  }}
+    });
+  }
 
   updateProgress();
-}})();
+})();
 </script>
 </body>
 </html>
@@ -289,29 +337,34 @@ def main():
     scan_lots, scan_total = load_scan_results()
 
     def scan_card(lot):
-        price = lot.get("current_bid")
-        price_html = (
-            f'<div class="scanprice">{int(price):,} kr</div>'.replace(",", " ")
-            if price
-            else '<div class="scanprice scanprice-empty">no bid</div>'
-        )
+        lot_key = esc(f"{lot['source']}-{lot['lot_id']}")
         flag = '<span class="scanflag">🚩</span>' if (lot.get("bad_listing_score") or 0) >= 3 else ""
-        img = lot.get("image_url")
-        img_html = f'<img src="{esc(img)}" alt="" loading="lazy">' if img else ""
-        lot_key = f'{lot.get("source")}-{lot.get("lot_id")}'
+        img = (
+            f'<img src="{esc(lot["image_url"])}" alt="" loading="lazy">'
+            if lot.get("image_url")
+            else ''
+        )
+        src = lot.get("source") or ""
+        location = lot.get("location")
+        location_badge = f'<span class="tag tag-accent-2">{esc(location)}</span>' if location else ""
+        price_badge = (
+            f'<span class="scanprice">{money(lot.get("current_bid"))}</span>'
+            if lot.get("current_bid") is not None
+            else '<span class="scanprice scanprice-empty">price tbc</span>'
+        )
         return (
-            f'<div class="card scancard" data-state="new" data-lot-key="{esc(lot_key)}">'
-            f'<div class="scanimgwrap fig ar-4-3">{img_html}{price_html}</div>'
+            f'<div class="scancard" data-lot-key="{lot_key}">'
+            f'<div class="fig ar-landscape scanimgwrap">{img}{price_badge}</div>'
             '<div class="scanbody">'
-            '<div class="scantop">'
-            f'{flag}<span class="tag">{esc(SCAN_SRC_LABEL.get(lot.get("source"), lot.get("source") or ""))}</span>'
-            f'<span class="scanends text-muted">ends {esc(format_scan_ends_at(lot.get("ends_at")))}</span>'
-            '</div>'
-            f'<a class="scantitle" href="{esc(lot.get("url") or "#")}" target="_blank" rel="noopener">{esc(lot.get("title") or "Untitled lot")}</a>'
+            f'<div class="scantop"><span class="tag tag-outline">{esc(SCAN_SRC_LABEL.get(src, src))}</span>{flag}'
+            f'{location_badge}'
+            f'<span class="text-muted scanends">ends {esc(format_scan_ends_at(lot.get("ends_at")))}</span></div>'
+            f'<a class="scantitle" href="{esc(lot.get("url") or "#")}" target="_blank">{esc(lot.get("title") or "")}</a>'
             f'<div class="text-muted scanmeta">matched "{esc(lot.get("matched_keyword") or "")}"</div>'
             '<div class="scanactions">'
-            '<button class="btn btn-secondary scanbtn scanbtn-love" data-action="love" type="button">♡ Love</button>'
-            '<button class="btn btn-secondary scanbtn scanbtn-discard" data-action="discard" type="button">✕ Discard</button>'
+            f'<button class="btn btn-secondary scanbtn scanbtn-love" data-action="love" type="button">♡ Love</button>'
+            f'<button class="btn btn-secondary scanbtn scanbtn-bought" data-action="bought" type="button">$ Bought</button>'
+            f'<button class="btn btn-secondary scanbtn scanbtn-discard" data-action="discard" type="button">✕ Discard</button>'
             '</div>'
             '</div></div>'
         )

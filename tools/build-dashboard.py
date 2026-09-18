@@ -356,13 +356,13 @@ def main():
         )
     materials_html = "".join(material_sections) or '<p class="text-muted">No materials logged yet.</p>'
 
-    supplier_cards = "".join(
-        '<div class="supcard">'
-        f'<div class="card-title-sm">{esc(s["name"])}</div>'
-        f'<div class="text-muted">{esc(s.get("kind") or "")}{" · " + esc(s["trade"]) if s.get("trade") else ""}{" · " + esc(s["country"]) if s.get("country") else ""}</div>'
-        + (f'<div class="suprating">{"★" * s["rating"]}{"☆" * (5 - s["rating"])}</div>' if s.get("rating") else "")
-        + (f'<div class="supnotes">{esc(s["notes"])}</div>' if s.get("notes") else "")
-        + '</div>'
+    supplier_rows = "".join(
+        "<tr>"
+        f'<td>{esc(s["name"])}</td>'
+        f'<td class="text-muted">{esc(s.get("kind") or "")}{" · " + esc(s["trade"]) if s.get("trade") else ""}{" · " + esc(s["country"]) if s.get("country") else ""}</td>'
+        f'<td class="suprating">{("★" * s["rating"] + "☆" * (5 - s["rating"])) if s.get("rating") else ""}</td>'
+        f'<td class="supnotes-cell text-muted">{esc(s.get("notes") or "")}</td>'
+        "</tr>"
         for s in sup["suppliers"]
     )
 
@@ -422,17 +422,19 @@ def main():
             '<div class="card costcard">'
             f'{img_html}'
             f'<h4 class="card-title-sm">{esc(c.get("title") or piece_name)}</h4>'
-            '<table class="table costtable">'
+            '<div class="costrows-scroll"><table class="table costtable">'
             '<thead><tr><th>Line</th><th>Qty</th><th class="num">Inc. VAT</th><th class="num">Ex. VAT</th></tr></thead>'
-            f'<tbody>{line_rows}'
+            f'<tbody>{line_rows}</tbody></table></div>'
+            '<table class="table costtable costsummary"><tbody>'
             f'<tr class="costsub"><td>Materials subtotal</td><td></td><td class="num price">{money(c["materials_inc_vat"])}</td><td class="num price">{money(materials_ex)}</td></tr>'
             f'<tr class="costsub"><td>Labour — {c["labour_hours"]:g}h @ {money(c["labour_rate"])}</td><td></td><td class="num price">{money(labour)}</td><td class="num price">{money(labour)}</td></tr>'
             f'<tr class="costtotal"><td>Total cost</td><td></td><td class="num price-lg">{money(total_inc)}</td><td class="num price-lg">{money(total_ex)}</td></tr>'
             '</tbody></table>'
+            '<div class="costfoot">'
             f'<div class="costmeta"><span class="price">Asking {money(ask)}</span>{pair_span}</div>'
             f'<div class="costchecks">{checks}</div>'
-            + (f'<div class="text-muted matnote">{esc(c["notes"])}</div>' if c.get("notes") else "")
-            + '</div>'
+            + (f'<div class="text-muted costnote">{esc(c["notes"])}</div>' if c.get("notes") else "")
+            + '</div></div>'
         )
 
     costing_html = "".join(costing_card(c) for c in C) or '<p class="text-muted">No costings logged yet.</p>'
@@ -492,7 +494,7 @@ def main():
     SCAN_SRC_LABEL = {"auctionet": "Auctionet", "tradera": "Tradera", "bukowskis": "Bukowskis", "haraldssons": "Haraldssons"}
 
     def scan_card(lot):
-        lot_key = esc(f"{lot['source']}:{lot['lot_id']}")
+        lot_key = esc(f"{lot['source']}-{lot['lot_id']}")
         flag = '<span class="scanflag">🚩</span>' if (lot.get("bad_listing_score") or 0) >= 3 else ""
         img = (
             f'<img src="{esc(lot["image_url"])}" alt="" loading="lazy">'
@@ -518,6 +520,7 @@ def main():
             f'<div class="text-muted scanmeta">matched "{esc(lot.get("matched_keyword") or "")}"</div>'
             '<div class="scanactions">'
             f'<button class="btn btn-secondary scanbtn scanbtn-love" data-action="love" type="button">♡ Love</button>'
+            f'<button class="btn btn-secondary scanbtn scanbtn-bought" data-action="bought" type="button">$ Bought</button>'
             f'<button class="btn btn-secondary scanbtn scanbtn-discard" data-action="discard" type="button">✕ Discard</button>'
             '</div>'
             '</div></div>'
@@ -539,9 +542,9 @@ def main():
         TEMPLATE,
         warn=warn,
         generated=today.isoformat(),
-        hero=money(capital_deployed),
-        hero_sub=f"across {len(held)} piece{'s' if len(held) != 1 else ''} held",
         stats="".join([
+            stat_block("Capital deployed", money(capital_deployed),
+                       f"across {len(held)} piece{'s' if len(held) != 1 else ''} held"),
             stat_block("In pipeline", str(len(held)), "not yet sold"),
             stat_block("Projected profit", money(projected), "if asking prices hold"),
             stat_block("Realised profit", money(realised), "on completed sales"),
@@ -557,7 +560,7 @@ def main():
         task_rows="".join(task_rows) or '<li class="task text-muted">Nothing outstanding.</li>',
         piece_table=piece_table,
         materials_html=materials_html,
-        supplier_cards=supplier_cards or '<p class="text-muted">No suppliers logged yet.</p>',
+        supplier_rows=supplier_rows,
         costing_html=costing_html,
         checklist_html=checklist_html,
         checklist_total=str(checklist_total),
@@ -593,13 +596,7 @@ TEMPLATE = r"""<!doctype html>
 
   {warn}
 
-  <div class="hero-block">
-    <span class="kicker">Capital deployed</span>
-    <div class="hero-value">{hero}</div>
-    <div class="text-muted">{hero_sub}</div>
-  </div>
-
-  <div class="stats">{stats}</div>
+  <div class="statsrow">{stats}</div>
 
   <div class="tabnav" role="tablist">
     <button class="tabbtn is-active" role="tab" aria-selected="true" data-tab="business" type="button">Business</button>
@@ -671,7 +668,12 @@ TEMPLATE = r"""<!doctype html>
     <section class="section-block">
       <h4>Suppliers</h4>
       <p class="text-muted">Dealers, auction houses, restorers, textile and material suppliers.</p>
-      <div class="supgrid">{supplier_cards}</div>
+      <div class="tablewrap">
+        <table class="table suptable">
+          <thead><tr><th>Name</th><th>Kind</th><th>Rating</th><th>Notes</th></tr></thead>
+          <tbody>{supplier_rows}</tbody>
+        </table>
+      </div>
     </section>
   </div>
 
@@ -681,7 +683,7 @@ TEMPLATE = r"""<!doctype html>
       <p class="text-muted">
         Auctionet, Tradera, Bukowskis, Haraldssons — run once a day with <code>python3 tools/scanner/run.py</code>, then rebuild the dashboard to see fresh results here.
         <strong>{scan_total} lots archived</strong>, {scan_count} shown here, ranked by bad-listing score (🚩 = ≥3, worth reading first). New and loved shown; discarded is out of the way.
-        Saved in this browser only.
+        Shared with everyone who opens this page.
         <a href="#" id="scan-show-discarded" class="btn-link scan-discarded-link"><span id="scan-link-label">Show discarded</span> (<span id="scan-discarded-count">0</span>)</a>
       </p>
       <div class="scangrid" id="scan-grid">{scan_cards_html}</div>
@@ -729,9 +731,9 @@ TEMPLATE = r"""<!doctype html>
   if (saved) show(saved);
 })();
 
-// scan results: love/discard state saved in this browser only.
-// Default view: new + loved. Discarded is out of the way, not a toggle —
-// just a small link to check the discard pile if you want to undo something.
+// scan results: love/discard/bought state shared via Supabase — you and
+// Amanda see the same clicks. Default view: new + loved. Discarded is out
+// of the way, not a toggle — just a small link to check the discard pile.
 (function () {
   var cards = Array.prototype.slice.call(document.querySelectorAll('.scancard'));
   if (!cards.length) return;
@@ -742,7 +744,26 @@ TEMPLATE = r"""<!doctype html>
   var PAGE_SIZE = 36;
   var currentPage = 1;
 
-  function storeKey(lotKey) { return 'vs-scan-' + lotKey; }
+  var SUPABASE_URL = 'https://rnquevahynifwpyynrbd.supabase.co';
+  var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJucXVldmFoeW5pZndweXlucmJkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk2MDQ5NDIsImV4cCI6MjEwNTE4MDk0Mn0.2xIZMYpxk-c6_xt7x8J0EkzRMWyRRRu4gy4kIEtLy1U';
+
+  function sbHeaders() {
+    return { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY, 'Content-Type': 'application/json' };
+  }
+
+  function sbPatch(lotKey, fields) {
+    return fetch(SUPABASE_URL + '/rest/v1/lots?lot_key=eq.' + encodeURIComponent(lotKey), {
+      method: 'PATCH',
+      headers: Object.assign(sbHeaders(), { 'Prefer': 'return=minimal' }),
+      body: JSON.stringify(fields)
+    }).catch(function (e) { console.warn('Supabase sync failed', e); });
+  }
+
+  function loadStates() {
+    return fetch(SUPABASE_URL + '/rest/v1/lots?select=lot_key,state,discard_reason,bought_price,bought_date&state=neq.new', {
+      headers: sbHeaders()
+    }).then(function (r) { return r.ok ? r.json() : []; }).catch(function () { return []; });
+  }
 
   function applyFilters() {
     var discardedCount = 0;
@@ -789,23 +810,34 @@ TEMPLATE = r"""<!doctype html>
     });
   }
 
+  var STATE_MAP = { love: 'loved', bought: 'bought', discard: 'discarded' };
+
   cards.forEach(function (card) {
     var lotKey = card.getAttribute('data-lot-key');
-    var saved = null;
-    try { saved = localStorage.getItem(storeKey(lotKey)); } catch (e) {}
-    if (saved) card.setAttribute('data-state', saved);
 
     card.querySelectorAll('.scanbtn').forEach(function (btn) {
       btn.addEventListener('click', function () {
-        var action = btn.getAttribute('data-action'); // 'love' or 'discard'
+        var action = btn.getAttribute('data-action'); // love / bought / discard
+        var targetState = STATE_MAP[action];
         var current = card.getAttribute('data-state') || 'new';
-        var next = current === action + 'd' || current === action ? 'new' : (action === 'love' ? 'loved' : 'discarded');
+        var next = current === targetState ? 'new' : targetState;
+
+        var fields = { state: next };
+        if (next === 'discarded') {
+          var reason = window.prompt('Why discard this one? (optional — helps refine the buy filter later)', '');
+          fields.discard_reason = reason || null;
+        } else if (next === 'bought') {
+          var price = window.prompt('Price paid (kr)?', '');
+          var date = window.prompt('Purchase date (YYYY-MM-DD)?', new Date().toISOString().slice(0, 10));
+          fields.bought_price = price ? parseFloat(price) : null;
+          fields.bought_date = date || null;
+        } else {
+          fields.discard_reason = null;
+        }
+
         card.setAttribute('data-state', next);
-        try {
-          if (next === 'new') localStorage.removeItem(storeKey(lotKey));
-          else localStorage.setItem(storeKey(lotKey), next);
-        } catch (e) {}
         applyFilters();
+        sbPatch(lotKey, fields);
       });
     });
   });
@@ -820,6 +852,16 @@ TEMPLATE = r"""<!doctype html>
       applyFilters();
     });
   }
+
+  loadStates().then(function (rows) {
+    var byKey = {};
+    rows.forEach(function (r) { byKey[r.lot_key] = r; });
+    cards.forEach(function (card) {
+      var row = byKey[card.getAttribute('data-lot-key')];
+      if (row && row.state) card.setAttribute('data-state', row.state);
+    });
+    applyFilters();
+  });
 
   applyFilters();
 })();

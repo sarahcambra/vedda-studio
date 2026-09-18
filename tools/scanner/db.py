@@ -18,9 +18,14 @@ CREATE TABLE IF NOT EXISTS lots (
     description TEXT,
     category TEXT,
     current_bid REAL,
+    final_bid REAL,
     estimate_low REAL,
     estimate_high REAL,
     ends_at TEXT,
+    status TEXT DEFAULT 'active',
+    bid_count INTEGER,
+    location TEXT,
+    currency TEXT DEFAULT 'SEK',
     image_url TEXT,
     matched_keyword TEXT,
     matched_kind TEXT,
@@ -33,6 +38,7 @@ CREATE TABLE IF NOT EXISTS lots (
 
 CREATE INDEX IF NOT EXISTS idx_lots_ends_at ON lots(ends_at);
 CREATE INDEX IF NOT EXISTS idx_lots_first_seen ON lots(first_seen);
+CREATE INDEX IF NOT EXISTS idx_lots_status ON lots(status);
 """
 
 
@@ -52,9 +58,9 @@ def upsert_lot(conn, lot):
     ).fetchone()
     if existing:
         conn.execute(
-            """UPDATE lots SET current_bid = ?, ends_at = ?, last_seen = datetime('now')
+            """UPDATE lots SET current_bid = ?, ends_at = ?, image_url = ?, last_seen = datetime('now')
                WHERE source = ? AND lot_id = ?""",
-            (lot["current_bid"], lot["ends_at"], lot["source"], lot["lot_id"]),
+            (lot["current_bid"], lot["ends_at"], lot.get("image_url"), lot["source"], lot["lot_id"]),
         )
     else:
         conn.execute(

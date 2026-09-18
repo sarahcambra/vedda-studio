@@ -61,6 +61,10 @@ def normalise(raw_item, source_query, kind):
     # of every photo in the listing — there's no true photo count in this
     # compact search response, only a per-item detail page would have that.
     image_urls = raw_item.get("image_urls") or {}
+    # Auctionet exposes thumb/medium/full; "large" (~800 px) isn't in the API
+    # response but exists on their CDN — derive it by rewriting the medium URL.
+    medium_url = image_urls.get("medium")
+    large_url = medium_url.replace("/medium_", "/large_") if medium_url else None
     return {
         "source": "auctionet",
         "lot_id": str(raw_item["id"]),
@@ -72,7 +76,7 @@ def normalise(raw_item, source_query, kind):
         "estimate_low": raw_item.get("estimate"),
         "estimate_high": raw_item.get("upper_estimate"),
         "ends_at": raw_item.get("ends_at"),
-        "image_url": image_urls.get("medium") or image_urls.get("full") or image_urls.get("thumb"),
+        "image_url": large_url or medium_url or image_urls.get("full") or image_urls.get("thumb"),
         "has_image": bool(image_urls),
         "matched_keyword": source_query,
         "matched_kind": kind,
