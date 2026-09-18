@@ -1,0 +1,40 @@
+/* Mapping — light mode. Role tokens: what a component actually asks for. */
+@import url('semantic-branding-default.css');
+
+:root {
+  --text-heading: var(--colors-neutral-900);
+  --text-body: var(--colors-neutral-900);
+  --text-body-muted: color-mix(in srgb, var(--colors-neutral-900) 62%, transparent);
+  --text-body-light: color-mix(in srgb, var(--colors-neutral-900) 78%, transparent);
+  --text-link: var(--colors-neutral-900);
+  --text-link-hover: var(--colors-brand-primary-default);
+  --text-primary: var(--colors-brand-primary-default);
+  --text-secondary: var(--colors-brand-secondary-default);
+  --text-success: var(--colors-success-default);
+  --text-warning: var(--colors-warning-default);
+  --text-error: var(--colors-error-default);
+  --text-on-primary: var(--colors-neutral-100);
+  --text-on-accent: var(--colors-brand-accent-default);
+
+  --surface-bg-page: #f3ece0; /* the brand guide's exact Bone value */
+  --surface-bg-raised: #f3ece0;
+  --surface-bg-sunken: #ece3d2;
+  --surface-fill-primary: var(--colors-brand-primary-default);
+  --surface-fill-primary-hover: var(--colors-brand-primary-700);
+  --surface-fill-accent: var(--colors-brand-accent-default);
+  --surface-bg-overlay: var(--colors-shadow-neutral-55);
+
+  --stroke-divider: color-mix(in srgb, var(--colors-neutral-900) 14%, transparent);
+  --stroke-primary: var(--colors-brand-primary-default);
+  --stroke-secondary: var(--colors-brand-secondary-default);
+  --stroke-neutral: color-mix(in srgb, var(--colors-neutral-900) 30%, transparent);
+  --stroke-error: var(--colors-error-default);
+  --stroke-focus-ring: var(--colors-brand-primary-default);
+
+  --icon-primary: var(--colors-brand-primary-default);
+  --icon-neutral: var(--colors-neutral-900);
+
+  --shadow-raised-y: var(--shadow-y-1); --shadow-raised-blur: var(--shadow-blur-2); --shadow-raised-color: var(--colors-shadow-neutral-14);
+  --shadow-floating-y: var(--shadow-y-4); --shadow-floating-blur: var(--shadow-blur-14); --shadow-floating-color: var(--colors-shadow-neutral-12);
+  --shadow-overlay-y: var(--shadow-y-18); --shadow-overlay-blur: var(--shadow-blur-44); --shadow-overlay-color: var(--colors-shadow-neutral-16);
+}

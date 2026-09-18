@@ -412,6 +412,15 @@ def main():
     import shutil
     shutil.copyfile(os.path.join(ROOT, "dashboard.css"), os.path.join(OUT_DIR, "dashboard.css"))
     shutil.copyfile(os.path.join(ROOT, "site", "styles.css"), os.path.join(OUT_DIR, "site", "styles.css"))
+    # styles.css @imports the token chain — mapping-light -> semantic-branding
+    # -> global-default — those have to be published too or the browser 404s/503s
+    # trying to fetch them.
+    os.makedirs(os.path.join(OUT_DIR, "site", "tokens"), exist_ok=True)
+    for token_file in ("mapping-light.css", "semantic-branding-default.css", "global-default.css"):
+        shutil.copyfile(
+            os.path.join(ROOT, "site", "tokens", token_file),
+            os.path.join(OUT_DIR, "site", "tokens", token_file),
+        )
 
     print(f"wrote {os.path.join(OUT_DIR, 'index.html')}")
     print(f"  scan lots: {scan_count} shown / {scan_total} archived · checklist terms: {checklist_total}")
