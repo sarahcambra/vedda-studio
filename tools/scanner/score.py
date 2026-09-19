@@ -20,7 +20,14 @@ ASSUMED_RESTORATION_HOURS = 6  # rough midpoint across job types, unverified per
 
 
 def load_model_prices():
+    """model_prices.json carries real buy-price benchmarks derived from
+    research/itens.md — same sensitive-data class, deliberately not committed
+    to this public repo (see .gitignore). Local runs have it; CI doesn't —
+    degrade to no price data rather than crash, same fallback pattern as
+    load_scan_results() when scanner.db doesn't exist yet."""
     path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "model_prices.json")
+    if not os.path.exists(path):
+        return {}
     with open(path, encoding="utf-8") as fh:
         return json.load(fh)["models"]
 
