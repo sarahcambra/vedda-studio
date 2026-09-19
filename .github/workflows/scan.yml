@@ -1,0 +1,55 @@
+name: Daily auction scan
+
+on:
+  schedule:
+    - cron: "0 6 * * *"   # 06:00 UTC daily — see research/auction-scanner.md §2 (be gentle with Auctionet's undocumented endpoint)
+  workflow_dispatch: {}    # lets you trigger a run manually from the Actions tab
+
+permissions:
+  contents: write
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # scanner.db is gitignored (regenerable binary) but persisting it across
+      # runs keeps first_seen accurate instead of resetting every day.
+      - name: Restore scanner.db
+        uses: actions/cache@v4
+        with:
+          path: tools/scanner/scanner.db
+          key: scanner-db-${{ github.run_id }}
+          restore-keys: scanner-db-
+
+      - name: Run scanner
+        env:
+          TRADERA_APP_ID: ${{ secrets.TRADERA_APP_ID }}
+          TRADERA_APP_KEY: ${{ secrets.TRADERA_APP_KEY }}
+        run: python3 tools/scanner/run.py
+        # Haraldssons needs Playwright for its one-time catalogue-id discovery
+        # step; it isn't installed here, so it skips gracefully (documented
+        # behavior in fetch_haraldssons.py) — Auctionet/Tradera/Bukowskis still
+        # run fully. Sikö is never called — see run.py's own docstring.
+
+      - name: Sync to Supabase
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: python3 tools/scanner/sync_supabase.py
+
+      - name: Rebuild public dashboard
+        run: python3 tools/build-public-dashboard.py
+
+      - name: Commit and push if changed
+        run: |
+          git config user.name "vedda-studio-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add docs/index.html
+          git diff --cached --quiet || git commit -m "Daily scan refresh [automated]"
+          git push
