@@ -1,0 +1,90 @@
+/* App-only additions. Everything else comes from site/styles.css + dashboard.css. */
+[hidden] { display: none !important; }
+
+.nav-user { font-size: 12px; }
+.btn-small { padding: 8px 14px; font-size: 10.5px; }
+
+/* ---------- login ---------- */
+.login { max-width: 420px; padding: var(--space-16) 0; }
+.login-title { font-family: var(--font-heading); font-weight: 400; font-size: 32px; margin: var(--space-2) 0 var(--space-4); }
+.login .field > span { display: block; margin-bottom: var(--space-2); font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: color-mix(in srgb, var(--color-text) 62%, transparent); }
+
+/* ---------- view header + toolbar ---------- */
+.view-head { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--space-6); padding: var(--space-10) 0 var(--space-6); flex-wrap: wrap; }
+.view-head h2 { font-family: var(--font-heading); font-weight: 400; font-size: 32px; margin: 0; line-height: 1.1; }
+.toolbar { display: flex; gap: var(--space-4); align-items: center; flex-wrap: wrap; padding: var(--space-4) 0; border-top: 1px solid var(--color-divider); border-bottom: 1px solid var(--color-divider); margin-bottom: var(--space-8); }
+.toolbar .input, .toolbar select.input { width: auto; min-height: 36px; padding: 6px 0; font-size: 14px; }
+.toolbar label { display: inline-flex; align-items: center; gap: 8px; font-size: 12.5px; color: color-mix(in srgb, var(--color-text) 62%, transparent); }
+.toolbar .chk { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; cursor: pointer; }
+.toolbar .chk input { accent-color: var(--color-accent); }
+.count { font-size: 12.5px; color: color-mix(in srgb, var(--color-text) 55%, transparent); margin-left: auto; }
+
+/* ---------- material cards: offers strip ---------- */
+.matcard[data-open] { cursor: pointer; text-decoration: none; color: inherit; transition: opacity var(--dur-1, .15s) var(--ease, ease); }
+.matcard[data-open]:hover { opacity: .82; }
+.matcard[data-open]:focus-visible { outline: 1px solid var(--color-accent); outline-offset: 4px; }
+.matcard .best-price { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.matcard .best-price a { font-size: 12px; }
+.matcard .best-price .price { font-size: 16px; }
+.offer-count { font-size: 12px; color: color-mix(in srgb, var(--color-text) 55%, transparent); }
+.card-actions { display: flex; gap: var(--space-4); margin-top: auto; padding-top: var(--space-2); }
+.card-actions .btn-link { font-size: 11px; }
+.status-watch .card-kicker::after { content: " · watch"; color: var(--color-caution); }
+.status-rejected { opacity: .45; }
+
+/* ---------- detail panel (material / supplier) ---------- */
+.detail { padding: var(--space-8) 0; }
+.detail-grid { display: grid; grid-template-columns: 320px 1fr; gap: var(--space-10); align-items: start; }
+@media (max-width: 900px) { .detail-grid { grid-template-columns: 1fr; } }
+.spec { list-style: none; margin: 0; padding: 0; font-size: 14px; }
+.spec li { display: flex; justify-content: space-between; gap: var(--space-4); padding: 6px 0; border-bottom: 1px solid var(--color-divider); }
+.spec li span:first-child { color: color-mix(in srgb, var(--color-text) 62%, transparent); }
+.offers-table td, .offers-table th { font-size: 13.5px; white-space: nowrap; }
+.offers-table td.wrap { white-space: normal; max-width: 34ch; }
+.offers-table tr.is-default td:first-child::before { content: "★ "; color: var(--color-accent); }
+.offers-table tr.is-cheapest .price { color: var(--color-positive); }
+.thumbs { display: flex; gap: 8px; flex-wrap: wrap; margin-top: var(--space-3); }
+.thumbs .fig { width: 72px; height: 72px; }
+.thumbs .fig img { width: 100%; height: 100%; object-fit: cover; }
+.thumbs .fig button { position: absolute; top: 0; right: 0; background: var(--color-text); color: var(--color-bg); border: 0; width: 20px; height: 20px; font-size: 12px; cursor: pointer; opacity: 0; }
+.thumbs .fig:hover button { opacity: 1; }
+
+.seat-badge { font-size: 10px; }
+
+/* ---------- costing builder ---------- */
+.builder { display: grid; grid-template-columns: 380px 1fr; gap: var(--space-10); align-items: start; }
+@media (max-width: 1000px) { .builder { grid-template-columns: 1fr; } }
+.builder .field { margin-bottom: var(--space-4); }
+.builder .field > label, .form .field > label { font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; }
+.builder .input, .form .input { min-height: 40px; padding: 8px 0; font-size: 15px; }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); }
+.three { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: var(--space-4); }
+.layer-pick { display: grid; grid-template-columns: 110px 1fr; gap: var(--space-3); align-items: center; padding: 8px 0; border-bottom: 1px solid var(--color-divider); font-size: 13.5px; }
+.layer-pick .role { font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: color-mix(in srgb, var(--color-text) 62%, transparent); }
+.layer-pick select { width: 100%; }
+.result-table td.num { text-align: right; }
+.result-table tr.approx td { color: color-mix(in srgb, var(--color-text) 70%, transparent); }
+.result-table tr.missing td { color: var(--color-critical); }
+.result-table .sub { font-size: 12px; color: color-mix(in srgb, var(--color-text) 55%, transparent); display: block; }
+.checks { display: flex; flex-direction: column; gap: 6px; margin-top: var(--space-4); font-size: 13.5px; }
+.checks .warn-line { color: var(--color-caution); }
+.manual-lines .row { display: grid; grid-template-columns: 2fr 60px 60px 90px 90px 28px; gap: 8px; align-items: center; margin-bottom: 6px; }
+.manual-lines .row .input { min-height: 34px; padding: 4px 0; font-size: 13.5px; }
+.manual-lines .del { background: none; border: 0; cursor: pointer; color: color-mix(in srgb, var(--color-text) 45%, transparent); font-size: 16px; }
+.manual-lines .del:hover { color: var(--color-critical); }
+.sticky-totals { position: sticky; top: 0; background: var(--color-bg); padding: var(--space-3) 0; border-bottom: 1px solid var(--color-divider); display: flex; gap: var(--space-8); flex-wrap: wrap; z-index: 2; }
+.sticky-totals .kicker { font-size: 10px; }
+
+/* ---------- forms in dialog ---------- */
+.dialog { width: min(680px, 100%); max-height: 92vh; overflow-y: auto; padding: var(--space-8); }
+.dialog-backdrop { z-index: 50; }
+.form .field > label { display: block; margin-bottom: 4px; color: color-mix(in srgb, var(--color-text) 62%, transparent); }
+.form .field { margin-bottom: var(--space-4); }
+.form-error { color: var(--color-critical); font-size: 13px; }
+.form fieldset { border: 0; padding: 0; margin: var(--space-6) 0 0; }
+.form legend { font-family: var(--font-heading); font-size: 18px; margin-bottom: var(--space-3); }
+select.input { appearance: none; background-image: linear-gradient(45deg, transparent 50%, currentColor 50%), linear-gradient(135deg, currentColor 50%, transparent 50%); background-position: calc(100% - 12px) 55%, calc(100% - 7px) 55%; background-size: 5px 5px; background-repeat: no-repeat; padding-right: 24px; }
+
+.empty { padding: var(--space-12) 0; color: color-mix(in srgb, var(--color-text) 55%, transparent); font-size: 14px; }
+.toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--color-text); color: var(--color-bg); padding: 10px 18px; font-size: 13px; z-index: 60; }
+.toast.err { background: var(--color-critical); }

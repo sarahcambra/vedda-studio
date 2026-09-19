@@ -85,6 +85,7 @@ TEMPLATE = """<!doctype html>
       Shared with everyone who opens this page.
       <a href="#" id="scan-show-discarded" class="btn-link scan-discarded-link"><span id="scan-link-label">Show discarded</span> (<span id="scan-discarded-count">0</span>)</a>
     </p>
+    <div class="tabnav" id="scan-source-tabs" role="tablist" style="margin-bottom:var(--space-6);"></div>
     <div class="scangrid" id="scan-grid">{scan_cards_html}</div>
     <div class="scanpager" id="scan-pager"></div>
   </section>
@@ -113,8 +114,10 @@ TEMPLATE = """<!doctype html>
   var discardedCountEl = document.getElementById('scan-discarded-count');
   var pagerEl = document.getElementById('scan-pager');
   var discardedVisible = false;
+  var sourceFilter = 'all';
   var PAGE_SIZE = 36;
   var currentPage = 1;
+  var SOURCE_LABEL = { auctionet: 'Auctionet', tradera: 'Tradera', bukowskis: 'Bukowskis', haraldssons: 'Haraldssons' };
 
   var SUPABASE_URL = 'https://rnquevahynifwpyynrbd.supabase.co';
   var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJucXVldmFoeW5pZndweXlucmJkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk2MDQ5NDIsImV4cCI6MjEwNTE4MDk0Mn0.2xIZMYpxk-c6_xt7x8J0EkzRMWyRRRu4gy4kIEtLy1U';
@@ -137,18 +140,43 @@ TEMPLATE = """<!doctype html>
     }).then(function (r) { return r.ok ? r.json() : []; }).catch(function () { return []; });
   }
 
+  function renderSourceTabs() {
+    var tabsEl = document.getElementById('scan-source-tabs');
+    if (!tabsEl) return;
+    var counts = { all: cards.length };
+    cards.forEach(function (card) {
+      var src = card.getAttribute('data-source') || '';
+      counts[src] = (counts[src] || 0) + 1;
+    });
+    var sources = Object.keys(SOURCE_LABEL).filter(function (s) { return counts[s]; });
+    var html = '<button class="tabbtn' + (sourceFilter === 'all' ? ' is-active' : '') + '" data-source-tab="all" type="button">All (' + counts.all + ')</button>';
+    sources.forEach(function (s) {
+      html += '<button class="tabbtn' + (sourceFilter === s ? ' is-active' : '') + '" data-source-tab="' + s + '" type="button">' + SOURCE_LABEL[s] + ' (' + counts[s] + ')</button>';
+    });
+    tabsEl.innerHTML = html;
+    tabsEl.querySelectorAll('[data-source-tab]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        sourceFilter = btn.getAttribute('data-source-tab');
+        currentPage = 1;
+        applyFilters();
+      });
+    });
+  }
+
   function applyFilters() {
     var discardedCount = 0;
     var eligible = [];
     cards.forEach(function (card) {
       var state = card.getAttribute('data-state') || 'new';
+      var matchesSource = sourceFilter === 'all' || card.getAttribute('data-source') === sourceFilter;
       if (state === 'discarded') {
         discardedCount++;
-        if (discardedVisible) eligible.push(card);
-      } else {
+        if (discardedVisible && matchesSource) eligible.push(card);
+      } else if (matchesSource) {
         eligible.push(card);
       }
     });
+    renderSourceTabs();
     if (discardedCountEl) discardedCountEl.textContent = discardedCount;
 
     var pageCount = Math.max(1, Math.ceil(eligible.length / PAGE_SIZE));
@@ -328,7 +356,7 @@ def format_scan_ends_at(value):
         return "—"
 
 
-SCAN_SRC_LABEL = {"auctionet": "Auctionet", "tradera": "Tradera", "bukowskis": "Bukowskis", "haraldssons": "Haraldssons"}
+SCAN_SRC_LABEL = {"auctionet": "Auctionet", "tradera": "Tradera", "bukowskis": "Bukowskis", "haraldssons": "Haraldssons", "siko": "Sikö"}
 
 
 def main():
@@ -353,7 +381,7 @@ def main():
             else '<span class="scanprice scanprice-empty">price tbc</span>'
         )
         return (
-            f'<div class="scancard" data-lot-key="{lot_key}">'
+            f'<div class="scancard" data-lot-key="{lot_key}" data-source="{esc(src)}">'
             f'<div class="fig ar-landscape scanimgwrap">{img}{price_badge}</div>'
             '<div class="scanbody">'
             f'<div class="scantop"><span class="tag tag-outline">{esc(SCAN_SRC_LABEL.get(src, src))}</span>{flag}'

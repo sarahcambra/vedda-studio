@@ -16,8 +16,8 @@
   --text-on-primary: var(--colors-neutral-100);
   --text-on-accent: var(--colors-brand-accent-default);
 
-  --surface-bg-page: #f3ece0; /* the brand guide's exact Bone value */
-  --surface-bg-raised: #f3ece0;
+  --surface-bg-page: #fefcf9; /* trying lighter than the brand guide's Bone (#f3ece0) — 2026-09-18 */
+  --surface-bg-raised: #fefcf9;
   --surface-bg-sunken: #ece3d2;
   --surface-fill-primary: var(--colors-brand-primary-default);
   --surface-fill-primary-hover: var(--colors-brand-primary-700);

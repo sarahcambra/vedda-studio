@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vedda Studio — materials & costing</title>
+<link rel="stylesheet" href="../site/styles.css">
+<link rel="stylesheet" href="../dashboard.css">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<div class="page">
+  <div class="nav">
+    <a class="nav-brand" href="#/materials">Vedda Studio</a>
+    <a href="#/materials" data-nav="materials">Materials</a>
+    <a href="#/suppliers" data-nav="suppliers">Suppliers</a>
+    <a href="#/costings" data-nav="costings">Costings</a>
+    <span class="text-muted nav-user" id="nav-user" hidden></span>
+    <button class="btn btn-secondary btn-small" id="nav-signout" type="button" hidden>Sign out</button>
+  </div>
+
+  <section id="login" class="login" hidden>
+    <span class="kicker">Private</span>
+    <h1 class="login-title">Materials &amp; costing</h1>
+    <p class="text-muted">Supplier prices and piece costings. Sign in with the account Sarah created for you.</p>
+    <form id="login-form" autocomplete="on">
+      <label class="field"><span>Email</span><input class="input" type="email" name="email" required autocomplete="username"></label>
+      <label class="field"><span>Password</span><input class="input" type="password" name="password" required autocomplete="current-password"></label>
+      <div class="note-critical" id="login-error" hidden></div>
+      <button class="btn btn-primary" type="submit">Sign in</button>
+    </form>
+  </section>
+
+  <main id="view" hidden></main>
+
+  <footer>
+    Live data from Supabase — edits are shared instantly with everyone signed in.
+    Rules (allowances, tiers, thresholds) live in <code>recipes.json</code> and <code>costing.js</code>, versioned in git.
+  </footer>
+</div>
+
+<div id="dialog-root"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="costing.js"></script>
+<script src="api.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

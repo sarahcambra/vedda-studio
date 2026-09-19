@@ -112,21 +112,14 @@ def load_scan_results(limit=2000):
 
 def main():
     pc = load("pieces.json")
-    sup = load("suppliers.json")
     tasks = load("tasks.json")
-    mat = load("materials.json")
-    pcost = load("piece_costings.json")
     kw = load_keywords()
     scan_lots, scan_total = load_scan_results()
 
     P = pc["pieces"]
-    suppliers = {s["id"]: s for s in sup["suppliers"]}
     T = tasks["tasks"]
-    M = mat["materials"]
-    C = pcost["costings"]
-    pieces_by_id = {p["id"]: p for p in P}
 
-    sample = any(d.get("_sample") for d in (pc, sup, tasks, mat, pcost))
+    sample = any(d.get("_sample") for d in (pc, tasks))
 
     # ---- derived figures -------------------------------------------------
     for p in P:
@@ -277,168 +270,6 @@ def main():
         for p in P
     )
 
-    # ---- materials cards, grouped by category -----------------------------
-    def fmt_material_price(m):
-        if m["price"] is None:
-            return "price tbc"
-        sym = "€" if m.get("currency") == "EUR" else "kr"
-        val = f"€{m['price']:,.0f}" if sym == "€" else f"{m['price']:,.0f} kr"
-        out = f"{val} {esc(m['unit'])}"
-        if m.get("price_ex_vat") is not None:
-            ex = f"€{m['price_ex_vat']:,.0f}" if sym == "€" else f"{m['price_ex_vat']:,.0f} kr"
-            out += f' <span class="text-muted">({ex} ex. VAT)</span>'
-        return out
-
-    CAT_LABEL = {"fabric": "Fabric", "interior": "Interior materials", "consumable": "Consumables", "equipment": "Equipment"}
-
-    def material_card(m):
-        supplier_name = ""
-        if m.get("supplier"):
-            s = suppliers.get(m["supplier"])
-            supplier_name = s["name"] if s else m["supplier"]
-        specs = []
-        if m.get("martindale"):
-            specs.append(f'{m["martindale"]:,} Martindale')
-        if m.get("weight_gsm"):
-            specs.append(f'{m["weight_gsm"]} g/m²')
-        if m.get("width_cm"):
-            specs.append(f'{m["width_cm"]} cm wide')
-        specs_html = "".join(f'<span class="tag tag-outline">{esc(s)}</span>' for s in specs)
-        images = m.get("images") or []
-        if not images:
-            img = '<div class="fig ar-square"></div>'
-        elif len(images) == 1:
-            img = f'<div class="fig ar-square"><img src="_assets/materials/{esc(images[0])}" alt=""></div>'
-        else:
-            slides = "".join(
-                f'<img class="carousel-slide{" is-active" if i == 0 else ""}" '
-                f'src="_assets/materials/{esc(src)}" alt="" data-i="{i}">'
-                for i, src in enumerate(images)
-            )
-            dots = "".join(
-                f'<button class="carousel-dot{" is-active" if i == 0 else ""}" data-i="{i}" '
-                f'type="button" aria-label="Image {i+1}"></button>'
-                for i in range(len(images))
-            )
-            img = (
-                f'<div class="fig ar-square carousel" data-carousel>'
-                f'{slides}'
-                f'<button class="carousel-nav carousel-prev" type="button" aria-label="Previous image">‹</button>'
-                f'<button class="carousel-nav carousel-next" type="button" aria-label="Next image">›</button>'
-                f'<div class="carousel-dots">{dots}</div>'
-                f'</div>'
-            )
-        subcat = f'<span class="tag tag-accent-2">{esc(m["subcategory"])}</span>' if m.get("subcategory") else ""
-        note = f'<div class="text-muted matnote">{esc(m["price_note"])}</div>' if m.get("price_note") else ""
-        link = f'<a class="btn-link" href="{esc(m["source_url"])}" target="_blank" rel="noopener">source</a>' if m.get("source_url") else ""
-        return (
-            '<div class="card matcard">'
-            f'{img}'
-            f'<div class="card-kicker">{esc(m["name"])}</div>'
-            f'<div class="card-price price">{fmt_material_price(m)}</div>'
-            f'<div class="tags-row">{subcat}{specs_html}</div>'
-            f'<div class="text-muted">{esc(supplier_name)}</div>'
-            f'{note}{link}'
-            '</div>'
-        )
-
-    material_sections = []
-    for cat in ("fabric", "interior", "consumable", "equipment"):
-        items = [m for m in M if m["category"] == cat]
-        if not items:
-            continue
-        cards = "".join(material_card(m) for m in items)
-        priced = sum(1 for m in items if m["price"] is not None)
-        material_sections.append(
-            f'<div class="matcat">'
-            f'<h4>{CAT_LABEL[cat]} <span class="text-muted">{priced}/{len(items)} priced</span></h4>'
-            f'<div class="grid-pieces matgrid">{cards}</div></div>'
-        )
-    materials_html = "".join(material_sections) or '<p class="text-muted">No materials logged yet.</p>'
-
-    supplier_rows = "".join(
-        "<tr>"
-        f'<td>{esc(s["name"])}</td>'
-        f'<td class="text-muted">{esc(s.get("kind") or "")}{" · " + esc(s["trade"]) if s.get("trade") else ""}{" · " + esc(s["country"]) if s.get("country") else ""}</td>'
-        f'<td class="suprating">{("★" * s["rating"] + "☆" * (5 - s["rating"])) if s.get("rating") else ""}</td>'
-        f'<td class="supnotes-cell text-muted">{esc(s.get("notes") or "")}</td>'
-        "</tr>"
-        for s in sup["suppliers"]
-    )
-
-    # ---- piece costings -----------------------------------------------------
-    MIN_MARKUP = 0.5
-    PRICE_FLOOR = 6000
-    materials_by_id = {m["id"]: m for m in M}
-
-    def costing_card(c):
-        p = pieces_by_id.get(c.get("piece"))
-        piece_name = p["name"] if p else c.get("piece") or ""
-        line_rows = "".join(
-            "<tr>"
-            f'<td>{esc(l["label"])}</td>'
-            f'<td class="text-muted">{l["qty"]:g} {esc(l["unit"])}</td>'
-            f'<td class="num price">{money(l["price_inc_vat"])}</td>'
-            f'<td class="num price">{money(l["price_ex_vat"])}</td>'
-            "</tr>"
-            for l in c["lines"]
-        )
-        materials_ex = c["materials_ex_vat"]
-        labour = c["labour_cost"]
-        total_ex = c["total_cost_ex_vat"]
-        total_inc = c["total_cost_inc_vat"]
-        ask = c.get("asking_price")
-        pair_ask = c.get("pair_asking_price")
-        effective_ask = pair_ask if pair_ask is not None else ask
-        markup = (effective_ask - total_ex) / total_ex if (effective_ask and total_ex) else None
-        markup_ok = markup is not None and markup >= MIN_MARKUP
-        floor_ok = effective_ask is not None and effective_ask >= PRICE_FLOOR
-        rate = (effective_ask - total_ex) / c["labour_hours"] if (effective_ask and c.get("labour_hours")) else None
-
-        checks = (
-            f'<span class="{"note-positive" if markup_ok else "note-critical"}">'
-            f'{"✓" if markup_ok else "✗"} {pct(markup) if markup is not None else "—"} markup (min 50%)</span>'
-        )
-        if ask is not None and ask < PRICE_FLOOR and pair_ask is None:
-            checks += (
-                f'<span class="{"note-positive" if floor_ok else "note-critical"}">'
-                f'{"✓" if floor_ok else "✗"} {money(ask)} vs {money(PRICE_FLOOR)} price floor</span>'
-            )
-
-        img_html = ""
-        for l in c["lines"]:
-            mat_id = l.get("material")
-            if mat_id:
-                m = materials_by_id.get(mat_id)
-                if m and m.get("images"):
-                    img_html = f'<div class="fig ar-landscape"><img src="_assets/materials/{esc(m["images"][0])}" alt="{esc(m["name"])}"></div>'
-                    break
-        if not img_html:
-            img_html = '<div class="fig ar-landscape"></div>'
-
-        pair_span = f'<span class="text-muted">Pair: {money(pair_ask)}</span>' if pair_ask is not None else ""
-
-        return (
-            '<div class="card costcard">'
-            f'{img_html}'
-            f'<h4 class="card-title-sm">{esc(c.get("title") or piece_name)}</h4>'
-            '<div class="costrows-scroll"><table class="table costtable">'
-            '<thead><tr><th>Line</th><th>Qty</th><th class="num">Inc. VAT</th><th class="num">Ex. VAT</th></tr></thead>'
-            f'<tbody>{line_rows}</tbody></table></div>'
-            '<table class="table costtable costsummary"><tbody>'
-            f'<tr class="costsub"><td>Materials subtotal</td><td></td><td class="num price">{money(c["materials_inc_vat"])}</td><td class="num price">{money(materials_ex)}</td></tr>'
-            f'<tr class="costsub"><td>Labour — {c["labour_hours"]:g}h @ {money(c["labour_rate"])}</td><td></td><td class="num price">{money(labour)}</td><td class="num price">{money(labour)}</td></tr>'
-            f'<tr class="costtotal"><td>Total cost</td><td></td><td class="num price-lg">{money(total_inc)}</td><td class="num price-lg">{money(total_ex)}</td></tr>'
-            '</tbody></table>'
-            '<div class="costfoot">'
-            f'<div class="costmeta"><span class="price">Asking {money(ask)}</span>{pair_span}</div>'
-            f'<div class="costchecks">{checks}</div>'
-            + (f'<div class="text-muted costnote">{esc(c["notes"])}</div>' if c.get("notes") else "")
-            + '</div></div>'
-        )
-
-    costing_html = "".join(costing_card(c) for c in C) or '<p class="text-muted">No costings logged yet.</p>'
-
     # ---- manual sourcing checklist (Facebook Marketplace etc — can't be automated) ---
     def dedupe_variants(terms):
         """Designers/models list carries spelling variants for the automated
@@ -491,7 +322,7 @@ def main():
         except (ValueError, OSError, TypeError):
             return "—"
 
-    SCAN_SRC_LABEL = {"auctionet": "Auctionet", "tradera": "Tradera", "bukowskis": "Bukowskis", "haraldssons": "Haraldssons"}
+    SCAN_SRC_LABEL = {"auctionet": "Auctionet", "tradera": "Tradera", "bukowskis": "Bukowskis", "haraldssons": "Haraldssons", "siko": "Sikö"}
 
     def scan_card(lot):
         lot_key = esc(f"{lot['source']}-{lot['lot_id']}")
@@ -510,7 +341,7 @@ def main():
             else '<span class="scanprice scanprice-empty">price tbc</span>'
         )
         return (
-            f'<div class="scancard" data-lot-key="{lot_key}">'
+            f'<div class="scancard" data-lot-key="{lot_key}" data-source="{esc(src)}">'
             f'<div class="fig ar-landscape scanimgwrap">{img}{price_badge}</div>'
             '<div class="scanbody">'
             f'<div class="scantop"><span class="tag tag-outline">{esc(SCAN_SRC_LABEL.get(src, src))}</span>{flag}'
@@ -559,22 +390,19 @@ def main():
         inv_rows="".join(inv_rows),
         task_rows="".join(task_rows) or '<li class="task text-muted">Nothing outstanding.</li>',
         piece_table=piece_table,
-        materials_html=materials_html,
-        supplier_rows=supplier_rows,
-        costing_html=costing_html,
         checklist_html=checklist_html,
         checklist_total=str(checklist_total),
         scan_cards_html=scan_cards_html or '<p class="text-muted">No scan results yet — run <code>python3 tools/scanner/run.py</code>, then rebuild the dashboard.</p>',
         scan_count=str(scan_count),
         scan_total=str(scan_total),
-        supplier_count=str(len(suppliers)),
+        piece_count=str(len(P)),
     )
 
     out = os.path.join(ROOT, "dashboard.html")
     with open(out, "w", encoding="utf-8") as fh:
         fh.write(doc)
     print(f"wrote {out}")
-    print(f"  pieces {len(P)} · suppliers {len(suppliers)} · tasks {len(T)} · materials {len(M)} · costings {len(C)}")
+    print(f"  pieces {len(P)} · tasks {len(T)} · scan lots {scan_total}")
     print(f"  capital deployed {money(capital_deployed)} · projected {money(projected)} · realised {money(realised)} · avg {kr_per_hour(avg_rate)}")
 
 
@@ -636,19 +464,13 @@ TEMPLATE = r"""<!doctype html>
 
     <section class="section-block">
       <h4>Inventory</h4>
-      <p class="text-muted">{supplier_count} suppliers on file.</p>
+      <p class="text-muted">{piece_count} pieces on file.</p>
       <div class="tablewrap">
         <table class="table inv">
           <thead><tr><th>Piece</th><th>Designer</th><th>Era</th><th>Wood</th><th>Status</th><th style="text-align:right">Cost</th><th style="text-align:right">Asking</th></tr></thead>
           <tbody>{inv_rows}</tbody>
         </table>
       </div>
-    </section>
-
-    <section class="section-block">
-      <h4>Piece costing</h4>
-      <p class="text-muted">Itemized bill of materials, inc. and ex. VAT, checked against the 50% markup rule and the 6,000 kr price floor.</p>
-      <div class="costgrid">{costing_html}</div>
     </section>
 
     <section class="section-block">
@@ -660,20 +482,16 @@ TEMPLATE = r"""<!doctype html>
 
   <div class="tabpanel" id="tab-suppliers" data-tab-panel="suppliers" hidden>
     <section class="section-block">
-      <h4>Materials</h4>
-      <p class="text-muted">What you buy, grouped by what it's for. Prices as last checked — not live.</p>
-      {materials_html}
-    </section>
-
-    <section class="section-block">
-      <h4>Suppliers</h4>
-      <p class="text-muted">Dealers, auction houses, restorers, textile and material suppliers.</p>
-      <div class="tablewrap">
-        <table class="table suptable">
-          <thead><tr><th>Name</th><th>Kind</th><th>Rating</th><th>Notes</th></tr></thead>
-          <tbody>{supplier_rows}</tbody>
-        </table>
-      </div>
+      <h4>Materials, suppliers &amp; piece costing</h4>
+      <p class="text-muted">
+        These moved to the live app — shared with Amanda, editable, prices behind login.
+        Materials with every supplier offer side by side, the fabrics board, supplier accounts, and the costing builder
+        (recipes per item type, quantities and VAT computed, markup / floor / fabric-share / kr-hour checks).
+      </p>
+      <p>
+        <a class="btn btn-primary" href="docs/app/index.html">Open the app (local)</a>
+        <a class="btn btn-secondary" href="https://sarahcambra.github.io/vedda-studio/app/" target="_blank" rel="noopener">Open online</a>
+      </p>
     </section>
   </div>
 
@@ -686,6 +504,7 @@ TEMPLATE = r"""<!doctype html>
         Shared with everyone who opens this page.
         <a href="#" id="scan-show-discarded" class="btn-link scan-discarded-link"><span id="scan-link-label">Show discarded</span> (<span id="scan-discarded-count">0</span>)</a>
       </p>
+      <div class="tabnav" id="scan-source-tabs" role="tablist" style="margin-bottom:var(--space-6);"></div>
       <div class="scangrid" id="scan-grid">{scan_cards_html}</div>
       <div class="scanpager" id="scan-pager"></div>
     </section>
@@ -741,8 +560,10 @@ TEMPLATE = r"""<!doctype html>
   var discardedCountEl = document.getElementById('scan-discarded-count');
   var pagerEl = document.getElementById('scan-pager');
   var discardedVisible = false;
+  var sourceFilter = 'all';
   var PAGE_SIZE = 36;
   var currentPage = 1;
+  var SOURCE_LABEL = { auctionet: 'Auctionet', tradera: 'Tradera', bukowskis: 'Bukowskis', haraldssons: 'Haraldssons' };
 
   var SUPABASE_URL = 'https://rnquevahynifwpyynrbd.supabase.co';
   var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJucXVldmFoeW5pZndweXlucmJkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk2MDQ5NDIsImV4cCI6MjEwNTE4MDk0Mn0.2xIZMYpxk-c6_xt7x8J0EkzRMWyRRRu4gy4kIEtLy1U';
@@ -765,19 +586,44 @@ TEMPLATE = r"""<!doctype html>
     }).then(function (r) { return r.ok ? r.json() : []; }).catch(function () { return []; });
   }
 
+  function renderSourceTabs() {
+    var tabsEl = document.getElementById('scan-source-tabs');
+    if (!tabsEl) return;
+    var counts = { all: cards.length };
+    cards.forEach(function (card) {
+      var src = card.getAttribute('data-source') || '';
+      counts[src] = (counts[src] || 0) + 1;
+    });
+    var sources = Object.keys(SOURCE_LABEL).filter(function (s) { return counts[s]; });
+    var html = '<button class="tabbtn' + (sourceFilter === 'all' ? ' is-active' : '') + '" data-source-tab="all" type="button">All (' + counts.all + ')</button>';
+    sources.forEach(function (s) {
+      html += '<button class="tabbtn' + (sourceFilter === s ? ' is-active' : '') + '" data-source-tab="' + s + '" type="button">' + SOURCE_LABEL[s] + ' (' + counts[s] + ')</button>';
+    });
+    tabsEl.innerHTML = html;
+    tabsEl.querySelectorAll('[data-source-tab]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        sourceFilter = btn.getAttribute('data-source-tab');
+        currentPage = 1;
+        applyFilters();
+      });
+    });
+  }
+
   function applyFilters() {
     var discardedCount = 0;
     var eligible = [];
     cards.forEach(function (card) {
       var state = card.getAttribute('data-state') || 'new';
+      var matchesSource = sourceFilter === 'all' || card.getAttribute('data-source') === sourceFilter;
       if (state === 'discarded') {
         discardedCount++;
-        if (discardedVisible) eligible.push(card);
-      } else {
+        if (discardedVisible && matchesSource) eligible.push(card);
+      } else if (matchesSource) {
         eligible.push(card);
       }
     });
     if (discardedCountEl) discardedCountEl.textContent = discardedCount;
+    renderSourceTabs();
 
     var pageCount = Math.max(1, Math.ceil(eligible.length / PAGE_SIZE));
     if (currentPage > pageCount) currentPage = pageCount;

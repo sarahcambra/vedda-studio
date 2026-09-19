@@ -15,9 +15,18 @@
 !/tools/
 !/tools/build-dashboard.py
 !/tools/build-public-dashboard.py
+!/tools/migrate_to_supabase.py
+!/tools/supabase-setup.sql
+!/tools/supabase-setup-materials.sql
+!/tools/test_costing_engine.js
 !/tools/scanner/
 !/tools/scanner/*.py
 !/tools/scanner/keywords.json
+
+# Never any env/dotenv file, anywhere.
+.env
+.env.*
+*.env
 
 # Never these, even though they live under an allowed folder above.
 # fetch_siko.py: Sikö's robots.txt explicitly names and blocks this bot —

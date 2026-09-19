@@ -5,9 +5,13 @@ Run the scanner: fetch -> normalise (done in fetch_*) -> score -> store -> repor
     python3 tools/scanner/run.py
 
 Sources wired up: Auctionet, Tradera (needs TRADERA_APP_ID / TRADERA_APP_KEY
-env vars — skips gracefully if unset, see fetch_tradera.py), Bukowskis,
-Haraldssons, and Sikö (both need Playwright — skips gracefully if not
-installed).
+env vars — skips gracefully if unset, see fetch_tradera.py), Bukowskis, and
+Haraldssons (needs Playwright — skips gracefully if not installed).
+
+Sikö is deliberately not wired up here: its robots.txt explicitly disallows
+scraping and specifically names and blocks ClaudeBot. That's a hard stop,
+not a technical obstacle to route around — see research/auction-scanner.md
+section 8.
 """
 
 import os
@@ -20,7 +24,6 @@ import score as scorer
 import fetch_auctionet
 import fetch_tradera
 import fetch_bukowskis
-import fetch_siko
 import fetch_haraldssons
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -47,11 +50,6 @@ def main():
     haraldssons_lots = fetch_haraldssons.run(fetch_auctionet.load_keywords())
     print(f"{len(haraldssons_lots)} lots fetched from Haraldssons.\n")
     lots += haraldssons_lots
-
-    print("Fetching Sikö...")
-    siko_lots = fetch_siko.run(fetch_auctionet.load_keywords())
-    print(f"{len(siko_lots)} lots fetched from Sikö.\n")
-    lots += siko_lots
 
     print("Scoring...")
     scored = [scorer.score_lot(lot) for lot in lots]

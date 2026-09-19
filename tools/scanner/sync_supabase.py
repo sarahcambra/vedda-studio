@@ -76,6 +76,7 @@ def upsert_batch(base_url, anon_key, batch):
         "apikey": anon_key,
         "Authorization": f"Bearer {anon_key}",
         "Content-Type": "application/json",
+        "User-Agent": "vedda-studio-scanner/1.0",
         # merge-duplicates: only the columns present in the payload get
         # overwritten (SCRAPED_COLUMNS) — state/discard_reason/etc are
         # simply absent from the payload, so PostgREST leaves them alone.
