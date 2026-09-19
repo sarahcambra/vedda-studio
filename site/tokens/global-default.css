@@ -1,0 +1,91 @@
+/* Global — primitives. Raw values only, no meaning attached. Named by hue/scale, never by role. */
+@import url('https://fonts.googleapis.com/css2?family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400&display=swap');
+
+:root {
+  --color-sand-100: #faf6ed;
+  --color-sand-200: #f0e8d8;
+  --color-sand-300: #e1d6c0;
+  --color-sand-400: #c9bfa9;
+  --color-sand-500: #a99f89;
+  --color-sand-600: #877d69;
+  --color-sand-700: #665e4e;
+  --color-sand-800: #474036;
+  --color-sand-900: #2b2620;
+
+  --color-hunter-100: #e4eae5;
+  --color-hunter-200: #c6d2c8;
+  --color-hunter-300: #9db0a2;
+  --color-hunter-400: #6c8272;
+  --color-hunter-500: #2e4034;
+  --color-hunter-600: #263429;
+  --color-hunter-700: #1e2a20;
+  --color-hunter-800: #161f17;
+  --color-hunter-900: #0f150f;
+
+  --color-cognac-100: #f3e9da;
+  --color-cognac-200: #e4d2b4;
+  --color-cognac-300: #d0b389;
+  --color-cognac-400: #b8955f;
+  --color-cognac-500: #7d5f3e;
+  --color-cognac-600: #6a4f32;
+  --color-cognac-700: #573f27;
+  --color-cognac-800: #43301d;
+  --color-cognac-900: #2f2114;
+
+  --color-camel-100: #f8f1e7;
+  --color-camel-200: #eee0c7;
+  --color-camel-300: #dfc79e;
+  --color-camel-400: #d2b588;
+  --color-camel-500: #c9a97e;
+  --color-camel-600: #b08f5e;
+  --color-camel-700: #8f7248;
+  --color-camel-800: #6d5735;
+  --color-camel-900: #4a3b24;
+
+  --color-moss-300: #7f9384;
+  --color-moss-500: #3f5a42;
+  --color-moss-700: #2b3f2d;
+  --color-ochre-300: #c0a468;
+  --color-ochre-500: #8a6a2f;
+  --color-ochre-700: #5f491f;
+  --color-rust-300: #cf7d78;
+  --color-rust-500: #a3322d;
+  --color-rust-700: #7a221e;
+
+  --shadow-color-ink-10: color-mix(in srgb, #2b2620 10%, transparent);
+  --shadow-color-ink-12: color-mix(in srgb, #2b2620 12%, transparent);
+  --shadow-color-ink-14: color-mix(in srgb, #2b2620 14%, transparent);
+  --shadow-color-ink-16: color-mix(in srgb, #2b2620 16%, transparent);
+  --shadow-color-ink-55: color-mix(in srgb, #2b2620 55%, transparent);
+  --shadow-y-1: 1px;
+  --shadow-y-4: 4px;
+  --shadow-y-18: 18px;
+  --shadow-blur-2: 2px;
+  --shadow-blur-14: 14px;
+  --shadow-blur-44: 44px;
+
+  --font-family-heading: "Libre Caslon Text", "Times New Roman", serif;
+  --font-family-body: "Helvetica Neue", Helvetica, Arial, system-ui, sans-serif;
+  --font-weight-heading: 400;
+
+  --spacing-1: 4px;
+  --spacing-2: 8px;
+  --spacing-3: 12px;
+  --spacing-4: 16px;
+  --spacing-6: 24px;
+  --spacing-8: 32px;
+  --spacing-12: 48px;
+  --spacing-16: 72px;
+  --spacing-20: 96px;
+  --spacing-24: 128px;
+  --spacing-32: 200px;
+
+  --radius-none: 0px;
+  --stroke-1: 1px;
+  --stroke-6: 6px;
+
+  --duration-1: 240ms; /* @kind other */
+  --duration-2: 420ms; /* @kind other */
+  --duration-3: 600ms; /* @kind other */
+  --ease-standard: cubic-bezier(0.22, 0.61, 0.36, 1); /* @kind other */
+}

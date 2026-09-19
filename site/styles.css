@@ -1,0 +1,367 @@
+@import url('tokens/mapping-light.css');
+/* Vedda Studio — design-system tokens and component classes. Source of truth for the system's look; retune here and see readme.md.
+   Three-layer token architecture lives in tokens/, mirroring the Figma variable collections (Global, Semantic Branding, Mapping):
+   global-default.css is raw primitives, semantic-branding-default.css gives them brand meaning, mapping-light.css is the role layer
+   a component actually reads. The block below aliases the original names every component file already uses onto that mapping layer,
+   so nothing downstream had to change. */
+
+:root {
+  --color-bg: var(--surface-bg-page);
+  --color-surface: var(--surface-bg-sunken);
+  --color-text: var(--text-body);
+  --color-accent: var(--colors-brand-primary-default);
+  --color-accent-2: var(--colors-brand-secondary-default);
+  --color-feature: var(--colors-brand-accent-default);
+  --color-divider: var(--stroke-divider);
+
+  --color-positive: var(--colors-success-default);
+  --color-caution: var(--colors-warning-default);
+  --color-critical: var(--colors-error-default);
+
+  --color-neutral-100: var(--colors-neutral-100);
+  --color-neutral-200: var(--colors-neutral-200);
+  --color-neutral-300: var(--colors-neutral-300);
+  --color-neutral-400: var(--colors-neutral-400);
+  --color-neutral-500: var(--colors-neutral-500);
+  --color-neutral-600: var(--colors-neutral-600);
+  --color-neutral-700: var(--colors-neutral-700);
+  --color-neutral-800: var(--colors-neutral-800);
+  --color-neutral-900: var(--colors-neutral-900);
+
+  --color-accent-100: var(--colors-brand-primary-100);
+  --color-accent-200: var(--colors-brand-primary-200);
+  --color-accent-300: var(--colors-brand-primary-300);
+  --color-accent-400: var(--colors-brand-primary-400);
+  --color-accent-500: var(--colors-brand-primary-default);
+  --color-accent-600: var(--colors-brand-primary-600);
+  --color-accent-700: var(--colors-brand-primary-700);
+  --color-accent-800: var(--colors-brand-primary-800);
+  --color-accent-900: var(--colors-brand-primary-900);
+
+  --color-accent-2-100: var(--colors-brand-secondary-100);
+  --color-accent-2-200: var(--colors-brand-secondary-200);
+  --color-accent-2-300: var(--colors-brand-secondary-300);
+  --color-accent-2-400: var(--colors-brand-secondary-400);
+  --color-accent-2-500: var(--colors-brand-secondary-default);
+  --color-accent-2-600: var(--colors-brand-secondary-600);
+  --color-accent-2-700: var(--colors-brand-secondary-700);
+  --color-accent-2-800: var(--colors-brand-secondary-800);
+  --color-accent-2-900: var(--colors-brand-secondary-900);
+
+  --color-feature-100: var(--colors-brand-accent-100);
+  --color-feature-200: var(--colors-brand-accent-200);
+  --color-feature-300: var(--colors-brand-accent-300);
+  --color-feature-400: var(--colors-brand-accent-400);
+  --color-feature-500: var(--colors-brand-accent-default);
+  --color-feature-600: var(--colors-brand-accent-600);
+  --color-feature-700: var(--colors-brand-accent-700);
+  --color-feature-800: var(--colors-brand-accent-800);
+  --color-feature-900: var(--colors-brand-accent-900);
+
+  --font-heading: var(--font-family-heading);
+  --font-heading-weight: var(--font-weight-heading);
+  --font-body: var(--font-family-body);
+
+  --space-1: var(--spacing-1);
+  --space-2: var(--spacing-2);
+  --space-3: var(--spacing-3);
+  --space-4: var(--spacing-4);
+  --space-6: var(--spacing-6);
+  --space-8: var(--spacing-8);
+  --space-12: var(--spacing-12);
+  --space-16: var(--spacing-16);
+  --space-20: var(--spacing-20);
+  --space-24: var(--spacing-24);
+  --space-32: var(--spacing-32);
+
+  --radius-sm: var(--radius-none);
+  --radius-md: var(--radius-none);
+  --radius-lg: var(--radius-none);
+
+  --ease: var(--ease-standard); /* @kind other */
+  --dur-1: var(--duration-1); /* @kind other */
+  --dur-2: var(--duration-2); /* @kind other */
+  --dur-3: var(--duration-3); /* @kind other */
+
+  --shadow-sm: 0 var(--shadow-raised-y) var(--shadow-raised-blur) var(--shadow-raised-color);
+  --shadow-md: 0 var(--shadow-floating-y) var(--shadow-floating-blur) var(--shadow-floating-color);
+  --shadow-lg: 0 var(--shadow-overlay-y) var(--shadow-overlay-blur) var(--shadow-overlay-color);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   Base
+   ══════════════════════════════════════════════════════════════════════ */
+
+*, *::before, *::after { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--color-bg); color: var(--color-text);
+  font-family: var(--font-body); font-size: 16px; line-height: 1.6; font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+}
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading); font-weight: var(--font-heading-weight);
+  line-height: 1.08; letter-spacing: -0.01em; margin: 0 0 var(--space-4);
+  text-wrap: pretty;
+}
+h1 { font-size: clamp(48px, 7vw, 108px); line-height: 1.02; letter-spacing: -0.025em; }
+h2 { font-size: clamp(34px, 4vw, 56px); letter-spacing: -0.018em; }
+h3 { font-size: 32px; }
+h4 { font-size: 24px; }
+h5 { font-size: 18px; }
+h6 {
+  font-family: var(--font-body); font-size: 11px; font-weight: 500;
+  letter-spacing: 0.18em; text-transform: uppercase; line-height: 1.4;
+}
+p { margin: 0 0 var(--space-4); max-width: 58ch; }
+em, i, .display-italic { font-family: var(--font-heading); font-style: italic; }
+a {
+  color: var(--color-text); text-decoration: none;
+  border-bottom: 1px solid color-mix(in srgb, var(--color-text) 35%, transparent);
+  transition: color var(--dur-1) var(--ease), border-color var(--dur-1) var(--ease);
+}
+a:hover { color: var(--color-accent); border-color: var(--color-accent); }
+img { display: block; max-width: 100%; }
+figure { margin: 0; }
+
+/* The one interface voice: small, tracked, upper-case grotesque. Kickers,
+   captions, material names, prices' labels, nav — all of it sets here. */
+.label, .kicker, figcaption, .card-kicker, .card-meta, .tag, .table th, .field > label {
+  font-family: var(--font-body); font-size: 11px; font-weight: 500;
+  letter-spacing: 0.16em; text-transform: uppercase; line-height: 1.5;
+}
+figcaption { margin-top: var(--space-3); color: color-mix(in srgb, var(--color-text) 62%, transparent); }
+.kicker, .label { color: color-mix(in srgb, var(--color-text) 62%, transparent); display: block; }
+.text-muted { color: color-mix(in srgb, var(--color-text) 62%, transparent); }
+.lead { font-family: var(--font-heading); font-size: clamp(20px, 2vw, 26px); line-height: 1.45; letter-spacing: -0.005em; max-width: 46ch; }
+/* Prices are the most-scanned figures on the site: tabular everywhere, and in
+   listings they set in the same tracked voice as the labels beside them so the
+   meta row reads as one line of type rather than two competing sizes. */
+.price { font-variant-numeric: tabular-nums; font-size: 15px; letter-spacing: 0.02em; }
+.price-lg { font-variant-numeric: tabular-nums; font-family: var(--font-heading); font-size: 28px; letter-spacing: 0; }
+:focus { outline: none; }
+:focus-visible { outline: 1px solid var(--color-accent); outline-offset: 3px; }
+::selection { background: var(--color-feature-300); }
+
+/* — rules: the only structure drawn on the page — */
+.hr, hr { height: 1px; border: 0; margin: var(--space-16) 0; background: var(--color-divider); }
+.hr-tight { margin: var(--space-8) 0; }
+
+/* — page frame: wide margins, generous section rhythm — */
+.page { max-width: 1440px; margin: 0 auto; padding: 0 clamp(24px, 6vw, 96px); }
+.section { padding: var(--space-20) 0; }
+.section-tight { padding: var(--space-16) 0; }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   Imagery — the largest lever in the system. Photographs sit directly on the
+   page: no mats, no frames, no grade. The ratio set is fixed so a grid of
+   pieces never ragged-edges, and details crop square.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.fig { position: relative; overflow: hidden; background: var(--color-surface); }
+.fig > img, .fig > image-slot { width: 100%; height: 100%; object-fit: cover; display: block; }
+.ar-portrait { aspect-ratio: 3 / 4; }   /* the default for a single piece */
+.ar-square { aspect-ratio: 1 / 1; }     /* details: joinery, weave, patina */
+.ar-landscape { aspect-ratio: 4 / 3; }  /* rooms and settings */
+.ar-wide { aspect-ratio: 16 / 9; }      /* hero and full-bleed */
+.fig-zoom > img, .fig-zoom > image-slot { transition: transform var(--dur-3) var(--ease); }
+.fig-zoom:hover > img, .fig-zoom:hover > image-slot { transform: scale(1.02); }
+.bleed { width: 100%; }
+.bleed-viewport { width: 100vw; margin-left: calc(50% - 50vw); } /* only where a scrollbar gutter is acceptable */
+/* Retained for legacy pages — a plate is a matted photograph; new work uses .fig. */
+.plate { box-sizing: border-box; border: 6px solid var(--color-surface); }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   Actions — a real hierarchy. Primary is an ink bar; secondary is a hairline;
+   tertiary is a tracked text link. None of them are chips.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2);
+  cursor: pointer; text-decoration: none; border: 1px solid transparent; border-radius: 0;
+  font-family: var(--font-body); font-size: 11px; font-weight: 500;
+  letter-spacing: 0.18em; text-transform: uppercase; line-height: 1;
+  padding: 17px 30px; background: transparent; color: var(--color-text);
+  transition: background var(--dur-1) var(--ease), color var(--dur-1) var(--ease), border-color var(--dur-1) var(--ease);
+}
+.btn svg { display: block; }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-primary { background: var(--color-text); color: var(--color-bg); border-color: var(--color-text); }
+.btn-primary:hover { background: var(--color-accent); border-color: var(--color-accent); }
+.btn-secondary { border-color: color-mix(in srgb, var(--color-text) 30%, transparent); }
+.btn-secondary:hover { border-color: var(--color-text); background: color-mix(in srgb, var(--color-text) 5%, transparent); }
+.btn-stamp { background: var(--color-accent); color: var(--color-feature); border-color: var(--color-accent); }
+.btn-stamp:hover { background: var(--color-accent-700); }
+.btn-link {
+  padding: 0; border: 0; border-bottom: 1px solid color-mix(in srgb, var(--color-text) 35%, transparent);
+  color: var(--color-text);
+}
+.btn-link:hover { color: var(--color-accent); border-color: var(--color-accent); }
+.btn-block { width: 100%; }
+.btn-icon { width: 44px; height: 44px; padding: 0; }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   Product — the photograph is the card. No border, no padding, no box.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.grid-pieces {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--space-16) var(--space-12);
+}
+.card { display: flex; flex-direction: column; gap: var(--space-3); background: transparent; border: 0; padding: 0; }
+.card > .fig { margin-bottom: var(--space-2); }
+.card-kicker { color: color-mix(in srgb, var(--color-text) 62%, transparent); }
+.card-title { font-family: var(--font-heading); font-weight: 400; font-size: 24px; line-height: 1.15; margin: 0; }
+.card-body { margin: 0; font-size: 15px; line-height: 1.6; color: color-mix(in srgb, var(--color-text) 78%, transparent); }
+.card-meta { display: flex; align-items: center; gap: var(--space-4); color: color-mix(in srgb, var(--color-text) 62%, transparent); }
+.card-price {
+  font-family: var(--font-body); font-size: 11px; font-weight: 500;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  font-variant-numeric: tabular-nums; color: var(--color-text);
+}
+.elev-sm { box-shadow: var(--shadow-sm); }
+.elev-md { box-shadow: var(--shadow-md); }
+.elev-lg { box-shadow: var(--shadow-lg); }
+
+/* — material and status marks — */
+.swatches { display: flex; gap: var(--space-3); }
+.swatch { width: 44px; height: 44px; border: 1px solid var(--color-divider); }
+.swatch-sage { background: #95a198; }
+.swatch-slate { background: #788080; }
+.swatch-rust { background: #a3322d; }
+.swatch-clay { background: #6b3927; }
+.swatch-camel { background: var(--color-feature); }
+.tag {
+  display: inline-flex; align-items: center; padding: 6px 11px 5px;
+  border: 1px solid transparent; border-radius: 0;
+}
+.tag-outline { border-color: color-mix(in srgb, var(--color-text) 30%, transparent); color: var(--color-text); }
+.tag-accent { border-color: var(--color-accent); color: var(--color-accent); }
+.tag-accent-2 { border-color: var(--color-accent-2); color: var(--color-accent-2); }
+.tag-neutral { border-color: var(--color-divider); color: color-mix(in srgb, var(--color-text) 62%, transparent); }
+.tag-feature, .tag-stamp { background: var(--color-accent); color: var(--color-feature); }
+.tag-sold { border-color: var(--color-divider); color: color-mix(in srgb, var(--color-text) 50%, transparent); }
+.note-positive { color: var(--color-positive); }
+.note-caution { color: var(--color-caution); }
+.note-critical { color: var(--color-critical); }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   Specification tables — dimensions, materials, provenance
+   ══════════════════════════════════════════════════════════════════════ */
+
+.table { width: 100%; border-collapse: collapse; font-size: 15px; }
+.table th {
+  text-align: left; padding: var(--space-3) var(--space-4) var(--space-3) 0;
+  color: color-mix(in srgb, var(--color-text) 62%, transparent);
+  border-bottom: 1px solid var(--color-divider); vertical-align: top;
+}
+.table td {
+  padding: var(--space-3) 0; border-bottom: 1px solid var(--color-divider);
+  font-variant-numeric: tabular-nums;
+}
+.table-spec th { width: 34%; }
+.table-spec td { text-align: right; }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   Forms — enquiries and commissions
+   ══════════════════════════════════════════════════════════════════════ */
+
+.field { display: block; margin-bottom: var(--space-6); }
+.field > label { display: block; margin-bottom: var(--space-2); color: color-mix(in srgb, var(--color-text) 62%, transparent); }
+.input {
+  width: 100%; min-height: 48px; padding: 12px 0; font: inherit; font-size: 16px;
+  color: var(--color-text); caret-color: var(--color-accent); background: transparent;
+  border: 0; border-bottom: 1px solid color-mix(in srgb, var(--color-text) 28%, transparent);
+  border-radius: 0; transition: border-color var(--dur-1) var(--ease);
+}
+.input:hover { border-color: color-mix(in srgb, var(--color-text) 55%, transparent); }
+.input:focus-visible { border-color: var(--color-accent); border-bottom-width: 1px; outline: none; }
+.input[aria-invalid='true'] { border-color: var(--color-critical); }
+textarea.input { min-height: 120px; resize: vertical; }
+.radio { display: inline-flex; align-items: center; gap: var(--space-3); cursor: pointer; font-size: 15px; }
+.radio input, .seg-opt input { position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none; }
+.radio .dot { width: 14px; height: 14px; flex: none; border-radius: 50%; border: 1px solid color-mix(in srgb, var(--color-text) 40%, transparent); transition: all var(--dur-1) var(--ease); }
+.radio:hover .dot { border-color: var(--color-accent); }
+.radio input:checked + .dot { border-color: var(--color-accent); background: var(--color-accent); box-shadow: inset 0 0 0 3px var(--color-bg); }
+.radio input:focus-visible + .dot { outline: 1px solid var(--color-accent); outline-offset: 3px; }
+.seg { display: inline-flex; border: 1px solid var(--color-divider); }
+.seg-opt {
+  display: inline-flex; align-items: center; padding: 13px 20px; cursor: pointer;
+  font-family: var(--font-body); font-size: 11px; font-weight: 500;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  transition: background var(--dur-1) var(--ease), color var(--dur-1) var(--ease);
+}
+.seg-opt + .seg-opt { border-left: 1px solid var(--color-divider); }
+.seg-opt:has(input:checked) { background: var(--color-text); color: var(--color-bg); }
+.seg-opt:not(:has(input:checked)):hover { background: color-mix(in srgb, var(--color-text) 5%, transparent); }
+.seg-opt:has(input:focus-visible) { outline: 1px solid var(--color-accent); outline-offset: -3px; }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   Navigation
+   ══════════════════════════════════════════════════════════════════════ */
+
+.nav {
+  display: flex; align-items: center; gap: var(--space-8);
+  padding: var(--space-6) 0; border-bottom: 1px solid var(--color-divider);
+}
+.nav-brand {
+  font-family: var(--font-heading); font-weight: 400; font-size: 22px;
+  letter-spacing: 0.14em; text-transform: uppercase; margin-right: auto;
+  border: 0; color: var(--color-text);
+}
+.nav a, .foot a {
+  font-family: var(--font-body); font-size: 11px; font-weight: 500;
+  letter-spacing: 0.16em; text-transform: uppercase; border: 0; color: var(--color-text);
+}
+.nav a:hover, .foot a:hover,
+.nav a[aria-current='page'], .nav a[aria-current='location'] { color: var(--color-accent); }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   Dialog
+   ══════════════════════════════════════════════════════════════════════ */
+
+.dialog-backdrop {
+  position: fixed; inset: 0; display: grid; place-items: center; padding: var(--space-6);
+  background: color-mix(in srgb, var(--color-neutral-900) 55%, transparent);
+}
+.dialog {
+  width: min(520px, 100%); display: flex; flex-direction: column; gap: var(--space-4);
+  padding: var(--space-12); background: var(--color-bg); box-shadow: var(--shadow-lg); border: 0;
+}
+.dialog-title { font-family: var(--font-heading); font-weight: 400; font-size: 30px; line-height: 1.1; }
+.dialog-body { font-size: 16px; color: color-mix(in srgb, var(--color-text) 78%, transparent); }
+.dialog-actions { display: flex; justify-content: flex-end; gap: var(--space-4); margin-top: var(--space-4); }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   Inverted band — the page's one change of ground. A single dark moment gives
+   an all-paper page its rhythm; the brand's reversed pairing (Camel on Hunter
+   Green) is what it's built from. Use once, maybe twice, per page — never for
+   ordinary content sections.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.section-invert {
+  background: var(--color-accent); color: var(--color-bg);
+  padding: var(--space-24) 0;
+}
+.section-invert h1, .section-invert h2, .section-invert h3, .section-invert blockquote { color: var(--color-bg); }
+.section-invert .kicker, .section-invert .label, .section-invert figcaption, .section-invert .text-muted { color: var(--color-feature); }
+.section-invert a, .section-invert .btn-link { color: var(--color-feature); border-color: color-mix(in srgb, var(--color-feature) 50%, transparent); }
+.section-invert a:hover, .section-invert .btn-link:hover { color: var(--color-bg); border-color: var(--color-bg); }
+.section-invert .btn-primary { background: var(--color-feature); color: var(--color-accent-900); border-color: var(--color-feature); }
+.section-invert .btn-primary:hover { background: var(--color-bg); border-color: var(--color-bg); }
+.section-invert .btn-secondary { border-color: color-mix(in srgb, var(--color-feature) 55%, transparent); color: var(--color-bg); }
+.section-invert .btn-secondary:hover { border-color: var(--color-feature); background: color-mix(in srgb, var(--color-feature) 12%, transparent); }
+.section-invert .hr, .section-invert hr { background: color-mix(in srgb, var(--color-feature) 35%, transparent); }
+.section-invert :focus-visible { outline-color: var(--color-feature); }
+
+/* Entrance — the only scripted motion: type and photographs settle upward once.
+   Elements are visible by default and only animate where the page opts in. */
+.reveal[data-reveal] { opacity: 0; transform: translateY(18px); }
+.reveal[data-reveal='in'] {
+  opacity: 1; transform: none;
+  transition: opacity var(--dur-3) var(--ease), transform var(--dur-3) var(--ease);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+  .reveal[data-reveal] { opacity: 1; transform: none; }
+}

@@ -10,9 +10,13 @@
 !/.github/workflows/
 !/.github/workflows/*.yml
 
-# Pure CSS, no business data — build-public-dashboard.py copies this into
-# docs/ at build time, so CI needs it present in the checkout.
+# Pure CSS, no business data — build-public-dashboard.py copies these into
+# docs/ at build time, so CI needs them present in the checkout.
 !/dashboard.css
+!/site/
+!/site/styles.css
+!/site/tokens/
+!/site/tokens/*.css
 
 # The published GitHub Pages site — sourcing/scan-results only.
 !/docs/

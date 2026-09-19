@@ -1,0 +1,66 @@
+/* Semantic branding — primitives given brand meaning. Still mode-agnostic. */
+@import url('global-default.css');
+
+:root {
+  --colors-neutral-100: var(--color-sand-100);
+  --colors-neutral-200: var(--color-sand-200);
+  --colors-neutral-300: var(--color-sand-300);
+  --colors-neutral-400: var(--color-sand-400);
+  --colors-neutral-500: var(--color-sand-500);
+  --colors-neutral-600: var(--color-sand-600);
+  --colors-neutral-700: var(--color-sand-700);
+  --colors-neutral-800: var(--color-sand-800);
+  --colors-neutral-900: var(--color-sand-900);
+
+  /* Brand primary — Hunter Green, the one signature accent. */
+  --colors-brand-primary-100: var(--color-hunter-100);
+  --colors-brand-primary-200: var(--color-hunter-200);
+  --colors-brand-primary-300: var(--color-hunter-300);
+  --colors-brand-primary-400: var(--color-hunter-400);
+  --colors-brand-primary-default: var(--color-hunter-500);
+  --colors-brand-primary-600: var(--color-hunter-600);
+  --colors-brand-primary-700: var(--color-hunter-700);
+  --colors-brand-primary-800: var(--color-hunter-800);
+  --colors-brand-primary-900: var(--color-hunter-900);
+
+  /* Brand secondary — Cognac, material marks and secondary linework. */
+  --colors-brand-secondary-100: var(--color-cognac-100);
+  --colors-brand-secondary-200: var(--color-cognac-200);
+  --colors-brand-secondary-300: var(--color-cognac-300);
+  --colors-brand-secondary-400: var(--color-cognac-400);
+  --colors-brand-secondary-default: var(--color-cognac-500);
+  --colors-brand-secondary-600: var(--color-cognac-600);
+  --colors-brand-secondary-700: var(--color-cognac-700);
+  --colors-brand-secondary-800: var(--color-cognac-800);
+  --colors-brand-secondary-900: var(--color-cognac-900);
+
+  /* Brand accent — Vedda Camel, stamp grounds and large shapes only, never type. */
+  --colors-brand-accent-100: var(--color-camel-100);
+  --colors-brand-accent-200: var(--color-camel-200);
+  --colors-brand-accent-300: var(--color-camel-300);
+  --colors-brand-accent-400: var(--color-camel-400);
+  --colors-brand-accent-default: var(--color-camel-500);
+  --colors-brand-accent-600: var(--color-camel-600);
+  --colors-brand-accent-700: var(--color-camel-700);
+  --colors-brand-accent-800: var(--color-camel-800);
+  --colors-brand-accent-900: var(--color-camel-900);
+
+  --colors-success-default: var(--color-moss-500);
+  --colors-success-300: var(--color-moss-300);
+  --colors-success-700: var(--color-moss-700);
+  --colors-warning-default: var(--color-ochre-500);
+  --colors-warning-300: var(--color-ochre-300);
+  --colors-warning-700: var(--color-ochre-700);
+  --colors-error-default: var(--color-rust-500);
+  --colors-error-300: var(--color-rust-300);
+  --colors-error-700: var(--color-rust-700);
+
+  --colors-shadow-neutral-10: var(--shadow-color-ink-10);
+  --colors-shadow-neutral-12: var(--shadow-color-ink-12);
+  --colors-shadow-neutral-14: var(--shadow-color-ink-14);
+  --colors-shadow-neutral-16: var(--shadow-color-ink-16);
+  --colors-shadow-neutral-55: var(--shadow-color-ink-55);
+
+  --font-heading: var(--font-family-heading);
+  --font-body: var(--font-family-body);
+}
