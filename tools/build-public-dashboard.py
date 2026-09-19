@@ -29,7 +29,7 @@ def load_keywords():
         return json.load(fh)
 
 
-def load_scan_results(limit=2000):
+def load_scan_results(limit=5000):
     if not os.path.exists(SCANNER_DB):
         return [], 0
     conn = sqlite3.connect(SCANNER_DB)

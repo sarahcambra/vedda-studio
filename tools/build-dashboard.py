@@ -86,7 +86,7 @@ def load_keywords():
         return json.load(fh)
 
 
-def load_scan_results(limit=2000):
+def load_scan_results(limit=5000):
     """Reads tools/scanner/scanner.db directly — run python3 tools/scanner/run.py
     to refresh it, then rebuild the dashboard to pick up new results. Ordered
     bad-listing-score first (the actual edge, per research/auction-scanner.md
