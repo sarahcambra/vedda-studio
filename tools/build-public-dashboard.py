@@ -31,10 +31,11 @@ def load_keywords():
 
 def load_scan_results(limit=5000):
     if not os.path.exists(SCANNER_DB):
-        return [], 0
+        return [], 0, None
     conn = sqlite3.connect(SCANNER_DB)
     conn.row_factory = sqlite3.Row
     total = conn.execute("SELECT COUNT(*) FROM lots").fetchone()[0]
+    last_scan = conn.execute("SELECT MAX(last_seen) FROM lots").fetchone()[0]
     rows = conn.execute(
         """SELECT * FROM lots
            ORDER BY bad_listing_score DESC, first_seen DESC
@@ -42,7 +43,7 @@ def load_scan_results(limit=5000):
         (limit,),
     ).fetchall()
     conn.close()
-    return [dict(r) for r in rows], total
+    return [dict(r) for r in rows], total, last_scan
 
 
 def money(v, dash="—"):
@@ -82,7 +83,7 @@ TEMPLATE = """<!doctype html>
     <p class="text-muted">
       Auctionet, Tradera, Bukowskis, Haraldssons.
       <strong>{scan_total} lots archived</strong>, {scan_count} shown here, ranked by bad-listing score (🚩 = ≥3, worth reading first). New and loved shown; discarded is out of the way.
-      Shared with everyone who opens this page.
+      Shared with everyone who opens this page. <span id="scan-last-updated" data-last-scan="{scan_last_seen_utc}"></span>
       <a href="#" id="scan-show-discarded" class="btn-link scan-discarded-link"><span id="scan-link-label">Show discarded</span> (<span id="scan-discarded-count">0</span>)</a>
     </p>
     <div class="tabnav" id="scan-source-tabs" role="tablist" style="margin-bottom:var(--space-6);"></div>
@@ -107,6 +108,15 @@ TEMPLATE = """<!doctype html>
 </div>
 
 <script>
+(function () {
+  var el = document.getElementById('scan-last-updated');
+  var lastIso = el && el.getAttribute('data-last-scan');
+  if (el && lastIso) {
+    var last = new Date(lastIso);
+    if (!isNaN(last)) el.textContent = 'Last updated ' + last.toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) + '.';
+  }
+})();
+
 (function () {
   var cards = Array.prototype.slice.call(document.querySelectorAll('.scancard'));
   if (!cards.length) return;
@@ -211,6 +221,22 @@ TEMPLATE = """<!doctype html>
   }
 
   var STATE_MAP = { love: 'loved', bought: 'bought', discard: 'discarded' };
+  var STATE_TAG_LABEL = { loved: 'LOVED', bought: 'BOUGHT' };
+
+  function updateStateTag(card) {
+    var state = card.getAttribute('data-state') || 'new';
+    var top = card.querySelector('.scantop');
+    if (!top) return;
+    var existing = top.querySelector('.scan-state-tag');
+    if (existing) existing.remove();
+    var label = STATE_TAG_LABEL[state];
+    if (label) {
+      var tag = document.createElement('span');
+      tag.className = 'tag tag-accent scan-state-tag';
+      tag.textContent = label;
+      top.appendChild(tag);
+    }
+  }
 
   cards.forEach(function (card) {
     var lotKey = card.getAttribute('data-lot-key');
@@ -236,6 +262,7 @@ TEMPLATE = """<!doctype html>
         }
 
         card.setAttribute('data-state', next);
+        updateStateTag(card);
         applyFilters();
         sbPatch(lotKey, fields);
       });
@@ -259,6 +286,7 @@ TEMPLATE = """<!doctype html>
     cards.forEach(function (card) {
       var row = byKey[card.getAttribute('data-lot-key')];
       if (row && row.state) card.setAttribute('data-state', row.state);
+      updateStateTag(card);
     });
     applyFilters();
   });
@@ -356,13 +384,47 @@ def format_scan_ends_at(value):
         return "—"
 
 
+def parse_scan_ends_at(value):
+    if not value:
+        return None
+    try:
+        if isinstance(value, str) and value.isdigit():
+            value = int(value)
+        if isinstance(value, (int, float)):
+            return datetime.datetime.fromtimestamp(value)
+        return datetime.datetime.fromisoformat(value)
+    except (ValueError, OSError, TypeError):
+        return None
+
+
+def scan_ends_badge(value):
+    """(label, urgency_class) for the badge overlaid on the lot image —
+    see tools/build-dashboard.py's twin of this function for the full
+    rationale. Keep both in sync."""
+    dt = parse_scan_ends_at(value)
+    if not dt:
+        return "—", ""
+    if dt.tzinfo is not None:
+        dt = dt.astimezone().replace(tzinfo=None)
+    hours = (dt - datetime.datetime.now()).total_seconds() / 3600
+    if hours < 0:
+        return "ended", ""
+    if hours < 24:
+        label = f"{max(1, round(hours))}H"
+    else:
+        days = round(hours / 24)
+        label = f"{days}D" if days < 7 else dt.strftime("%d %b")
+    urgency = "urgent" if hours < 6 else "soon" if hours < 24 else ""
+    return label, urgency
+
+
 SCAN_SRC_LABEL = {"auctionet": "Auctionet", "tradera": "Tradera", "bukowskis": "Bukowskis", "haraldssons": "Haraldssons", "siko": "Sikö"}
 
 
 def main():
     esc = html.escape
     kw = load_keywords()
-    scan_lots, scan_total = load_scan_results()
+    scan_lots, scan_total, scan_last_seen = load_scan_results()
 
     def scan_card(lot):
         lot_key = esc(f"{lot['source']}-{lot['lot_id']}")
@@ -375,20 +437,53 @@ def main():
         src = lot.get("source") or ""
         location = lot.get("location")
         location_badge = f'<span class="tag tag-accent-2">{esc(location)}</span>' if location else ""
+        current_bid = lot.get("current_bid")
         price_badge = (
-            f'<span class="scanprice">{money(lot.get("current_bid"))}</span>'
-            if lot.get("current_bid") is not None
+            f'<span class="scanprice">{money(current_bid)}</span>'
+            if current_bid is not None
             else '<span class="scanprice scanprice-empty">price tbc</span>'
+        )
+        est_low, est_high = lot.get("estimate_low"), lot.get("estimate_high")
+        if est_low is not None or est_high is not None:
+            est_label = f"{money(est_low) if est_low is not None else '?'}–{money(est_high) if est_high is not None else '?'}"
+            within = ""
+            extra = ""
+            if current_bid is not None and est_low is not None and est_high is not None and est_high > est_low:
+                pct = max(0.0, min(1.0, (current_bid - est_low) / (est_high - est_low)))
+                within = (
+                    '<div class="estimate-range"><div class="estimate-track">'
+                    f'<div class="estimate-fill" style="width:{pct * 100:.1f}%"></div>'
+                    '</div></div>'
+                )
+                if current_bid > est_high:
+                    over_pct = (current_bid - est_high) / est_high * 100
+                    extra = f'<div class="scanestimate-note note-critical">{over_pct:.0f}% over high estimate</div>'
+            elif current_bid is None and (est_low is not None or est_high is not None):
+                extra = '<div class="scanestimate-note text-muted" style="font-style:italic;">Opening only</div>'
+            estimate_html = (
+                '<div class="scanrow"><span class="scanrow-label">Current bid</span>'
+                '<span class="scanrow-label scanrow-label-right">Estimate</span></div>'
+                f'<div class="scanrow"><span class="scanrow-value">{money(current_bid)}</span>'
+                f'<span class="scanrow-value scanrow-value-right">{est_label}</span></div>'
+                f'{within}{extra}'
+            )
+        else:
+            estimate_html = ""
+        ends_label, ends_urgency = scan_ends_badge(lot.get("ends_at"))
+        ends_badge = (
+            f'<span class="scanends-badge{(" " + ends_urgency) if ends_urgency else ""}" '
+            f'title="ends {esc(format_scan_ends_at(lot.get("ends_at")))}">'
+            f'⏱ ENDS {esc(ends_label)}</span>'
         )
         return (
             f'<div class="scancard" data-lot-key="{lot_key}" data-source="{esc(src)}">'
-            f'<div class="fig ar-landscape scanimgwrap">{img}{price_badge}</div>'
+            f'<div class="fig ar-landscape scanimgwrap">{img}{price_badge}{ends_badge}</div>'
             '<div class="scanbody">'
             f'<div class="scantop"><span class="tag tag-outline">{esc(SCAN_SRC_LABEL.get(src, src))}</span>{flag}'
-            f'{location_badge}'
-            f'<span class="text-muted scanends">ends {esc(format_scan_ends_at(lot.get("ends_at")))}</span></div>'
+            f'{location_badge}</div>'
             f'<a class="scantitle" href="{esc(lot.get("url") or "#")}" target="_blank">{esc(lot.get("title") or "")}</a>'
             f'<div class="text-muted scanmeta">matched "{esc(lot.get("matched_keyword") or "")}"</div>'
+            f'{estimate_html}'
             '<div class="scanactions">'
             f'<button class="btn btn-secondary scanbtn scanbtn-love" data-action="love" type="button">♡ Love</button>'
             f'<button class="btn btn-secondary scanbtn scanbtn-bought" data-action="bought" type="button">$ Bought</button>'
@@ -424,6 +519,7 @@ def main():
     html_out = render(
         TEMPLATE,
         scan_total=str(scan_total),
+        scan_last_seen_utc=esc((scan_last_seen or "").replace(" ", "T") + ("Z" if scan_last_seen else "")),
         scan_count=str(scan_count),
         scan_cards_html=scan_cards_html or '<p class="text-muted">No scan results yet.</p>',
         checklist_total=str(checklist_total),

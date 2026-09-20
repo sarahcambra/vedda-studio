@@ -8,6 +8,85 @@
 /* ---------- nav ---------- */
 .nav { margin-bottom: var(--space-6); }
 
+/* ---------- sidebar layout ---------- */
+.layout {
+  display: grid; grid-template-columns: 220px 1fr; min-height: 100vh;
+  max-width: 1440px; margin: 0 auto;
+  transition: grid-template-columns var(--dur-1) var(--ease);
+}
+@media (max-width: 800px) { .layout { grid-template-columns: 1fr; } }
+.sidebar {
+  border-right: 1px solid var(--color-divider);
+  padding: var(--space-6) var(--space-4);
+  display: flex; flex-direction: column;
+  overflow: hidden;
+  /* Grid items stretch to the row's full height by default — with 2000+
+     scan cards in .main that would push the footer (Last/Next scan) far
+     below the fold. Pin the sidebar to the viewport instead. */
+  position: sticky; top: 0; align-self: start; height: 100vh;
+}
+@media (max-width: 800px) { .sidebar { position: static; height: auto; } }
+.sidebar-brand-row { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); margin-bottom: var(--space-8); }
+.sidebar-brand {
+  font-family: var(--font-heading); font-size: 18px; letter-spacing: 0.02em;
+  white-space: nowrap; overflow: hidden;
+}
+.sidebar-collapse {
+  flex: none; background: none; border: 1px solid var(--color-divider); cursor: pointer;
+  width: 24px; height: 24px; line-height: 1; color: color-mix(in srgb, var(--color-text) 62%, transparent);
+  font-size: 13px; padding: 0;
+}
+.sidebar-collapse:hover { color: var(--color-text); border-color: var(--color-text); }
+.sidebar-nav { display: flex; flex-direction: column; gap: var(--space-1); }
+.sidebar-item {
+  background: none; border: none; text-align: left; cursor: pointer;
+  font-family: var(--font-body); font-size: 13px; font-weight: 500;
+  color: color-mix(in srgb, var(--color-text) 62%, transparent);
+  padding: var(--space-2) var(--space-3); border-left: 2px solid transparent;
+  white-space: nowrap; overflow: hidden;
+  transition: color var(--dur-1) var(--ease), border-color var(--dur-1) var(--ease), background var(--dur-1) var(--ease);
+}
+.sidebar-item:hover { color: var(--color-text); }
+.sidebar-item.is-active {
+  color: var(--color-accent); border-left-color: var(--color-accent);
+  background: color-mix(in srgb, var(--color-accent) 6%, transparent);
+}
+.sidebar-foot { margin-top: auto; font-size: 11px; padding: var(--space-3); white-space: nowrap; }
+.main { padding: var(--space-6) var(--space-8); min-width: 0; }
+@media (max-width: 800px) { .main { padding: var(--space-6) var(--space-4); } }
+
+/* Collapsed: icon-width rail, labels hidden (not just clipped — avoids
+   reading as broken on narrow viewports where the media query above
+   already drops to a single column). */
+.layout:has(.sidebar.is-collapsed) { grid-template-columns: 56px 1fr; }
+.sidebar.is-collapsed .sidebar-brand,
+.sidebar.is-collapsed .sidebar-item,
+.sidebar.is-collapsed .sidebar-foot { display: none; }
+.sidebar.is-collapsed { padding-left: var(--space-2); padding-right: var(--space-2); align-items: center; }
+.sidebar.is-collapsed .sidebar-brand-row { margin-bottom: 0; }
+
+/* ---------- sourcing toolbar (state filter + sort) ---------- */
+.scantoolbar {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: var(--space-4); margin: var(--space-4) 0; flex-wrap: wrap;
+}
+.scansort { font-size: 12px; color: color-mix(in srgb, var(--color-text) 62%, transparent); }
+.scansort select {
+  font-family: var(--font-body); font-size: 12px; margin-left: var(--space-2);
+  background: transparent; border: 1px solid var(--color-divider); padding: var(--space-1) var(--space-2);
+  color: var(--color-text);
+}
+.statsrow-4 { grid-template-columns: repeat(4, 1fr); }
+@media (max-width: 700px) { .statsrow-4 { grid-template-columns: repeat(2, 1fr); } }
+
+/* ---------- estimate range bar ---------- */
+.scanrow { display: flex; justify-content: space-between; font-size: 11px; margin-top: var(--space-2); }
+.scanrow-label { color: color-mix(in srgb, var(--color-text) 55%, transparent); text-transform: uppercase; letter-spacing: 0.08em; font-size: 10px; }
+.scanrow-value { font-variant-numeric: tabular-nums; }
+.estimate-range { margin: var(--space-1) 0 var(--space-2); }
+.estimate-track { height: 3px; background: var(--color-divider); position: relative; }
+.estimate-fill { height: 100%; background: var(--color-accent); position: absolute; top: 0; left: 0; }
+
 .warn {
   border: 1px solid var(--color-caution); padding: var(--space-3) var(--space-4);
   margin-bottom: var(--space-8); font-size: 13.5px; color: var(--color-caution);
@@ -160,12 +239,23 @@ tr.costtotal td { font-weight: 500; border-top: 1px solid var(--color-text); pad
   padding: 6px 12px; font-variant-numeric: tabular-nums;
 }
 .scanprice-empty { background: color-mix(in srgb, var(--color-text) 50%, transparent); }
+/* Ends-soon badge, overlaid top-left of the image. Neutral by default;
+   'soon' (<24h) and 'urgent' (<6h) reuse the existing caution/critical
+   tokens — never a new color. */
+.scanends-badge {
+  position: absolute; top: var(--space-3); left: var(--space-3);
+  background: color-mix(in srgb, var(--color-text) 78%, transparent); color: var(--color-bg);
+  font-family: var(--font-body); font-size: 10.5px; font-weight: 500; letter-spacing: 0.08em;
+  padding: 5px 10px; white-space: nowrap;
+}
+.scanends-badge.soon { background: var(--color-caution); }
+.scanends-badge.urgent { background: var(--color-critical); }
 .scanbody { display: flex; flex-direction: column; gap: var(--space-2); flex: 1; }
 .scantop { display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; }
 /* Quiet metadata mark — deliberately lighter than the action row below it */
 .scantop .tag { color: color-mix(in srgb, var(--color-text) 55%, transparent); }
 .scanflag { font-size: 13px; }
-.scanends { margin-left: auto; font-size: 12px; white-space: nowrap; color: color-mix(in srgb, var(--color-text) 55%, transparent); }
+.scanestimate-note { font-size: 11.5px; margin-top: 2px; }
 .scantitle {
   font-family: var(--font-heading); font-size: 16px; font-weight: 400; color: var(--color-text); line-height: 1.3; border: 0;
   display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 2.6em;

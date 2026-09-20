@@ -96,10 +96,11 @@ def load_scan_results(limit=5000):
     limit is a safety cap, not a real page size — the archive should never
     get anywhere near it in normal use."""
     if not os.path.exists(SCANNER_DB):
-        return [], 0
+        return [], 0, None
     conn = sqlite3.connect(SCANNER_DB)
     conn.row_factory = sqlite3.Row
     total = conn.execute("SELECT COUNT(*) FROM lots").fetchone()[0]
+    last_scan = conn.execute("SELECT MAX(last_seen) FROM lots").fetchone()[0]
     rows = conn.execute(
         """SELECT * FROM lots
            ORDER BY bad_listing_score DESC, first_seen DESC
@@ -107,14 +108,14 @@ def load_scan_results(limit=5000):
         (limit,),
     ).fetchall()
     conn.close()
-    return [dict(r) for r in rows], total
+    return [dict(r) for r in rows], total, last_scan
 
 
 def main():
     pc = load("pieces.json")
     tasks = load("tasks.json")
     kw = load_keywords()
-    scan_lots, scan_total = load_scan_results()
+    scan_lots, scan_total, scan_last_seen = load_scan_results()
 
     P = pc["pieces"]
     T = tasks["tasks"]
@@ -322,11 +323,58 @@ def main():
         except (ValueError, OSError, TypeError):
             return "—"
 
+    def parse_scan_ends_at(value):
+        if not value:
+            return None
+        try:
+            if isinstance(value, str) and value.isdigit():
+                value = int(value)
+            if isinstance(value, (int, float)):
+                return datetime.datetime.fromtimestamp(value)
+            return datetime.datetime.fromisoformat(value)
+        except (ValueError, OSError, TypeError):
+            return None
+
+    def scan_ends_badge(value):
+        """(label, urgency_class) for the badge overlaid on the lot image.
+        Hours-remaining phrasing close in, date further out — matches the
+        mockup's 'ENDS 2H' / 'ENDS 1D' style. urgency_class bands: urgent
+        (<6h, reads as --color-critical), soon (6-24h, --color-caution),
+        '' beyond that (neutral)."""
+        dt = parse_scan_ends_at(value)
+        if not dt:
+            return "—", ""
+        if dt.tzinfo is not None:
+            dt = dt.astimezone().replace(tzinfo=None)  # match fromtimestamp()'s naive-local convention below
+        hours = (dt - datetime.datetime.now()).total_seconds() / 3600
+        if hours < 0:
+            return "ended", ""
+        if hours < 24:
+            label = f"{max(1, round(hours))}H"
+        else:
+            days = round(hours / 24)
+            label = f"{days}D" if days < 7 else dt.strftime("%d %b")
+        urgency = "urgent" if hours < 6 else "soon" if hours < 24 else ""
+        return label, urgency
+
     SCAN_SRC_LABEL = {"auctionet": "Auctionet", "tradera": "Tradera", "bukowskis": "Bukowskis", "haraldssons": "Haraldssons", "siko": "Sikö"}
+
+    def scan_ends_sort_key(value):
+        if not value:
+            return ""
+        try:
+            if isinstance(value, str) and value.isdigit():
+                value = int(value)
+            if isinstance(value, (int, float)):
+                return datetime.datetime.fromtimestamp(value).isoformat()
+            return datetime.datetime.fromisoformat(value).isoformat()
+        except (ValueError, OSError, TypeError):
+            return ""
 
     def scan_card(lot):
         lot_key = esc(f"{lot['source']}-{lot['lot_id']}")
-        flag = '<span class="scanflag">🚩</span>' if (lot.get("bad_listing_score") or 0) >= 3 else ""
+        is_flagged = (lot.get("bad_listing_score") or 0) >= 3
+        flag = '<span class="scanflag" title="Bad-listing score {0}">🚩</span>'.format(lot.get("bad_listing_score") or 0) if is_flagged else ""
         img = (
             f'<img src="{esc(lot["image_url"])}" alt="" loading="lazy">'
             if lot.get("image_url")
@@ -335,21 +383,59 @@ def main():
         src = lot.get("source") or ""
         location = lot.get("location")
         location_badge = f'<span class="tag tag-accent-2">{esc(location)}</span>' if location else ""
+        current_bid = lot.get("current_bid")
         price_badge = (
-            f'<span class="scanprice">{money(lot.get("current_bid"))}</span>'
-            if lot.get("current_bid") is not None
+            f'<span class="scanprice">{money(current_bid)}</span>'
+            if current_bid is not None
             else '<span class="scanprice scanprice-empty">price tbc</span>'
         )
+        est_low, est_high = lot.get("estimate_low"), lot.get("estimate_high")
+        if est_low is not None or est_high is not None:
+            est_label = f"{money(est_low) if est_low is not None else '?'}–{money(est_high) if est_high is not None else '?'}"
+            within = ""
+            extra = ""
+            if current_bid is not None and est_low is not None and est_high is not None and est_high > est_low:
+                pct = max(0.0, min(1.0, (current_bid - est_low) / (est_high - est_low)))
+                within = (
+                    '<div class="estimate-range"><div class="estimate-track">'
+                    f'<div class="estimate-fill" style="width:{pct * 100:.1f}%"></div>'
+                    '</div></div>'
+                )
+                if current_bid > est_high:
+                    over_pct = (current_bid - est_high) / est_high * 100
+                    extra = f'<div class="scanestimate-note note-critical">{over_pct:.0f}% over high estimate</div>'
+            elif current_bid is None and (est_low is not None or est_high is not None):
+                extra = '<div class="scanestimate-note text-muted" style="font-style:italic;">Opening only</div>'
+            estimate_html = (
+                '<div class="scanrow"><span class="scanrow-label">Current bid</span>'
+                '<span class="scanrow-label scanrow-label-right">Estimate</span></div>'
+                f'<div class="scanrow"><span class="scanrow-value">{money(current_bid)}</span>'
+                f'<span class="scanrow-value scanrow-value-right">{est_label}</span></div>'
+                f'{within}{extra}'
+            )
+        else:
+            estimate_html = ""
+        ends_label, ends_urgency = scan_ends_badge(lot.get("ends_at"))
+        ends_badge = (
+            f'<span class="scanends-badge{(" " + ends_urgency) if ends_urgency else ""}" '
+            f'title="ends {esc(format_scan_ends_at(lot.get("ends_at")))}">'
+            f'⏱ ENDS {esc(ends_label)}</span>'
+        )
         return (
-            f'<div class="scancard" data-lot-key="{lot_key}" data-source="{esc(src)}">'
-            f'<div class="fig ar-landscape scanimgwrap">{img}{price_badge}</div>'
+            f'<div class="scancard" data-lot-key="{lot_key}" data-source="{esc(src)}" '
+            f'data-flagged="{"1" if is_flagged else "0"}" '
+            f'data-ends="{esc(scan_ends_sort_key(lot.get("ends_at")))}" '
+            f'data-bid="{current_bid if current_bid is not None else ""}" '
+            f'data-first-seen="{esc(str(lot.get("first_seen") or ""))}">'
+            f'<div class="fig ar-landscape scanimgwrap">{img}{price_badge}{ends_badge}</div>'
             '<div class="scanbody">'
             f'<div class="scantop"><span class="tag tag-outline">{esc(SCAN_SRC_LABEL.get(src, src))}</span>{flag}'
-            f'{location_badge}'
-            f'<span class="text-muted scanends">ends {esc(format_scan_ends_at(lot.get("ends_at")))}</span></div>'
+            f'{location_badge}</div>'
             f'<a class="scantitle" href="{esc(lot.get("url") or "#")}" target="_blank">{esc(lot.get("title") or "")}</a>'
             f'<div class="text-muted scanmeta">matched "{esc(lot.get("matched_keyword") or "")}"</div>'
+            f'{estimate_html}'
             '<div class="scanactions">'
+            f'<a class="btn-link" href="{esc(lot.get("url") or "#")}" target="_blank">View auction</a>'
             f'<button class="btn btn-secondary scanbtn scanbtn-love" data-action="love" type="button">♡ Love</button>'
             f'<button class="btn btn-secondary scanbtn scanbtn-bought" data-action="bought" type="button">$ Bought</button>'
             f'<button class="btn btn-secondary scanbtn scanbtn-discard" data-action="discard" type="button">✕ Discard</button>'
@@ -359,6 +445,7 @@ def main():
 
     scan_cards_html = "".join(scan_card(l) for l in scan_lots)
     scan_count = len(scan_lots)
+    scan_flagged_count = sum(1 for l in scan_lots if (l.get("bad_listing_score") or 0) >= 3)
 
     warn = (
         '<div class="warn"><strong>Sample data.</strong> '
@@ -369,10 +456,19 @@ def main():
         else ""
     )
 
+    sourcing_stats_html = "".join([
+        stat_block("Scanned", str(scan_total), "lots archived"),
+        stat_block("To triage", '<span id="stat-triage">' + str(scan_count) + '</span>', "not yet decided"),
+        stat_block("Flagged", str(scan_flagged_count), "bad-listing score ≥ 3"),
+        stat_block("Loved", '<span id="stat-loved">0</span>', "saved for later"),
+    ])
+
     doc = render(
         TEMPLATE,
         warn=warn,
         generated=today.isoformat(),
+        scan_last_seen_utc=esc((scan_last_seen or "").replace(" ", "T") + ("Z" if scan_last_seen else "")),
+        sourcing_stats=sourcing_stats_html,
         stats="".join([
             stat_block("Capital deployed", money(capital_deployed),
                        f"across {len(held)} piece{'s' if len(held) != 1 else ''} held"),
@@ -395,6 +491,7 @@ def main():
         scan_cards_html=scan_cards_html or '<p class="text-muted">No scan results yet — run <code>python3 tools/scanner/run.py</code>, then rebuild the dashboard.</p>',
         scan_count=str(scan_count),
         scan_total=str(scan_total),
+        scan_flagged_count=str(scan_flagged_count),
         piece_count=str(len(P)),
     )
 
@@ -416,24 +513,80 @@ TEMPLATE = r"""<!doctype html>
 <link rel="stylesheet" href="dashboard.css">
 </head>
 <body>
-<div class="page">
-  <div class="nav">
-    <span class="nav-brand">Vedda Studio</span>
-    <span class="text-muted" style="margin-right:auto;">generated {generated}</span>
-  </div>
+<div class="layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand-row">
+      <div class="sidebar-brand">Vedda Studio</div>
+      <button class="sidebar-collapse" id="sidebar-collapse-btn" type="button" title="Collapse sidebar" aria-label="Collapse sidebar">‹</button>
+    </div>
+    <nav class="sidebar-nav" role="tablist">
+      <button class="sidebar-item is-active" role="tab" aria-selected="true" data-tab="sourcing" type="button">Sourcing</button>
+      <button class="sidebar-item" role="tab" aria-selected="false" data-tab="inventory" type="button">Inventory</button>
+      <button class="sidebar-item" role="tab" aria-selected="false" data-tab="restorations" type="button">Restorations</button>
+      <button class="sidebar-item" role="tab" aria-selected="false" data-tab="suppliers" type="button">Suppliers &amp; Materials</button>
+      <button class="sidebar-item" role="tab" aria-selected="false" data-tab="business" type="button">Business</button>
+    </nav>
+    <div class="sidebar-foot text-muted" id="sidebar-foot" data-last-scan="{scan_last_seen_utc}" data-scan-cron-hour-utc="6">
+      generated {generated}
+    </div>
+  </aside>
 
+  <main class="main">
   {warn}
 
-  <div class="statsrow">{stats}</div>
+  <div class="tabpanel" id="tab-sourcing" data-tab-panel="sourcing">
+    <section class="section-block">
+      <div class="statsrow statsrow-4">
+        {sourcing_stats}
+      </div>
+      <p class="text-muted">
+        Auctionet, Tradera, Bukowskis, Haraldssons — run once a day with <code>python3 tools/scanner/run.py</code>, then rebuild the dashboard to see fresh results here.
+        <strong>{scan_total} lots archived</strong>, {scan_count} shown here, ranked by bad-listing score (🚩 = ≥3, worth reading first). New and loved shown; discarded is out of the way.
+        Shared with everyone who opens this page.
+        <a href="#" id="scan-show-discarded" class="btn-link scan-discarded-link"><span id="scan-link-label">Show discarded</span> (<span id="scan-discarded-count">0</span>)</a>
+      </p>
+      <div class="scantoolbar">
+        <div class="tabnav" id="scan-state-tabs" role="tablist"></div>
+        <label class="scansort">Sort
+          <select id="scan-sort">
+            <option value="ending">Ending soonest</option>
+            <option value="bid">Highest bid</option>
+            <option value="newest">Newest find</option>
+          </select>
+        </label>
+      </div>
+      <div class="tabnav" id="scan-source-tabs" role="tablist" style="margin-bottom:var(--space-6);"></div>
+      <div class="scangrid" id="scan-grid">{scan_cards_html}</div>
+      <div class="scanpager" id="scan-pager"></div>
+    </section>
 
-  <div class="tabnav" role="tablist">
-    <button class="tabbtn is-active" role="tab" aria-selected="true" data-tab="business" type="button">Business</button>
-    <button class="tabbtn" role="tab" aria-selected="false" data-tab="suppliers" type="button">Suppliers &amp; Materials</button>
-    <button class="tabbtn" role="tab" aria-selected="false" data-tab="sourcing" type="button">Sourcing</button>
+    <section class="section-block">
+      <h4>Manual checklist — Facebook Marketplace</h4>
+      <p class="text-muted">
+        Can't be automated — Meta's ToS bans automated collection, with real enforcement history. Search these yourself, one at a time — click a term to copy it and mark it checked, then paste straight into Facebook's search box.
+        Progress: <span id="chk-progress">0</span>/{checklist_total} checked. Saved in this browser only — checking from a different device or browser starts over.
+        <button id="chk-reset" type="button" class="btn btn-secondary" style="margin-left:8px; padding:6px 14px;">Reset</button>
+      </p>
+      <div class="chk-grid">{checklist_html}</div>
+    </section>
   </div>
-  <div class="hr hr-tight"></div>
 
-  <div class="tabpanel" id="tab-business" data-tab-panel="business">
+  <div class="tabpanel" id="tab-inventory" data-tab-panel="inventory" hidden>
+    <section class="section-block">
+      <h4>Inventory</h4>
+      <p class="text-muted">Coming soon — pieces you've bought, pulled from <code>data/pieces.json</code>.</p>
+    </section>
+  </div>
+
+  <div class="tabpanel" id="tab-restorations" data-tab-panel="restorations" hidden>
+    <section class="section-block">
+      <h4>Restorations</h4>
+      <p class="text-muted">Coming soon — a per-piece planner and tracker for pieces in restoration, built from <code>data/tasks.json</code>.</p>
+    </section>
+  </div>
+
+  <div class="tabpanel" id="tab-business" data-tab-panel="business" hidden>
+    <div class="statsrow">{stats}</div>
     <section class="section-block">
       <h4>Pipeline</h4>
       <p class="text-muted">Every piece sits in exactly one stage. Counts are pieces, not value.</p>
@@ -463,8 +616,8 @@ TEMPLATE = r"""<!doctype html>
     </section>
 
     <section class="section-block">
-      <h4>Inventory</h4>
-      <p class="text-muted">{piece_count} pieces on file.</p>
+      <h4>Piece ledger</h4>
+      <p class="text-muted">{piece_count} pieces on file. Full financial detail — see the Inventory tab for the piece-level view.</p>
       <div class="tablewrap">
         <table class="table inv">
           <thead><tr><th>Piece</th><th>Designer</th><th>Era</th><th>Wood</th><th>Status</th><th style="text-align:right">Cost</th><th style="text-align:right">Asking</th></tr></thead>
@@ -495,43 +648,20 @@ TEMPLATE = r"""<!doctype html>
     </section>
   </div>
 
-  <div class="tabpanel" id="tab-sourcing" data-tab-panel="sourcing" hidden>
-    <section class="section-block">
-      <h4>Scan results</h4>
-      <p class="text-muted">
-        Auctionet, Tradera, Bukowskis, Haraldssons — run once a day with <code>python3 tools/scanner/run.py</code>, then rebuild the dashboard to see fresh results here.
-        <strong>{scan_total} lots archived</strong>, {scan_count} shown here, ranked by bad-listing score (🚩 = ≥3, worth reading first). New and loved shown; discarded is out of the way.
-        Shared with everyone who opens this page.
-        <a href="#" id="scan-show-discarded" class="btn-link scan-discarded-link"><span id="scan-link-label">Show discarded</span> (<span id="scan-discarded-count">0</span>)</a>
-      </p>
-      <div class="tabnav" id="scan-source-tabs" role="tablist" style="margin-bottom:var(--space-6);"></div>
-      <div class="scangrid" id="scan-grid">{scan_cards_html}</div>
-      <div class="scanpager" id="scan-pager"></div>
-    </section>
-
-    <section class="section-block">
-      <h4>Manual checklist — Facebook Marketplace</h4>
-      <p class="text-muted">
-        Can't be automated — Meta's ToS bans automated collection, with real enforcement history. Search these yourself, one at a time — click a term to copy it and mark it checked, then paste straight into Facebook's search box.
-        Progress: <span id="chk-progress">0</span>/{checklist_total} checked. Saved in this browser only — checking from a different device or browser starts over.
-        <button id="chk-reset" type="button" class="btn btn-secondary" style="margin-left:8px; padding:6px 14px;">Reset</button>
-      </p>
-      <div class="chk-grid">{checklist_html}</div>
-    </section>
-  </div>
-
   <footer>
     Generated by <code>tools/build-dashboard.py</code> from <code>data/*.json</code>.
     Edit the data, not this file.
   </footer>
+  </main>
 </div>
 
 <script>
 // tabs: click to switch, remember the last one open
 (function () {
-  var btns = document.querySelectorAll('.tabbtn');
+  var btns = document.querySelectorAll('.sidebar-item');
   var panels = document.querySelectorAll('[data-tab-panel]');
   function show(name) {
+    if (!document.getElementById('tab-' + name)) return;
     btns.forEach(function (b) {
       var active = b.getAttribute('data-tab') === name;
       b.classList.toggle('is-active', active);
@@ -550,6 +680,48 @@ TEMPLATE = r"""<!doctype html>
   if (saved) show(saved);
 })();
 
+// sidebar collapse — per-browser convenience, same pattern as vs-tab
+(function () {
+  var sidebar = document.getElementById('sidebar');
+  var btn = document.getElementById('sidebar-collapse-btn');
+  if (!sidebar || !btn) return;
+  function apply(collapsed) {
+    sidebar.classList.toggle('is-collapsed', collapsed);
+    btn.textContent = collapsed ? '›' : '‹';
+    btn.setAttribute('title', collapsed ? 'Expand sidebar' : 'Collapse sidebar');
+  }
+  var saved = null;
+  try { saved = localStorage.getItem('vs-sidebar-collapsed'); } catch (e) {}
+  apply(saved === '1');
+  btn.addEventListener('click', function () {
+    var next = !sidebar.classList.contains('is-collapsed');
+    apply(next);
+    try { localStorage.setItem('vs-sidebar-collapsed', next ? '1' : '0'); } catch (e) {}
+  });
+})();
+
+// sidebar footer: real last-scan time (server-rendered) + next-scan time,
+// computed client-side from the known daily UTC cron hour so it displays
+// correctly in whichever timezone the viewer is actually in.
+(function () {
+  var el = document.getElementById('sidebar-foot');
+  if (!el) return;
+  var lastIso = el.getAttribute('data-last-scan');
+  var cronHourUtc = parseInt(el.getAttribute('data-scan-cron-hour-utc'), 10);
+  var lines = [];
+  if (lastIso) {
+    var last = new Date(lastIso);
+    if (!isNaN(last)) lines.push('Last scan ' + last.toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }));
+  }
+  if (!isNaN(cronHourUtc)) {
+    var next = new Date();
+    next.setUTCHours(cronHourUtc, 0, 0, 0);
+    if (next <= new Date()) next.setUTCDate(next.getUTCDate() + 1);
+    lines.push('Next scan ' + next.toLocaleString(undefined, { weekday: 'short', hour: '2-digit', minute: '2-digit' }));
+  }
+  if (lines.length) el.innerHTML = lines.map(function (l) { return '<div>' + l + '</div>'; }).join('');
+})();
+
 // scan results: love/discard/bought state shared via Supabase — you and
 // Amanda see the same clicks. Default view: new + loved. Discarded is out
 // of the way, not a toggle — just a small link to check the discard pile.
@@ -561,9 +733,12 @@ TEMPLATE = r"""<!doctype html>
   var pagerEl = document.getElementById('scan-pager');
   var discardedVisible = false;
   var sourceFilter = 'all';
+  var stateFilter = 'all';
+  var sortMode = 'ending';
   var PAGE_SIZE = 36;
   var currentPage = 1;
   var SOURCE_LABEL = { auctionet: 'Auctionet', tradera: 'Tradera', bukowskis: 'Bukowskis', haraldssons: 'Haraldssons' };
+  var STATE_TAB_LABEL = { all: 'All', new: 'New', flagged: 'Flagged', loved: 'Loved', dealt_with: 'Dealt with' };
 
   var SUPABASE_URL = 'https://rnquevahynifwpyynrbd.supabase.co';
   var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJucXVldmFoeW5pZndweXlucmJkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk2MDQ5NDIsImV4cCI6MjEwNTE4MDk0Mn0.2xIZMYpxk-c6_xt7x8J0EkzRMWyRRRu4gy4kIEtLy1U';
@@ -609,21 +784,82 @@ TEMPLATE = r"""<!doctype html>
     });
   }
 
+  function cardStateBucket(card) {
+    var state = card.getAttribute('data-state') || 'new';
+    if (state === 'loved') return 'loved';
+    if (state === 'bought' || state === 'discarded') return 'dealt_with';
+    if (card.getAttribute('data-flagged') === '1') return 'flagged';
+    return 'new';
+  }
+
+  function renderStateTabs() {
+    var tabsEl = document.getElementById('scan-state-tabs');
+    if (!tabsEl) return;
+    var counts = { all: 0, new: 0, flagged: 0, loved: 0, dealt_with: 0 };
+    cards.forEach(function (card) {
+      if (card.getAttribute('data-state') === 'discarded' && !discardedVisible) return;
+      counts.all++;
+      counts[cardStateBucket(card)]++;
+    });
+    var html = '';
+    ['all', 'new', 'flagged', 'loved', 'dealt_with'].forEach(function (key) {
+      html += '<button class="tabbtn' + (stateFilter === key ? ' is-active' : '') + '" data-state-tab="' + key + '" type="button">' + STATE_TAB_LABEL[key] + ' (' + counts[key] + ')</button>';
+    });
+    tabsEl.innerHTML = html;
+    tabsEl.querySelectorAll('[data-state-tab]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        stateFilter = btn.getAttribute('data-state-tab');
+        currentPage = 1;
+        applyFilters();
+      });
+    });
+    var lovedCountEl = document.getElementById('stat-loved');
+    if (lovedCountEl) lovedCountEl.textContent = counts.loved;
+    var triageCountEl = document.getElementById('stat-triage');
+    if (triageCountEl) triageCountEl.textContent = counts.new + counts.flagged;
+  }
+
+  function sortEligible(eligible) {
+    var sorted = eligible.slice();
+    if (sortMode === 'bid') {
+      sorted.sort(function (a, b) {
+        var av = parseFloat(a.getAttribute('data-bid')) || -1;
+        var bv = parseFloat(b.getAttribute('data-bid')) || -1;
+        return bv - av;
+      });
+    } else if (sortMode === 'newest') {
+      sorted.sort(function (a, b) {
+        return (b.getAttribute('data-first-seen') || '').localeCompare(a.getAttribute('data-first-seen') || '');
+      });
+    } else {
+      sorted.sort(function (a, b) {
+        var av = a.getAttribute('data-ends') || '9999';
+        var bv = b.getAttribute('data-ends') || '9999';
+        return av.localeCompare(bv);
+      });
+    }
+    return sorted;
+  }
+
   function applyFilters() {
     var discardedCount = 0;
     var eligible = [];
     cards.forEach(function (card) {
       var state = card.getAttribute('data-state') || 'new';
       var matchesSource = sourceFilter === 'all' || card.getAttribute('data-source') === sourceFilter;
+      var matchesState = stateFilter === 'all' || cardStateBucket(card) === stateFilter;
       if (state === 'discarded') {
         discardedCount++;
-        if (discardedVisible && matchesSource) eligible.push(card);
-      } else if (matchesSource) {
+        if (discardedVisible && matchesSource && matchesState) eligible.push(card);
+      } else if (matchesSource && matchesState) {
         eligible.push(card);
       }
     });
     if (discardedCountEl) discardedCountEl.textContent = discardedCount;
     renderSourceTabs();
+    renderStateTabs();
+
+    eligible = sortEligible(eligible);
 
     var pageCount = Math.max(1, Math.ceil(eligible.length / PAGE_SIZE));
     if (currentPage > pageCount) currentPage = pageCount;
@@ -631,7 +867,11 @@ TEMPLATE = r"""<!doctype html>
     var end = start + PAGE_SIZE;
 
     cards.forEach(function (card) { card.hidden = true; });
-    eligible.slice(start, end).forEach(function (card) { card.hidden = false; });
+    var gridEl = document.getElementById('scan-grid');
+    eligible.slice(start, end).forEach(function (card) {
+      card.hidden = false;
+      if (gridEl) gridEl.appendChild(card);
+    });
 
     renderPager(pageCount);
   }
@@ -657,6 +897,22 @@ TEMPLATE = r"""<!doctype html>
   }
 
   var STATE_MAP = { love: 'loved', bought: 'bought', discard: 'discarded' };
+  var STATE_TAG_LABEL = { loved: 'LOVED', bought: 'BOUGHT' };
+
+  function updateStateTag(card) {
+    var state = card.getAttribute('data-state') || 'new';
+    var top = card.querySelector('.scantop');
+    if (!top) return;
+    var existing = top.querySelector('.scan-state-tag');
+    if (existing) existing.remove();
+    var label = STATE_TAG_LABEL[state];
+    if (label) {
+      var tag = document.createElement('span');
+      tag.className = 'tag tag-accent scan-state-tag';
+      tag.textContent = label;
+      top.appendChild(tag);
+    }
+  }
 
   cards.forEach(function (card) {
     var lotKey = card.getAttribute('data-lot-key');
@@ -682,11 +938,21 @@ TEMPLATE = r"""<!doctype html>
         }
 
         card.setAttribute('data-state', next);
+        updateStateTag(card);
         applyFilters();
         sbPatch(lotKey, fields);
       });
     });
   });
+
+  var sortSelect = document.getElementById('scan-sort');
+  if (sortSelect) {
+    sortSelect.addEventListener('change', function () {
+      sortMode = sortSelect.value;
+      currentPage = 1;
+      applyFilters();
+    });
+  }
 
   var linkLabel = document.getElementById('scan-link-label');
   if (showDiscardedLink) {
@@ -705,6 +971,7 @@ TEMPLATE = r"""<!doctype html>
     cards.forEach(function (card) {
       var row = byKey[card.getAttribute('data-lot-key')];
       if (row && row.state) card.setAttribute('data-state', row.state);
+      updateStateTag(card);
     });
     applyFilters();
   });
