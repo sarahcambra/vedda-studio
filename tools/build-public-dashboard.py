@@ -477,7 +477,7 @@ def main():
         )
         return (
             f'<div class="scancard" data-lot-key="{lot_key}" data-source="{esc(src)}">'
-            f'<div class="fig ar-landscape scanimgwrap">{img}{price_badge}{ends_badge}</div>'
+            f'<div class="fig ar-square scanimgwrap">{img}{price_badge}{ends_badge}</div>'
             '<div class="scanbody">'
             f'<div class="scantop"><span class="tag tag-outline">{esc(SCAN_SRC_LABEL.get(src, src))}</span>{flag}'
             f'{location_badge}</div>'

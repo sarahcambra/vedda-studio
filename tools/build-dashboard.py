@@ -427,7 +427,7 @@ def main():
             f'data-ends="{esc(scan_ends_sort_key(lot.get("ends_at")))}" '
             f'data-bid="{current_bid if current_bid is not None else ""}" '
             f'data-first-seen="{esc(str(lot.get("first_seen") or ""))}">'
-            f'<div class="fig ar-landscape scanimgwrap">{img}{price_badge}{ends_badge}</div>'
+            f'<div class="fig ar-square scanimgwrap">{img}{price_badge}{ends_badge}</div>'
             '<div class="scanbody">'
             f'<div class="scantop"><span class="tag tag-outline">{esc(SCAN_SRC_LABEL.get(src, src))}</span>{flag}'
             f'{location_badge}</div>'
