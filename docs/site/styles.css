@@ -74,9 +74,8 @@
   --space-24: var(--spacing-24);
   --space-32: var(--spacing-32);
 
-  --radius-sm: var(--radius-none);
-  --radius-md: var(--radius-none);
-  --radius-lg: var(--radius-none);
+  /* --radius-sm/md/lg/full come straight from global-default.css — already
+     the exact names every component below uses, no alias needed. */
 
   --ease: var(--ease-standard); /* @kind other */
   --dur-1: var(--duration-1); /* @kind other */
@@ -177,7 +176,7 @@ figcaption { margin-top: var(--space-3); color: color-mix(in srgb, var(--color-t
 
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2);
-  cursor: pointer; text-decoration: none; border: 1px solid transparent; border-radius: 0;
+  cursor: pointer; text-decoration: none; border: 1px solid transparent; border-radius: var(--radius-sm);
   font-family: var(--font-body); font-size: 11px; font-weight: 500;
   letter-spacing: 0.18em; text-transform: uppercase; line-height: 1;
   padding: 17px 30px; background: transparent; color: var(--color-text);
@@ -207,8 +206,12 @@ figcaption { margin-top: var(--space-3); color: color-mix(in srgb, var(--color-t
   display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: var(--space-16) var(--space-12);
 }
-.card { display: flex; flex-direction: column; gap: var(--space-3); background: transparent; border: 0; padding: 0; }
-.card > .fig { margin-bottom: var(--space-2); }
+.card {
+  display: flex; flex-direction: column; gap: var(--space-3);
+  background: var(--color-bg); border: 1px solid var(--color-divider);
+  border-radius: var(--radius-md); padding: var(--space-4); overflow: hidden;
+}
+.card > .fig { margin: calc(var(--space-4) * -1) calc(var(--space-4) * -1) var(--space-2); width: calc(100% + var(--space-4) * 2); }
 .card-kicker { color: color-mix(in srgb, var(--color-text) 62%, transparent); }
 .card-title { font-family: var(--font-heading); font-weight: 400; font-size: 24px; line-height: 1.15; margin: 0; }
 .card-body { margin: 0; font-size: 15px; line-height: 1.6; color: color-mix(in srgb, var(--color-text) 78%, transparent); }
@@ -232,7 +235,7 @@ figcaption { margin-top: var(--space-3); color: color-mix(in srgb, var(--color-t
 .swatch-camel { background: var(--color-feature); }
 .tag {
   display: inline-flex; align-items: center; padding: 6px 11px 5px;
-  border: 1px solid transparent; border-radius: 0;
+  border: 1px solid transparent; border-radius: var(--radius-full);
 }
 .tag-outline { border-color: color-mix(in srgb, var(--color-text) 30%, transparent); color: var(--color-text); }
 .tag-accent { border-color: var(--color-accent); color: var(--color-accent); }
@@ -271,7 +274,7 @@ figcaption { margin-top: var(--space-3); color: color-mix(in srgb, var(--color-t
   width: 100%; min-height: 48px; padding: 12px 0; font: inherit; font-size: 16px;
   color: var(--color-text); caret-color: var(--color-accent); background: transparent;
   border: 0; border-bottom: 1px solid color-mix(in srgb, var(--color-text) 28%, transparent);
-  border-radius: 0; transition: border-color var(--dur-1) var(--ease);
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0; transition: border-color var(--dur-1) var(--ease);
 }
 .input:hover { border-color: color-mix(in srgb, var(--color-text) 55%, transparent); }
 .input:focus-visible { border-color: var(--color-accent); border-bottom-width: 1px; outline: none; }
@@ -326,6 +329,7 @@ textarea.input { min-height: 120px; resize: vertical; }
 .dialog {
   width: min(520px, 100%); display: flex; flex-direction: column; gap: var(--space-4);
   padding: var(--space-12); background: var(--color-bg); box-shadow: var(--shadow-lg); border: 0;
+  border-radius: var(--radius-md);
 }
 .dialog-title { font-family: var(--font-heading); font-weight: 400; font-size: 30px; line-height: 1.1; }
 .dialog-body { font-size: 16px; color: color-mix(in srgb, var(--color-text) 78%, transparent); }

@@ -96,11 +96,14 @@
 /* ---------- stats row (replaces the old oversized hero) ---------- */
 .statsrow {
   display: grid; grid-template-columns: repeat(6, 1fr); gap: var(--space-6);
-  padding: var(--space-6) 0; border-top: 1px solid var(--color-divider);
-  border-bottom: 1px solid var(--color-divider); margin-bottom: var(--space-10);
+  margin-bottom: var(--space-10);
 }
 @media (max-width: 1000px) { .statsrow { grid-template-columns: repeat(3, 1fr); } }
 @media (max-width: 560px) { .statsrow { grid-template-columns: repeat(2, 1fr); } }
+.stat {
+  background: var(--color-bg); border: 1px solid var(--color-divider);
+  border-radius: var(--radius-md); padding: var(--space-4);
+}
 .stat-value {
   font-family: var(--font-heading); font-size: 26px; line-height: 1.1;
   margin: var(--space-1) 0 2px; font-variant-numeric: tabular-nums;
@@ -223,9 +226,16 @@ tr.costtotal td { font-weight: 500; border-top: 1px solid var(--color-text); pad
 .scan-discarded-link { font-size: 12.5px; margin-left: var(--space-3); color: color-mix(in srgb, var(--color-text) 55%, transparent); border-bottom-color: color-mix(in srgb, var(--color-text) 30%, transparent); }
 .scangrid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-8) var(--space-6); align-items: stretch; }
 @media (max-width: 640px) { .scangrid { grid-template-columns: 1fr; } }
-.scancard { display: flex; flex-direction: column; transition: opacity var(--dur-1) var(--ease); }
+.scancard {
+  display: flex; flex-direction: column; transition: opacity var(--dur-1) var(--ease);
+  background: var(--color-bg); border: 1px solid var(--color-divider);
+  border-radius: var(--radius-md); padding: var(--space-4); overflow: hidden;
+}
 .scancard[data-state="discarded"] { opacity: .35; }
-.scanimgwrap { position: relative; margin-bottom: var(--space-3); }
+.scanimgwrap {
+  position: relative; margin: calc(var(--space-4) * -1) calc(var(--space-4) * -1) var(--space-3);
+  width: calc(100% + var(--space-4) * 2);
+}
 /* Sharper image rendering — auction thumbnails are small and stretchy */
 .scanimgwrap img,
 .costcard .fig img {
@@ -236,7 +246,7 @@ tr.costtotal td { font-weight: 500; border-top: 1px solid var(--color-text); pad
   position: absolute; bottom: var(--space-3); left: var(--space-3);
   background: color-mix(in srgb, var(--color-text) 85%, transparent); color: var(--color-bg);
   font-family: var(--font-body); font-size: 11px; font-weight: 500; letter-spacing: 0.1em;
-  padding: 6px 12px; font-variant-numeric: tabular-nums;
+  padding: 6px 12px; font-variant-numeric: tabular-nums; border-radius: var(--radius-sm);
 }
 .scanprice-empty { background: color-mix(in srgb, var(--color-text) 50%, transparent); }
 /* Ends-soon badge, overlaid top-left of the image. Neutral by default;
@@ -246,7 +256,7 @@ tr.costtotal td { font-weight: 500; border-top: 1px solid var(--color-text); pad
   position: absolute; top: var(--space-3); left: var(--space-3);
   background: color-mix(in srgb, var(--color-text) 78%, transparent); color: var(--color-bg);
   font-family: var(--font-body); font-size: 10.5px; font-weight: 500; letter-spacing: 0.08em;
-  padding: 5px 10px; white-space: nowrap;
+  padding: 5px 10px; white-space: nowrap; border-radius: var(--radius-full);
 }
 .scanends-badge.soon { background: var(--color-caution); }
 .scanends-badge.urgent { background: var(--color-critical); }

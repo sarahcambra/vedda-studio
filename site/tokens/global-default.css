@@ -80,7 +80,11 @@
   --spacing-24: 128px;
   --spacing-32: 200px;
 
-  --radius-none: 0px;
+  --radius-none: 0px; /* kept for opt-out cases; no longer the system default */
+  --radius-sm: 8px;   /* buttons, inputs, tags-as-rect */
+  --radius-md: 16px;  /* cards */
+  --radius-lg: 24px;  /* large containers */
+  --radius-full: 9999px; /* pills — tags, badges */
   --stroke-1: 1px;
   --stroke-6: 6px;
 
