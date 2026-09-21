@@ -1,0 +1,438 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Piece costings — Vedda Studio</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,500;0,600;1,400&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="site/styles.css">
+<link rel="stylesheet" href="dashboard.css">
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0}
+  body{font-family:'IBM Plex Sans','Helvetica Neue',sans-serif;color:#1C1B17;background:#F7F3EC;-webkit-font-smoothing:antialiased;}
+  a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid #C1573B;outline-offset:2px;}
+
+  /* ---------- top nav ---------- */
+  .topnav{display:flex;align-items:center;justify-content:space-between;padding:16px 48px;background:#FFF;border-bottom:1px solid #ECE6D8;}
+  .topnav-logo{font-family:'IBM Plex Mono',ui-monospace,monospace;font-weight:500;font-size:12.5px;letter-spacing:0.1em;color:#1C1B17;}
+  .topnav-links{display:flex;align-items:center;gap:28px;}
+  .topnav-links a{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;letter-spacing:0.08em;color:#726752;text-decoration:none;padding-bottom:4px;border-bottom:2px solid transparent;transition:color .15s ease,border-color .15s ease;}
+  .topnav-links a:hover{color:#1C1B17;}
+  .topnav-links a.is-active{color:#1C1B17;border-bottom-color:#C1573B;}
+  .topnav-user{display:flex;align-items:center;gap:16px;}
+  .topnav-user span{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11.5px;color:#726752;}
+  .btn{display:inline-flex;align-items:center;gap:8px;font-family:'IBM Plex Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer;border-radius:2px;padding:8px 16px;transition:background .15s ease,border-color .15s ease;}
+  .btn-secondary{background:#FFF;color:#1C1B17;border:1px solid #ECE6D8;}
+  .btn-secondary:hover{background:#F1ECE1;border-color:#DCD3BE;}
+  .btn-primary{background:#2E3D33;color:#FAF7F0;border:1px solid #2E3D33;}
+  .btn-primary:hover{background:#1C1B17;border-color:#1C1B17;}
+  .btn:disabled{background:#F1ECE1;color:#726752;border-color:#ECE6D8;cursor:default;}
+
+  /* ---------- layout ---------- */
+  .catalog-page{max-width:1344px;margin:0 auto;padding:40px 48px 96px;}
+  .page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px;}
+  .page-kicker{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;letter-spacing:0.1em;color:#726752;text-transform:uppercase;margin-bottom:4px;}
+  .page-title{margin:0;font-family:'Newsreader','Times New Roman',serif;font-weight:500;font-size:34px;color:#1C1B17;letter-spacing:-0.01em;}
+  .page-desc{font-size:12.5px;color:#726752;max-width:620px;line-height:1.6;margin-bottom:30px;}
+
+  /* ---------- summary strip ---------- */
+  .summary-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:#ECE6D8;border:1px solid #ECE6D8;border-radius:2px;margin-bottom:36px;overflow:hidden;}
+  .summary-cell{background:#FFF;padding:16px 20px;}
+  .summary-label{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10.5px;letter-spacing:0.06em;text-transform:uppercase;color:#726752;margin-bottom:6px;}
+  .summary-value{font-family:'Newsreader','Times New Roman',serif;font-size:24px;font-weight:500;color:#1C1B17;}
+
+  /* ---------- filter bar ---------- */
+  .filterbar{display:flex;align-items:center;gap:14px;padding-bottom:18px;margin-bottom:28px;border-bottom:1px solid #ECE6D8;flex-wrap:wrap;}
+  .search-box{display:flex;align-items:center;gap:8px;border:1px solid #ECE6D8;border-radius:2px;padding:8px 12px;background:#FFF;width:190px;}
+  .search-box span{font-size:12.5px;color:#736A57;}
+  .filter-pill{display:inline-flex;align-items:center;gap:7px;border:1px solid #ECE6D8;border-radius:2px;padding:8px 12px;background:#FFF;cursor:pointer;}
+  .filter-pill .flabel{font-size:12px;color:#726752;}
+  .filter-pill .fvalue{font-size:12.5px;font-weight:600;color:#1C1B17;}
+  .filter-count{margin-left:auto;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11.5px;color:#736A57;}
+
+  /* ---------- piece cards ---------- */
+  .piece-list{display:flex;flex-direction:column;gap:20px;}
+  .piece-card{background:#FFF;border:1px solid rgba(28,27,23,0.07);border-radius:2px;box-shadow:0 1px 2px rgba(28,27,23,0.035);transition:box-shadow .15s ease;}
+  .piece-card:hover{box-shadow:0 4px 12px rgba(28,27,23,0.06);}
+
+  .card-head{display:flex;gap:18px;padding:20px 22px;border-bottom:1px solid #ECE6D8;}
+  .card-swatch{width:92px;height:92px;flex-shrink:0;border-radius:2px;}
+  .card-main{flex-grow:1;min-width:0;}
+  .card-name-row{display:flex;align-items:center;gap:10px;margin-bottom:3px;}
+  .card-name{margin:0;font-family:'Newsreader','Times New Roman',serif;font-weight:500;font-size:19px;color:#1C1B17;}
+  .card-qty{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11.5px;color:#726752;}
+  .card-meta{font-size:12px;color:#726752;margin-bottom:10px;}
+  .card-tags{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .status-tag{display:inline-flex;align-items:center;gap:5px;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:9.5px;letter-spacing:0.05em;text-transform:uppercase;padding:4px 9px;border-radius:2px;}
+  .check-tag{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;color:#437054;}
+
+  .card-price-col{text-align:right;flex-shrink:0;}
+  .card-price-label{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10.5px;letter-spacing:0.05em;text-transform:uppercase;color:#736A57;margin-bottom:4px;}
+  .card-price{font-family:'Newsreader','Times New Roman',serif;font-size:26px;font-weight:500;color:#1C1B17;}
+  .card-price-sub{font-size:11px;color:#736A57;}
+
+  /* ---------- line items ---------- */
+  .line-items{padding:4px 22px 6px;}
+  .line-header{display:grid;grid-template-columns:1fr 90px 90px 90px;padding:10px 0 8px;border-bottom:1px solid #ECE6D8;}
+  .line-header span{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;letter-spacing:0.06em;text-transform:uppercase;color:#736A57;}
+  .line-header span:nth-child(n+2){text-align:right;}
+  .line-row{display:grid;grid-template-columns:1fr 90px 90px 90px;padding:11px 0;border-bottom:1px solid #F4EFE4;align-items:center;}
+  .line-row:last-child{border-bottom:0;}
+  .line-name{font-size:13px;color:#1C1B17;}
+  .line-tag{margin-left:8px;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:9px;letter-spacing:0.04em;text-transform:uppercase;padding:2px 7px;border-radius:2px;border:1px solid #ECE6D8;color:#6E6858;}
+  .line-qty,.line-inc{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:12px;color:#6B6656;text-align:right;}
+  .line-ex{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:12.5px;color:#1C1B17;font-weight:500;text-align:right;}
+  .line-footer{display:grid;grid-template-columns:1fr 90px 90px 90px;padding:13px 0 15px;align-items:baseline;}
+  .line-footer .line-meta{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10.5px;letter-spacing:0.05em;text-transform:uppercase;color:#726752;}
+  .line-footer .line-total-label{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:#736A57;text-align:right;}
+  .line-footer .line-total{font-family:'Newsreader','Times New Roman',serif;font-size:16px;font-weight:600;color:#1C1B17;text-align:right;}
+
+  /* ---------- card footer ---------- */
+  .card-foot{display:flex;align-items:center;justify-content:flex-end;gap:10px;padding:14px 22px;border-top:1px solid #ECE6D8;background:#FBF9F4;}
+
+  .footer-note{margin-top:40px;padding-top:16px;border-top:1px solid #ECE6D8;font-size:12px;font-style:italic;color:#726752;}
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand-row">
+      <div class="sidebar-brand">Vedda<br>Studio</div>
+      <button class="sidebar-collapse" id="sidebar-collapse-btn" type="button" title="Collapse sidebar" aria-label="Collapse sidebar">&lsaquo;</button>
+    </div>
+    <nav class="sidebar-nav" role="tablist">
+      <a class="sidebar-item" href="../dashboard.html">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><path d="M21 21l-4.3-4.3"></path></svg>
+        Sourcing
+      </a>
+      <a class="sidebar-item" href="../dashboard.html">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8l-9-5-9 5 9 5 9-5z"></path><path d="M3 8v8l9 5 9-5V8"></path><path d="M12 13v8"></path></svg>
+        Inventory
+      </a>
+      <a class="sidebar-item" href="../dashboard.html">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 11-5.4 5.4L3 18v3h3l6.3-6.3a4 4 0 015.4-5.4z"></path></svg>
+        Restorations
+      </a>
+      <a class="sidebar-item" href="../dashboard.html">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l3 3v15H6z"></path><path d="M9 8h6M9 12h6M9 16h4"></path></svg>
+        Business
+      </a>
+      <div class="sidebar-divider"></div>
+      <span class="sidebar-label">Catalogue</span>
+      <a class="sidebar-item" href="materials.html">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect></svg>
+        Materials
+      </a>
+      <a class="sidebar-item" href="suppliers.html">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="1"></rect><path d="M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2"></path></svg>
+        Suppliers
+      </a>
+      <a class="sidebar-item is-active" href="costings.html">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"></path></svg>
+        Costings
+      </a>
+    </nav>
+    <div class="sidebar-foot text-muted"></div>
+  </aside>
+
+  <main class="main">
+  <div class="catalog-page">
+
+  <!-- HEADER -->
+  <div class="page-header">
+    <div>
+      <div class="page-kicker">Bill of materials</div>
+      <h1 class="page-title">Piece costings</h1>
+    </div>
+    <button class="btn btn-primary" style="flex-shrink:0;">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"></path></svg>
+      Costing
+    </button>
+  </div>
+  <p class="page-desc">Checked against the 50% markup rule, the 6,000 kr floor, fabric ≤ 25–30% of sale, and kr/hour.</p>
+
+  <!-- SUMMARY STRIP -->
+  <div class="summary-strip">
+    <div class="summary-cell">
+      <div class="summary-label">Costed pieces</div>
+      <div class="summary-value">4</div>
+    </div>
+    <div class="summary-cell">
+      <div class="summary-label">Priced</div>
+      <div class="summary-value" style="color:#437054;">2</div>
+    </div>
+    <div class="summary-cell">
+      <div class="summary-label">Below 6,000 kr floor</div>
+      <div class="summary-value" style="color:#B5673E;">2</div>
+    </div>
+    <div class="summary-cell">
+      <div class="summary-label">Materials value</div>
+      <div class="summary-value">12,137 kr</div>
+    </div>
+  </div>
+
+  <!-- FILTER BAR -->
+  <div class="filterbar">
+    <div class="search-box">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#726752" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><path d="M21 21l-4.3-4.3"></path></svg>
+      <span>Search pieces…</span>
+    </div>
+    <div class="filter-pill"><span class="flabel">Status</span><span class="fvalue">All</span><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#736A57" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"></path></svg></div>
+    <div class="filter-pill"><span class="flabel">Piece type</span><span class="fvalue">All</span><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#736A57" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"></path></svg></div>
+    <div class="filter-pill"><span class="flabel">Fabric</span><span class="fvalue">All</span><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#736A57" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"></path></svg></div>
+    <span class="filter-count">4 of 4</span>
+  </div>
+
+  <!-- PIECE CARDS -->
+  <div class="piece-list">
+
+    <!-- Piece 1: Dining chair without back -->
+    <div class="piece-card">
+      <div class="card-head">
+        <div class="card-swatch" style="background:repeating-linear-gradient(45deg,#C7B79A 0 5px,#E4D9BC 5px 10px);"></div>
+        <div class="card-main">
+          <div class="card-name-row">
+            <h2 class="card-name">Dining chair without back</h2>
+            <span class="card-qty">× 2</span>
+          </div>
+          <div class="card-meta">Dining chair — seat only · 45×43 cm · saved 2026-09-16</div>
+          <div class="card-tags">
+            <span class="status-tag" style="background:#E4EEE2;color:#437054;">Priced</span>
+          </div>
+        </div>
+        <div class="card-price-col">
+          <div class="card-price-label">Suggested price</div>
+          <div class="card-price">4,970 kr</div>
+          <div class="card-price-sub">2,485 kr materials · ×2 markup</div>
+        </div>
+      </div>
+      <div class="line-items">
+        <div class="line-header">
+          <span>Line</span><span style="text-align:right;">Qty</span><span style="text-align:right;">Inc.</span><span style="text-align:right;">Ex.</span>
+        </div>
+        <div class="line-row">
+          <div><span class="line-name">Frame (pair)</span></div>
+          <span class="line-qty">1 pair</span><span class="line-inc">200 kr</span><span class="line-ex">160 kr</span>
+        </div>
+        <div class="line-row">
+          <div><span class="line-name">Kallskum 38kg/m³, 2cm</span></div>
+          <span class="line-qty">0.4 sheet</span><span class="line-inc">410 kr</span><span class="line-ex">328 kr</span>
+        </div>
+        <div class="line-row">
+          <div><span class="line-name">Wool wadding, 300 g/m²</span></div>
+          <span class="line-qty">0.6 m</span><span class="line-inc">101 kr</span><span class="line-ex">81 kr</span>
+        </div>
+        <div class="line-row">
+          <div><span class="line-name">Gabriel — Savak</span><span class="line-tag">Fabric</span></div>
+          <span class="line-qty">0.9 m</span><span class="line-inc">2,395 kr</span><span class="line-ex">1,916 kr</span>
+        </div>
+        <div class="line-footer">
+          <span class="line-meta">4 lines · labor 1.5h</span><span></span>
+          <span class="line-total-label">Total</span><span class="line-total">2,485 kr</span>
+        </div>
+      </div>
+      <div class="card-foot">
+        <button class="btn btn-secondary" style="font-size:12px;font-weight:500;padding:7px 15px;">Edit lines</button>
+        <button class="btn btn-primary" style="font-size:12px;font-weight:500;padding:7px 15px;">Freeze &amp; save</button>
+      </div>
+    </div>
+
+    <!-- Piece 2: Dining chair with back -->
+    <div class="piece-card">
+      <div class="card-head">
+        <div class="card-swatch" style="background:#EAE2CE;"></div>
+        <div class="card-main">
+          <div class="card-name-row">
+            <h2 class="card-name">Dining chair with back</h2>
+            <span class="card-qty">× 2</span>
+          </div>
+          <div class="card-meta">Dining chair — seat + back · 45×43 cm · saved 2026-09-16</div>
+          <div class="card-tags">
+            <span class="status-tag" style="background:#E4EEE2;color:#437054;">Priced</span>
+            <span class="check-tag">✓ fabric 27% of sale</span>
+          </div>
+        </div>
+        <div class="card-price-col">
+          <div class="card-price-label">Suggested price</div>
+          <div class="card-price">5,904 kr</div>
+          <div class="card-price-sub">2,952 kr materials · ×2 markup</div>
+        </div>
+      </div>
+      <div class="line-items">
+        <div class="line-header">
+          <span>Line</span><span style="text-align:right;">Qty</span><span style="text-align:right;">Inc.</span><span style="text-align:right;">Ex.</span>
+        </div>
+        <div class="line-row">
+          <div><span class="line-name">Frame (pair)</span></div>
+          <span class="line-qty">1 pair</span><span class="line-inc">200 kr</span><span class="line-ex">160 kr</span>
+        </div>
+        <div class="line-row">
+          <div><span class="line-name">Foam, seat + back</span></div>
+          <span class="line-qty">1 pair</span><span class="line-inc">160 kr</span><span class="line-ex">128 kr</span>
+        </div>
+        <div class="line-row">
+          <div><span class="line-name">Jute webbing, 50mm</span></div>
+          <span class="line-qty">3.2 m</span><span class="line-inc">188 kr</span><span class="line-ex">150 kr</span>
+        </div>
+        <div class="line-row">
+          <div><span class="line-name">Wool wadding, 300 g/m²</span></div>
+          <span class="line-qty">0.9 m</span><span class="line-inc">152 kr</span><span class="line-ex">122 kr</span>
+        </div>
+        <div class="line-row">
+          <div><span class="line-name">Cathy Nordström — Faye</span><span class="line-tag">Fabric</span></div>
+          <span class="line-qty">1.3 m</span><span class="line-inc">2,990 kr</span><span class="line-ex">2,392 kr</span>
+        </div>
+        <div class="line-footer">
+          <span class="line-meta">5 lines · labor 2.25h</span><span></span>
+          <span class="line-total-label">Total</span><span class="line-total">2,952 kr</span>
+        </div>
+      </div>
+      <div class="card-foot">
+        <button class="btn btn-secondary" style="font-size:12px;font-weight:500;padding:7px 15px;">Edit lines</button>
+        <button class="btn btn-primary" style="font-size:12px;font-weight:500;padding:7px 15px;">Freeze &amp; save</button>
+      </div>
+    </div>
+
+    <!-- Piece 3: Piano bench solo -->
+    <div class="piece-card">
+      <div class="card-head">
+        <div class="card-swatch" style="background:repeating-linear-gradient(90deg,#C4553F 0 12px,#F1ECE1 12px 22px);"></div>
+        <div class="card-main">
+          <div class="card-name-row">
+            <h2 class="card-name">Piano bench solo</h2>
+          </div>
+          <div class="card-meta">Piano bench — solo · 80×55 cm · saved 2026-09-16</div>
+          <div class="card-tags">
+            <span class="status-tag" style="background:#F1ECE1;color:#6E6858;">Draft</span>
+            <span class="check-tag">✓ 6,000 kr floor</span>
+          </div>
+        </div>
+        <div class="card-price-col">
+          <div class="card-price-label">Suggested price</div>
+          <div class="card-price">2,004 kr</div>
+          <div class="card-price-sub">1,002 kr materials · ×2 markup</div>
+        </div>
+      </div>
+      <div class="line-items">
+        <div class="line-header">
+          <span>Line</span><span style="text-align:right;">Qty</span><span style="text-align:right;">Inc.</span><span style="text-align:right;">Ex.</span>
+        </div>
+        <div class="line-row">
+          <div><span class="line-name">Frame</span></div>
+          <span class="line-qty">1 unit</span><span class="line-inc">375 kr</span><span class="line-ex">300 kr</span>
+        </div>
+        <div class="line-row">
+          <div><span class="line-name">Kallskum 38kg/m³, 4cm</span></div>
+          <span class="line-qty">0.6 m</span><span class="line-inc">64 kr</span><span class="line-ex">52 kr</span>
+        </div>
+        <div class="line-row">
+          <div><span class="line-name">checked cotton, red/blue</span><span class="line-tag">Fabric</span></div>
+          <span class="line-qty">0.7 m</span><span class="line-inc">812 kr</span><span class="line-ex">650 kr</span>
+        </div>
+        <div class="line-footer">
+          <span class="line-meta">3 lines · labor 1h</span><span></span>
+          <span class="line-total-label">Total</span><span class="line-total">1,002 kr</span>
+        </div>
+      </div>
+      <div class="card-foot">
+        <button class="btn btn-secondary" style="font-size:12px;font-weight:500;padding:7px 15px;">Edit lines</button>
+      </div>
+    </div>
+
+    <!-- Piece 4: Armchair, wingback -->
+    <div class="piece-card">
+      <div class="card-head">
+        <div class="card-swatch" style="background:#2B2A25;"></div>
+        <div class="card-main">
+          <div class="card-name-row">
+            <h2 class="card-name">Armchair, wingback</h2>
+          </div>
+          <div class="card-meta">Armchair — full reupholstery · 78×80 cm · saved 2026-09-11</div>
+          <div class="card-tags">
+            <span class="status-tag" style="background:#ECE6D8;color:#6B6656;">
+              <svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor" style="margin-right:3px;"><path d="M12 1a5 5 0 00-5 5v3H6a1 1 0 00-1 1v10a1 1 0 001 1h12a1 1 0 001-1V10a1 1 0 00-1-1h-1V6a5 5 0 00-5-5zm0 2a3 3 0 013 3v3H9V6a3 3 0 013-3z"></path></svg>
+              Frozen
+            </span>
+            <span class="check-tag">✓ 6,000 kr floor</span>
+            <span class="check-tag">✓ fabric 26% of sale</span>
+          </div>
+        </div>
+        <div class="card-price-col">
+          <div class="card-price-label">Suggested price</div>
+          <div class="card-price">11,396 kr</div>
+          <div class="card-price-sub">5,698 kr materials · ×2 markup</div>
+        </div>
+      </div>
+      <div class="line-items">
+        <div class="line-header">
+          <span>Line</span><span style="text-align:right;">Qty</span><span style="text-align:right;">Inc.</span><span style="text-align:right;">Ex.</span>
+        </div>
+        <div class="line-row">
+          <div><span class="line-name">Frame + spring repair</span></div>
+          <span class="line-qty">1 unit</span><span class="line-inc">950 kr</span><span class="line-ex">760 kr</span>
+        </div>
+        <div class="line-row">
+          <div><span class="line-name">Kallskum 38kg/m³, 4cm</span></div>
+          <span class="line-qty">2.1 m</span><span class="line-inc">224 kr</span><span class="line-ex">179 kr</span>
+        </div>
+        <div class="line-row">
+          <div><span class="line-name">Cotton felt, 450 g/m²</span></div>
+          <span class="line-qty">1.5 m</span><span class="line-inc">223 kr</span><span class="line-ex">178 kr</span>
+        </div>
+        <div class="line-row">
+          <div><span class="line-name">Jute webbing, 60mm</span></div>
+          <span class="line-qty">4.5 m</span><span class="line-inc">281 kr</span><span class="line-ex">225 kr</span>
+        </div>
+        <div class="line-row">
+          <div><span class="line-name">Upholstery thread</span></div>
+          <span class="line-qty">2 reels</span><span class="line-inc">90 kr</span><span class="line-ex">72 kr</span>
+        </div>
+        <div class="line-row">
+          <div><span class="line-name">Manuel Canovas — Tobago</span><span class="line-tag">Fabric</span></div>
+          <span class="line-qty">3.4 m</span><span class="line-inc">5,355 kr</span><span class="line-ex">4,284 kr</span>
+        </div>
+        <div class="line-footer">
+          <span class="line-meta">6 lines · labor 5h</span><span></span>
+          <span class="line-total-label">Total</span><span class="line-total">5,698 kr</span>
+        </div>
+      </div>
+      <div class="card-foot">
+        <button class="btn btn-secondary" style="font-size:12px;font-weight:500;padding:7px 15px;">Edit lines</button>
+        <button class="btn" disabled style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:500;padding:7px 15px;">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M12 1a5 5 0 00-5 5v3H6a1 1 0 00-1 1v10a1 1 0 001 1h12a1 1 0 001-1V10a1 1 0 00-1-1h-1V6a5 5 0 00-5-5zm0 2a3 3 0 013 3v3H9V6a3 3 0 013-3z"></path></svg>
+          Frozen
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <p class="footer-note">Live data from Supabase — edits are shared instantly with everyone signed in. Rules (allowances, tiers, thresholds) live in recipes.json and costing.js, versioned in git.</p>
+
+  </div>
+  </main>
+</div>
+<script>
+(function () {
+  var sidebar = document.getElementById('sidebar');
+  var btn = document.getElementById('sidebar-collapse-btn');
+  if (!sidebar || !btn) return;
+  function apply(collapsed) {
+    sidebar.classList.toggle('is-collapsed', collapsed);
+    btn.textContent = collapsed ? '›' : '‹';
+    btn.setAttribute('title', collapsed ? 'Expand sidebar' : 'Collapse sidebar');
+  }
+  var saved = null;
+  try { saved = localStorage.getItem('vs-sidebar-collapsed'); } catch (e) {}
+  apply(saved === '1');
+  btn.addEventListener('click', function () {
+    var next = !sidebar.classList.contains('is-collapsed');
+    apply(next);
+    try { localStorage.setItem('vs-sidebar-collapsed', next ? '1' : '0'); } catch (e) {}
+  });
+})();
+</script>
+
+</body>
+</html>

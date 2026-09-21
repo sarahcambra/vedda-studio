@@ -1,0 +1,448 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Materials — Vedda Studio</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,500;0,600;1,400&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="site/styles.css">
+<link rel="stylesheet" href="dashboard.css">
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0}
+  body{font-family:'IBM Plex Sans','Helvetica Neue',sans-serif;color:#1C1B17;background:#F7F3EC;-webkit-font-smoothing:antialiased;}
+  a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid #C1573B;outline-offset:2px;}
+
+  /* ---------- top nav ---------- */
+  .topnav{display:flex;align-items:center;justify-content:space-between;padding:16px 48px;background:#FFF;border-bottom:1px solid #ECE6D8;}
+  .topnav-logo{font-family:'IBM Plex Mono',ui-monospace,monospace;font-weight:500;font-size:12.5px;letter-spacing:0.1em;color:#1C1B17;}
+  .topnav-links{display:flex;align-items:center;gap:28px;}
+  .topnav-links a{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;letter-spacing:0.08em;color:#726752;text-decoration:none;padding-bottom:4px;border-bottom:2px solid transparent;transition:color .15s ease,border-color .15s ease;}
+  .topnav-links a:hover{color:#1C1B17;}
+  .topnav-links a.is-active{color:#1C1B17;border-bottom-color:#C1573B;}
+  .topnav-user{display:flex;align-items:center;gap:16px;}
+  .topnav-user span{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11.5px;color:#726752;}
+  .btn{display:inline-flex;align-items:center;gap:8px;font-family:'IBM Plex Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer;border-radius:2px;padding:8px 16px;transition:background .15s ease,border-color .15s ease;}
+  .btn-secondary{background:#FFF;color:#1C1B17;border:1px solid #ECE6D8;}
+  .btn-secondary:hover{background:#F1ECE1;border-color:#DCD3BE;}
+  .btn-primary{background:#2E3D33;color:#FAF7F0;border:1px solid #2E3D33;}
+  .btn-primary:hover{background:#1C1B17;border-color:#1C1B17;}
+
+  /* ---------- layout ---------- */
+  .catalog-page{max-width:1344px;margin:0 auto;padding:40px 48px 96px;}
+  .page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:28px;}
+  .page-kicker{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;letter-spacing:0.1em;color:#726752;text-transform:uppercase;margin-bottom:4px;}
+  .page-title{margin:0;font-family:'Newsreader','Times New Roman',serif;font-weight:500;font-size:34px;color:#1C1B17;letter-spacing:-0.01em;}
+
+  /* ---------- summary strip ---------- */
+  .summary-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:#ECE6D8;border:1px solid #ECE6D8;border-radius:2px;margin-bottom:28px;overflow:hidden;}
+  .summary-cell{background:#FFF;padding:16px 20px;}
+  .summary-label{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10.5px;letter-spacing:0.06em;text-transform:uppercase;color:#726752;margin-bottom:6px;}
+  .summary-value{font-family:'Newsreader','Times New Roman',serif;font-size:24px;font-weight:500;color:#1C1B17;}
+
+  /* ---------- filter bar ---------- */
+  .filterbar{display:flex;align-items:center;gap:14px;padding-bottom:18px;margin-bottom:32px;border-bottom:1px solid #ECE6D8;flex-wrap:wrap;}
+  .search-box{display:flex;align-items:center;gap:8px;border:1px solid #ECE6D8;border-radius:2px;padding:8px 12px;background:#FFF;width:190px;}
+  .search-box span{font-size:12.5px;color:#736A57;}
+  .filter-pill{display:inline-flex;align-items:center;gap:7px;border:1px solid #ECE6D8;border-radius:2px;padding:8px 12px;background:#FFF;cursor:pointer;}
+  .filter-pill .flabel{font-size:12px;color:#726752;}
+  .filter-pill .fvalue{font-size:12.5px;font-weight:600;color:#1C1B17;}
+  .filter-divider{width:1px;height:20px;background:#ECE6D8;}
+  .filter-check{display:flex;align-items:center;gap:6px;font-size:12px;color:#6B6656;cursor:pointer;}
+  .filter-check input{accent-color:#C1573B;cursor:pointer;}
+  .filter-count{margin-left:auto;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11.5px;color:#736A57;}
+
+  /* ---------- category jump nav ---------- */
+  .cat-jump{display:flex;align-items:center;gap:8px;margin-bottom:36px;flex-wrap:wrap;}
+  .cat-jump a{display:flex;align-items:center;gap:6px;padding:6px 14px;border-radius:2px;border:1px solid #ECE6D8;background:#FFF;text-decoration:none;font-family:'IBM Plex Sans',sans-serif;font-size:12px;font-weight:500;color:#1C1B17;transition:background .15s ease,border-color .15s ease;}
+  .cat-jump a:hover{background:#FBF9F4;border-color:#DCD3BE;}
+  .cat-jump a span{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10.5px;color:#736A57;font-weight:400;}
+
+  /* ---------- category sections ---------- */
+  .cat-section{margin-bottom:48px;scroll-margin-top:24px;}
+  .cat-head{display:flex;align-items:baseline;gap:10px;margin-bottom:20px;}
+  .cat-head h2{margin:0;font-family:'Newsreader','Times New Roman',serif;font-weight:400;font-size:20px;color:#1C1B17;}
+  .cat-head span{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11.5px;color:#736A57;}
+
+  /* ---------- material cards grid ---------- */
+  .mat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:28px 20px;}
+  .mat-card{transition:opacity .15s ease;}
+  .mat-card:hover{opacity:.88;}
+  .mat-swatch{aspect-ratio:1/1;width:100%;border-radius:2px;margin-bottom:10px;}
+  .mat-name{font-size:10.5px;letter-spacing:0.02em;text-transform:uppercase;color:#1C1B17;line-height:1.4;min-height:2.6em;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:6px;}
+  .mat-price-row{display:flex;align-items:baseline;gap:5px;margin-bottom:2px;}
+  .mat-price{font-family:'Newsreader','Times New Roman',serif;font-size:15px;font-weight:500;color:#1C1B17;}
+  .mat-unit{font-size:11px;color:#726752;font-style:italic;}
+  .mat-vat{font-size:10.5px;color:#736A57;margin-bottom:8px;}
+  .mat-tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:6px;}
+  .mat-tag{display:inline-flex;align-items:center;gap:3px;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:9px;letter-spacing:0.04em;text-transform:uppercase;padding:3px 8px;border-radius:2px;}
+  .mat-specs{display:flex;flex-wrap:wrap;gap:5px;}
+  .mat-spec{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:9px;letter-spacing:0.03em;color:#726752;border:1px solid #ECE6D8;border-radius:2px;padding:3px 8px;}
+
+  .show-all-btn{display:flex;align-items:center;gap:7px;margin-top:20px;padding:8px 16px;border-radius:2px;border:1px solid #ECE6D8;background:#FFF;color:#1C1B17;font-family:'IBM Plex Sans',sans-serif;font-size:12.5px;font-weight:500;cursor:pointer;transition:background .15s ease,border-color .15s ease;}
+  .show-all-btn:hover{background:#FBF9F4;border-color:#DCD3BE;}
+
+  .footer-note{margin-top:40px;padding-top:16px;border-top:1px solid #ECE6D8;font-size:12px;font-style:italic;color:#726752;}
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand-row">
+      <div class="sidebar-brand">Vedda<br>Studio</div>
+      <button class="sidebar-collapse" id="sidebar-collapse-btn" type="button" title="Collapse sidebar" aria-label="Collapse sidebar">&lsaquo;</button>
+    </div>
+    <nav class="sidebar-nav" role="tablist">
+      <a class="sidebar-item" href="../dashboard.html">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><path d="M21 21l-4.3-4.3"></path></svg>
+        Sourcing
+      </a>
+      <a class="sidebar-item" href="../dashboard.html">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8l-9-5-9 5 9 5 9-5z"></path><path d="M3 8v8l9 5 9-5V8"></path><path d="M12 13v8"></path></svg>
+        Inventory
+      </a>
+      <a class="sidebar-item" href="../dashboard.html">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 11-5.4 5.4L3 18v3h3l6.3-6.3a4 4 0 015.4-5.4z"></path></svg>
+        Restorations
+      </a>
+      <a class="sidebar-item" href="../dashboard.html">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l3 3v15H6z"></path><path d="M9 8h6M9 12h6M9 16h4"></path></svg>
+        Business
+      </a>
+      <div class="sidebar-divider"></div>
+      <span class="sidebar-label">Catalogue</span>
+      <a class="sidebar-item is-active" href="materials.html">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect></svg>
+        Materials
+      </a>
+      <a class="sidebar-item" href="suppliers.html">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="1"></rect><path d="M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2"></path></svg>
+        Suppliers
+      </a>
+      <a class="sidebar-item" href="costings.html">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"></path></svg>
+        Costings
+      </a>
+    </nav>
+    <div class="sidebar-foot text-muted"></div>
+  </aside>
+
+  <main class="main">
+  <div class="catalog-page">
+
+  <!-- HEADER -->
+  <div class="page-header">
+    <div>
+      <div class="page-kicker">Catalogue</div>
+      <h1 class="page-title">Materials</h1>
+    </div>
+    <button class="btn btn-primary">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"></path></svg>
+      Material
+    </button>
+  </div>
+
+  <!-- SUMMARY STRIP -->
+  <div class="summary-strip">
+    <div class="summary-cell">
+      <div class="summary-label">Total items</div>
+      <div class="summary-value">26</div>
+    </div>
+    <div class="summary-cell">
+      <div class="summary-label">Priced</div>
+      <div class="summary-value" style="color:#437054;">20 / 26</div>
+    </div>
+    <div class="summary-cell">
+      <div class="summary-label">Missing price</div>
+      <div class="summary-value" style="color:#B5673E;">6</div>
+    </div>
+    <div class="summary-cell">
+      <div class="summary-label">Categories</div>
+      <div class="summary-value">4</div>
+    </div>
+  </div>
+
+  <!-- FILTER BAR -->
+  <div class="filterbar">
+    <div class="search-box">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#726752" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><path d="M21 21l-4.3-4.3"></path></svg>
+      <span>Search…</span>
+    </div>
+    <div class="filter-pill"><span class="flabel">Category</span><span class="fvalue">All</span><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#736A57" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"></path></svg></div>
+    <div class="filter-pill"><span class="flabel">Layer</span><span class="fvalue">All</span><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#736A57" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"></path></svg></div>
+    <div class="filter-pill"><span class="flabel">Supplier</span><span class="fvalue">All</span><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#736A57" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"></path></svg></div>
+    <div class="filter-divider"></div>
+    <div class="filter-pill"><span class="flabel">Type</span><span class="fvalue">All</span><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#736A57" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"></path></svg></div>
+    <div class="filter-pill"><span class="flabel">Brand</span><span class="fvalue">All</span><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#736A57" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"></path></svg></div>
+    <label class="filter-check"><input type="checkbox">Seat-suitable</label>
+    <label class="filter-check"><input type="checkbox">Has price</label>
+    <span class="filter-count">26 of 26</span>
+  </div>
+
+  <!-- CATEGORY JUMP NAV -->
+  <div class="cat-jump">
+    <a href="#cat-fabric">Fabric <span>(6)</span></a>
+    <a href="#cat-interior">Interior materials <span>(13)</span></a>
+    <a href="#cat-consumables">Consumables <span>(5)</span></a>
+    <a href="#cat-equipment">Equipment <span>(2)</span></a>
+  </div>
+
+  <!-- CATEGORY: Fabric -->
+  <div class="cat-section" id="cat-fabric">
+    <div class="cat-head">
+      <h2>Fabric</h2>
+      <span>6/6 priced</span>
+    </div>
+    <div class="mat-grid">
+      <div class="mat-card">
+        <div class="mat-swatch" style="background:#E4A574;"></div>
+        <div class="mat-name">Casamance — Orange (confirm per listing)</div>
+        <div class="mat-price-row"><span class="mat-price">1,000 kr</span><span class="mat-unit">per m</span></div>
+        <div class="mat-vat">ex VAT</div>
+        <div class="mat-tags">
+          <span class="mat-tag" style="border:1px solid #ECE6D8;color:#6E6858;">Pattern</span>
+          <span class="mat-tag" style="border:1px solid #C7DBC9;color:#437054;">Seat ✓</span>
+        </div>
+        <div class="mat-specs"><span class="mat-spec">40,000 Martindale</span></div>
+      </div>
+      <div class="mat-card">
+        <div class="mat-swatch" style="background:repeating-linear-gradient(45deg,#D9776A 0 10px,#F1ECE1 10px 20px);"></div>
+        <div class="mat-name">Cathy Nordström — Faye, rust and lilac</div>
+        <div class="mat-price-row"><span class="mat-price">1,840 kr</span><span class="mat-unit">per m</span></div>
+        <div class="mat-vat">ex VAT</div>
+        <div class="mat-tags">
+          <span class="mat-tag" style="border:1px solid #ECE6D8;color:#6E6858;">Linen</span>
+          <span class="mat-tag" style="border:1px solid #ECE6D8;color:#6E6858;">Light domestic</span>
+        </div>
+        <div class="mat-specs"><span class="mat-spec">20,000 Martindale</span></div>
+      </div>
+      <div class="mat-card">
+        <div class="mat-swatch" style="background:repeating-linear-gradient(90deg,#7C8B6E 0 6px,#E7DFC9 6px 12px,#8B6A4F 12px 18px);"></div>
+        <div class="mat-name">Coordonné — Vibrant, Moss / Indigo / Clay</div>
+        <div class="mat-price-row"><span class="mat-price">570 kr</span><span class="mat-unit">per m</span></div>
+        <div class="mat-vat">ex VAT</div>
+        <div class="mat-tags">
+          <span class="mat-tag" style="border:1px solid #ECE6D8;color:#6E6858;">Pattern</span>
+          <span class="mat-tag" style="border:1px solid #C7DBC9;color:#437054;">Seat ✓</span>
+        </div>
+        <div class="mat-specs"><span class="mat-spec">50,000 Martindale</span><span class="mat-spec">140 cm wide</span></div>
+      </div>
+      <div class="mat-card">
+        <div class="mat-swatch" style="background:#C7B79A;"></div>
+        <div class="mat-name">Gabriel — Savak</div>
+        <div class="mat-price-row"><span class="mat-price">2,128 kr</span><span class="mat-unit">per m</span></div>
+        <div class="mat-vat">ex VAT</div>
+        <div class="mat-tags">
+          <span class="mat-tag" style="border:1px solid #ECE6D8;color:#6E6858;">Wool</span>
+          <span class="mat-tag" style="border:1px solid #C7DBC9;color:#437054;">Seat ✓</span>
+        </div>
+        <div class="mat-specs"><span class="mat-spec">100,000 Martindale</span><span class="mat-spec">140 cm wide</span></div>
+      </div>
+      <div class="mat-card">
+        <div class="mat-swatch" style="background:#B7A98C;"></div>
+        <div class="mat-name">Manuel Canovas — Tobago, Greige</div>
+        <div class="mat-price-row"><span class="mat-price">1,260 kr</span><span class="mat-unit">per m</span></div>
+        <div class="mat-vat">ex VAT</div>
+        <div class="mat-tags">
+          <span class="mat-tag" style="border:1px solid #ECE6D8;color:#6E6858;">Velvet</span>
+        </div>
+        <div class="mat-specs"><span class="mat-spec">680 g/m²</span><span class="mat-spec">140 cm wide</span></div>
+      </div>
+      <div class="mat-card">
+        <div class="mat-swatch" style="background:repeating-linear-gradient(60deg,#5F7A5A 0 8px,#C97B56 8px 16px,#7A93A8 16px 24px);"></div>
+        <div class="mat-name">William Morris &amp; Co — Honeysuckle &amp; Tulip</div>
+        <div class="mat-price-row"><span class="mat-price">1,492 kr</span><span class="mat-unit">per m</span></div>
+        <div class="mat-vat">ex VAT</div>
+        <div class="mat-tags">
+          <span class="mat-tag" style="border:1px solid #ECE6D8;color:#6E6858;">Pattern</span>
+          <span class="mat-tag" style="border:1px solid #ECE6D8;color:#6E6858;">Light domestic</span>
+        </div>
+        <div class="mat-specs"><span class="mat-spec">20,000 Martindale</span><span class="mat-spec">140 cm wide</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CATEGORY: Interior materials -->
+  <div class="cat-section" id="cat-interior">
+    <div class="cat-head">
+      <h2>Interior materials</h2>
+      <span>11/13 priced</span>
+    </div>
+    <div class="mat-grid">
+      <div class="mat-card">
+        <div class="mat-swatch" style="background:#EDE6D6;"></div>
+        <div class="mat-name">Calico / Lakansväv, 150 cm</div>
+        <div class="mat-price-row"><span class="mat-price">64 kr</span><span class="mat-unit">per m</span></div>
+        <div class="mat-vat">ex VAT</div>
+        <div class="mat-specs"><span class="mat-spec">150 g/m²</span><span class="mat-spec">150 cm wide</span></div>
+      </div>
+      <div class="mat-card">
+        <div class="mat-swatch" style="background:#EFE9DD;"></div>
+        <div class="mat-name">Cotton felt, 450 g/m²</div>
+        <div class="mat-price-row"><span class="mat-price">119 kr</span><span class="mat-unit">per m</span></div>
+        <div class="mat-vat">ex VAT</div>
+        <div class="mat-specs"><span class="mat-spec">450 g/m²</span><span class="mat-spec">100 cm wide</span></div>
+      </div>
+      <div class="mat-card">
+        <div class="mat-swatch" style="background:#D8C9A3;"></div>
+        <div class="mat-name">Jute webbing, 30 mm</div>
+        <div class="mat-price-row"><span class="mat-price">29 kr</span><span class="mat-unit">per m</span></div>
+        <div class="mat-vat">ex VAT</div>
+        <div class="mat-specs"><span class="mat-spec">3.5 cm wide</span></div>
+      </div>
+      <div class="mat-card">
+        <div class="mat-swatch" style="background:#D8C9A3;"></div>
+        <div class="mat-name">Jute webbing, 50 mm</div>
+        <div class="mat-price-row"><span class="mat-price">47 kr</span><span class="mat-unit">per m</span></div>
+        <div class="mat-vat">ex VAT</div>
+        <div class="mat-specs"><span class="mat-spec">5 cm wide</span></div>
+      </div>
+      <div class="mat-card">
+        <div class="mat-swatch" style="background:#2B2A25;"></div>
+        <div class="mat-name">Jute webbing, 60mm</div>
+        <div class="mat-price-row"><span class="mat-price">50 kr</span><span class="mat-unit">per m</span></div>
+        <div class="mat-vat">ex VAT</div>
+        <div class="mat-specs"><span class="mat-spec">6 cm wide</span></div>
+      </div>
+      <div class="mat-card">
+        <div class="mat-swatch" style="background:#F1ECE1;"></div>
+        <div class="mat-name">Kallskum 38 kg/m³, 2 cm</div>
+        <div class="mat-price-row"><span class="mat-price">820 kr</span><span class="mat-unit">per 120x200cm sheet</span></div>
+        <div class="mat-vat">ex VAT</div>
+        <div class="mat-specs"><span class="mat-spec">120 cm wide</span><span class="mat-spec">38 kg/m³</span><span class="mat-spec">2 cm</span></div>
+      </div>
+      <div class="mat-card">
+        <div class="mat-swatch" style="background:#F1ECE1;"></div>
+        <div class="mat-name">Kallskum 38 kg/m³, 4 cm</div>
+        <div class="mat-price-row"><span class="mat-price">86 kr</span><span class="mat-unit">per m (120 cm wide, 4 cm)</span></div>
+        <div class="mat-vat">ex VAT</div>
+        <div class="mat-specs"><span class="mat-spec">120 cm wide</span><span class="mat-spec">38 kg/m³</span><span class="mat-spec">4 cm</span></div>
+      </div>
+      <div class="mat-card">
+        <div class="mat-swatch" style="background:#EFE9DD;"></div>
+        <div class="mat-name">Sheepskin, custom cut seat cushion</div>
+        <div class="mat-price-row"><span class="mat-price">price tbc</span></div>
+        <div class="mat-vat">ex VAT</div>
+        <div class="mat-tags">
+          <span class="mat-tag" style="border:1px solid #ECE6D8;color:#6E6858;">Sheepskin</span>
+          <span class="mat-tag" style="border:1px solid #ECE6D8;color:#6E6858;">Martindale ?</span>
+        </div>
+      </div>
+      <div class="mat-card">
+        <div class="mat-swatch" style="background:#F4EFE4;"></div>
+        <div class="mat-name">Wool wadding, 120 g/m² (85% wool) — watch</div>
+        <div class="mat-price-row"><span class="mat-price">175 kr</span><span class="mat-unit">per m</span></div>
+        <div class="mat-vat">ex VAT</div>
+        <div class="mat-specs"><span class="mat-spec">120 g/m²</span><span class="mat-spec">150 cm wide</span></div>
+      </div>
+      <div class="mat-card">
+        <div class="mat-swatch" style="background:#F6F1E7;"></div>
+        <div class="mat-name">Wool wadding, 300 g/m² (50/50 wool-poly)</div>
+        <div class="mat-price-row"><span class="mat-price">135 kr</span><span class="mat-unit">per m</span></div>
+        <div class="mat-vat">ex VAT</div>
+        <div class="mat-specs"><span class="mat-spec">300 g/m²</span><span class="mat-spec">75 cm wide</span></div>
+      </div>
+      <div class="mat-card">
+        <div class="mat-swatch" style="background:#FBF8EE;"></div>
+        <div class="mat-name">Scrim / calico (domestik), 100% cotton</div>
+        <div class="mat-price-row"><span class="mat-price">95 kr</span><span class="mat-unit">per m</span></div>
+        <div class="mat-vat">ex VAT</div>
+        <div class="mat-specs"><span class="mat-spec">157 cm wide</span></div>
+      </div>
+    </div>
+    <button class="show-all-btn">
+      Show all 13
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"></path></svg>
+    </button>
+  </div>
+
+  <!-- CATEGORY: Consumables -->
+  <div class="cat-section" id="cat-consumables">
+    <div class="cat-head">
+      <h2>Consumables</h2>
+      <span>1/5 priced</span>
+    </div>
+    <div class="mat-grid">
+      <div class="mat-card">
+        <div class="mat-swatch" style="background:#EFE9DD;"></div>
+        <div class="mat-name">Brand tag / stamp</div>
+        <div class="mat-price-row"><span class="mat-price">price tbc</span></div>
+        <div class="mat-vat">ex VAT</div>
+      </div>
+      <div class="mat-card">
+        <div class="mat-swatch" style="background:#EDE6D6;"></div>
+        <div class="mat-name">Chamäleon Kontaktlim spray, 500 ml</div>
+        <div class="mat-price-row"><span class="mat-price">183 kr</span><span class="mat-unit">per 500ml can</span></div>
+        <div class="mat-vat">ex VAT</div>
+      </div>
+      <div class="mat-card">
+        <div class="mat-swatch" style="background:#F1ECE1;"></div>
+        <div class="mat-name">Häftklammer typ 8G, 12mm, box of 5,000</div>
+        <div class="mat-price-row"><span class="mat-price">price tbc</span></div>
+        <div class="mat-vat">ex VAT</div>
+      </div>
+      <div class="mat-card">
+        <div class="mat-swatch" style="background:#E7DFC9;"></div>
+        <div class="mat-name">Sandpaper</div>
+        <div class="mat-price-row"><span class="mat-price">price tbc</span></div>
+        <div class="mat-vat">ex VAT</div>
+      </div>
+      <div class="mat-card">
+        <div class="mat-swatch" style="background:#D8C9A3;"></div>
+        <div class="mat-name">Upholstery thread</div>
+        <div class="mat-price-row"><span class="mat-price">price tbc</span></div>
+        <div class="mat-vat">ex VAT</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CATEGORY: Equipment -->
+  <div class="cat-section" id="cat-equipment">
+    <div class="cat-head">
+      <h2>Equipment</h2>
+      <span>1/2 priced</span>
+    </div>
+    <div class="mat-grid">
+      <div class="mat-card">
+        <div class="mat-swatch" style="background:#EFE9DD;"></div>
+        <div class="mat-name">Air compressor, oil-free</div>
+        <div class="mat-price-row"><span class="mat-price">price tbc</span></div>
+        <div class="mat-vat">ex VAT</div>
+      </div>
+      <div class="mat-card">
+        <div class="mat-swatch" style="background:#2B2A25;"></div>
+        <div class="mat-name">Senco SFT10XP-AT pneumatic staple gun</div>
+        <div class="mat-price-row"><span class="mat-price">3,075 kr</span><span class="mat-unit">per gun</span></div>
+        <div class="mat-vat">ex VAT</div>
+      </div>
+    </div>
+  </div>
+
+  <p class="footer-note">Live data from Supabase — edits are shared instantly with everyone signed in. Rules (allowances, tiers, thresholds) live in recipes.json and costing.js, versioned in git.</p>
+
+  </div>
+  </main>
+</div>
+<script>
+(function () {
+  var sidebar = document.getElementById('sidebar');
+  var btn = document.getElementById('sidebar-collapse-btn');
+  if (!sidebar || !btn) return;
+  function apply(collapsed) {
+    sidebar.classList.toggle('is-collapsed', collapsed);
+    btn.textContent = collapsed ? '›' : '‹';
+    btn.setAttribute('title', collapsed ? 'Expand sidebar' : 'Collapse sidebar');
+  }
+  var saved = null;
+  try { saved = localStorage.getItem('vs-sidebar-collapsed'); } catch (e) {}
+  apply(saved === '1');
+  btn.addEventListener('click', function () {
+    var next = !sidebar.classList.contains('is-collapsed');
+    apply(next);
+    try { localStorage.setItem('vs-sidebar-collapsed', next ? '1' : '0'); } catch (e) {}
+  });
+})();
+</script>
+
+</body>
+</html>

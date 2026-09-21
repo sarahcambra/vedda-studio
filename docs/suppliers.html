@@ -1,0 +1,608 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Suppliers — Vedda Studio</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,500;0,600;1,400&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<link rel="stylesheet" href="site/styles.css">
+<link rel="stylesheet" href="dashboard.css">
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0}
+  body{font-family:'IBM Plex Sans','Helvetica Neue',sans-serif;color:#1C1B17;background:#F7F3EC;-webkit-font-smoothing:antialiased;}
+  a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid #C1573B;outline-offset:2px;}
+
+  /* ---------- top nav ---------- */
+  .topnav{display:flex;align-items:center;justify-content:space-between;padding:16px 48px;background:#FFF;border-bottom:1px solid #ECE6D8;}
+  .topnav-logo{font-family:'IBM Plex Mono',ui-monospace,monospace;font-weight:500;font-size:12.5px;letter-spacing:0.1em;color:#1C1B17;}
+  .topnav-links{display:flex;align-items:center;gap:28px;}
+  .topnav-links a{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;letter-spacing:0.08em;color:#726752;text-decoration:none;padding-bottom:4px;border-bottom:2px solid transparent;transition:color .15s ease,border-color .15s ease;}
+  .topnav-links a:hover{color:#1C1B17;}
+  .topnav-links a.is-active{color:#1C1B17;border-bottom-color:#C1573B;}
+  .topnav-user{display:flex;align-items:center;gap:16px;}
+  .topnav-user span{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11.5px;color:#726752;}
+  .btn{display:inline-flex;align-items:center;gap:8px;font-family:'IBM Plex Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer;border-radius:2px;padding:8px 16px;transition:background .15s ease,border-color .15s ease;}
+  .btn-secondary{background:#FFF;color:#1C1B17;border:1px solid #ECE6D8;}
+  .btn-secondary:hover{background:#F1ECE1;border-color:#DCD3BE;}
+  .btn-primary{background:#2E3D33;color:#FAF7F0;border:1px solid #2E3D33;}
+  .btn-primary:hover{background:#1C1B17;border-color:#1C1B17;}
+
+  /* ---------- layout ---------- */
+  .catalog-page{max-width:1344px;margin:0 auto;padding:40px 48px 96px;}
+  .page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:32px;}
+  .page-kicker{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;letter-spacing:0.1em;color:#726752;text-transform:uppercase;margin-bottom:4px;}
+  .page-title{margin:0 0 8px;font-family:'Newsreader','Times New Roman',serif;font-weight:500;font-size:34px;color:#1C1B17;letter-spacing:-0.01em;}
+  .page-desc{font-size:12.5px;color:#726752;max-width:520px;line-height:1.6;}
+
+  /* ---------- summary strip ---------- */
+  .summary-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:#ECE6D8;border:1px solid #ECE6D8;border-radius:2px;margin-bottom:28px;overflow:hidden;}
+  .summary-cell{background:#FFF;padding:16px 20px;}
+  .summary-label{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10.5px;letter-spacing:0.06em;text-transform:uppercase;color:#726752;margin-bottom:6px;}
+  .summary-value{font-family:'Newsreader','Times New Roman',serif;font-size:24px;font-weight:500;color:#1C1B17;}
+
+  /* ---------- filter bar ---------- */
+  .filterbar{display:flex;align-items:center;gap:14px;padding-bottom:18px;margin-bottom:24px;border-bottom:1px solid #ECE6D8;flex-wrap:wrap;}
+  .search-box{display:flex;align-items:center;gap:8px;border:1px solid #ECE6D8;border-radius:2px;padding:8px 12px;background:#FFF;width:190px;}
+  .search-box span{font-size:12.5px;color:#736A57;}
+  .filter-pill{display:inline-flex;align-items:center;gap:7px;border:1px solid #ECE6D8;border-radius:2px;padding:8px 12px;background:#FFF;cursor:pointer;}
+  .filter-pill .flabel{font-size:12px;color:#726752;}
+  .filter-pill .fvalue{font-size:12.5px;font-weight:600;color:#1C1B17;}
+  .filter-count{margin-left:auto;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11.5px;color:#736A57;}
+
+  /* ---------- supplier cards ---------- */
+  .supplier-list{display:flex;flex-direction:column;gap:14px;margin-bottom:56px;}
+  .supplier-card{background:#FFF;border:1px solid rgba(28,27,23,0.07);border-radius:2px;box-shadow:0 1px 2px rgba(28,27,23,0.035);transition:box-shadow .15s ease;padding:18px 20px;}
+  .supplier-card:hover{box-shadow:0 4px 12px rgba(28,27,23,0.06);}
+  .supplier-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:12px;}
+  .supplier-name{display:flex;align-items:center;gap:9px;margin-bottom:3px;}
+  .supplier-name a{font-family:'Newsreader','Times New Roman',serif;font-size:17px;font-weight:500;color:#1C1B17;text-decoration:underline;text-decoration-color:#DCD3BE;text-underline-offset:2px;transition:color .15s ease,text-decoration-color .15s ease;}
+  .supplier-name a:hover{color:#C1573B;text-decoration-color:#C1573B;}
+  .house-badge{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:9px;letter-spacing:0.05em;text-transform:uppercase;padding:3px 8px;border-radius:2px;background:#E4EEE2;color:#437054;}
+  .supplier-kind{font-size:12.5px;color:#6B6656;line-height:1.5;max-width:620px;}
+  .supplier-edit{font-size:12px;color:#1C1B17;text-decoration:underline;text-decoration-color:#DCD3BE;text-underline-offset:2px;transition:color .15s ease,text-decoration-color .15s ease;}
+  .supplier-edit:hover{color:#C1573B;text-decoration-color:#C1573B;}
+
+  .supplier-meta{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;}
+  .meta-pill{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;padding:5px 10px;border-radius:2px;border:1px solid #ECE6D8;color:#6B6656;}
+  .meta-pill .meta-label{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:9.5px;letter-spacing:0.04em;text-transform:uppercase;color:#736A57;}
+  .meta-pill.ships-yes{border-color:#C7DBC9;color:#437054;}
+  .supplier-notes{font-size:12.5px;color:#6B6656;line-height:1.6;padding-top:12px;border-top:1px solid #F4EFE4;}
+
+  /* ---------- fabric houses ---------- */
+  .houses-section{margin-bottom:40px;}
+  .houses-title{margin:0 0 4px;font-family:'Newsreader','Times New Roman',serif;font-weight:400;font-size:20px;color:#1C1B17;}
+  .houses-desc{font-size:12.5px;color:#726752;margin-bottom:20px;}
+  .houses-list{display:flex;flex-direction:column;gap:1px;background:#ECE6D8;border:1px solid #ECE6D8;border-radius:2px;overflow:hidden;}
+  .house-row{display:flex;align-items:center;gap:16px;padding:14px 18px;background:#FFF;transition:background .15s ease;}
+  .house-row:hover{background:#FBF9F4;}
+  .house-name{font-size:13.5px;color:#1C1B17;width:130px;flex-shrink:0;}
+  .house-country{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10.5px;letter-spacing:0.03em;color:#726752;width:80px;flex-shrink:0;}
+  .house-fabrics{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:#1C1B17;width:90px;flex-shrink:0;}
+  .house-notes{font-size:12px;color:#6B6656;line-height:1.5;flex-grow:1;}
+  .house-links{display:flex;align-items:center;gap:12px;flex-shrink:0;}
+  .house-links a{font-size:11.5px;color:#1C1B17;text-decoration:underline;text-decoration-color:#DCD3BE;text-underline-offset:2px;transition:color .15s ease,text-decoration-color .15s ease;}
+  .house-links a:hover{color:#C1573B;text-decoration-color:#C1573B;}
+
+  .footer-note{margin-top:40px;padding-top:16px;border-top:1px solid #ECE6D8;font-size:12px;font-style:italic;color:#726752;}
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand-row">
+      <div class="sidebar-brand">Vedda<br>Studio</div>
+      <button class="sidebar-collapse" id="sidebar-collapse-btn" type="button" title="Collapse sidebar" aria-label="Collapse sidebar">&lsaquo;</button>
+    </div>
+    <nav class="sidebar-nav" role="tablist">
+      <a class="sidebar-item" href="../dashboard.html">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><path d="M21 21l-4.3-4.3"></path></svg>
+        Sourcing
+      </a>
+      <a class="sidebar-item" href="../dashboard.html">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8l-9-5-9 5 9 5 9-5z"></path><path d="M3 8v8l9 5 9-5V8"></path><path d="M12 13v8"></path></svg>
+        Inventory
+      </a>
+      <a class="sidebar-item" href="../dashboard.html">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 11-5.4 5.4L3 18v3h3l6.3-6.3a4 4 0 015.4-5.4z"></path></svg>
+        Restorations
+      </a>
+      <a class="sidebar-item" href="../dashboard.html">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l3 3v15H6z"></path><path d="M9 8h6M9 12h6M9 16h4"></path></svg>
+        Business
+      </a>
+      <div class="sidebar-divider"></div>
+      <span class="sidebar-label">Catalogue</span>
+      <a class="sidebar-item" href="materials.html">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect></svg>
+        Materials
+      </a>
+      <a class="sidebar-item is-active" href="suppliers.html">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="1"></rect><path d="M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2"></path></svg>
+        Suppliers
+      </a>
+      <a class="sidebar-item" href="costings.html">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"></path></svg>
+        Costings
+      </a>
+    </nav>
+    <div class="sidebar-foot text-muted"></div>
+  </aside>
+
+  <main class="main">
+  <div class="catalog-page">
+
+  <!-- HEADER -->
+  <div class="page-header">
+    <div>
+      <div class="page-kicker">Where to buy</div>
+      <h1 class="page-title">Suppliers</h1>
+      <p class="page-desc">Vendors we buy from, and the fabric houses behind them. House accounts get first look before checking the open market.</p>
+    </div>
+    <div style="display:flex;gap:10px;flex-shrink:0;">
+      <button class="btn btn-secondary">+ House</button>
+      <button class="btn btn-primary">+ Supplier</button>
+    </div>
+  </div>
+
+  <!-- SUMMARY STRIP -->
+  <div class="summary-strip">
+    <div class="summary-cell">
+      <div class="summary-label">Suppliers</div>
+      <div class="summary-value">18</div>
+    </div>
+    <div class="summary-cell">
+      <div class="summary-label">House accounts</div>
+      <div class="summary-value" style="color:#437054;">2</div>
+    </div>
+    <div class="summary-cell">
+      <div class="summary-label">Ships to Sweden</div>
+      <div class="summary-value">15</div>
+    </div>
+    <div class="summary-cell">
+      <div class="summary-label">Fabric houses</div>
+      <div class="summary-value">9</div>
+    </div>
+  </div>
+
+  <!-- FILTER BAR -->
+  <div class="filterbar">
+    <div class="search-box">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#726752" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><path d="M21 21l-4.3-4.3"></path></svg>
+      <span>Search suppliers…</span>
+    </div>
+    <div class="filter-pill"><span class="flabel">Kind</span><span class="fvalue">All</span><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#736A57" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"></path></svg></div>
+    <div class="filter-pill"><span class="flabel">Account</span><span class="fvalue">All</span><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#736A57" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"></path></svg></div>
+    <span class="filter-count">18 of 18</span>
+  </div>
+
+  <!-- SUPPLIER CARDS -->
+  <div class="supplier-list">
+
+    <div class="supplier-card">
+      <div class="supplier-head">
+        <div>
+          <div class="supplier-name">
+            <a href="#">AutoDex</a>
+          </div>
+          <div class="supplier-kind">textile_supplier · spray adhesive · Sweden</div>
+        </div>
+        <div style="flex-shrink:0;"><a href="#" class="supplier-edit">edit</a></div>
+      </div>
+      <div class="supplier-meta">
+        <span class="meta-pill"><span class="meta-label">Account</span> incl. 25%</span>
+        <span class="meta-pill ships-yes"><span class="meta-label">Ships SE</span> yes</span>
+        <span class="meta-pill"><span class="meta-label">Offers</span> 1</span>
+      </div>
+      <div class="supplier-notes">Chamäleon Kontaktlim Spray stockist. Fallback if Nevotex is out of stock.</div>
+    </div>
+
+    <div class="supplier-card">
+      <div class="supplier-head">
+        <div>
+          <div class="supplier-name">
+            <a href="#">Brittfurn</a>
+          </div>
+          <div class="supplier-kind">textile_supplier · designer fabric · Sweden</div>
+        </div>
+        <div style="flex-shrink:0;"><a href="#" class="supplier-edit">edit</a></div>
+      </div>
+      <div class="supplier-meta">
+        <span class="meta-pill"><span class="meta-label">Account</span> incl. 25%</span>
+        <span class="meta-pill ships-yes"><span class="meta-label">Ships SE</span> yes</span>
+        <span class="meta-pill"><span class="meta-label">Offers</span> 1</span>
+      </div>
+      <div class="supplier-notes">Swedish retailer for Manuel Canovas, Designers Guild, Mulberry Home, Ralph Lauren Home and others. Site categorises some listings under a house that isn't the actual vendor — check the vendor tag, not just the URL/collection name.</div>
+    </div>
+
+    <div class="supplier-card">
+      <div class="supplier-head">
+        <div>
+          <div class="supplier-name">
+            <a href="#">Cathy Nordström</a>
+            <span class="house-badge">House account</span>
+          </div>
+          <div class="supplier-kind">textile_supplier · pattern fabric · Sweden</div>
+        </div>
+        <div style="flex-shrink:0;"><a href="#" class="supplier-edit">edit</a></div>
+      </div>
+      <div class="supplier-meta">
+        <span class="meta-pill"><span class="meta-label">Account</span> incl. 25%</span>
+        <span class="meta-pill ships-yes"><span class="meta-label">Ships SE</span> yes</span>
+        <span class="meta-pill"><span class="meta-label">Offers</span> 1</span>
+      </div>
+      <div class="supplier-notes">Reserve for pieces where the Swedish-designer name carries the listing and the sell price clears the fabric-% test — see costing.md. 20,000 Martindale, below the 25,000 seat threshold.</div>
+    </div>
+
+    <div class="supplier-card">
+      <div class="supplier-head">
+        <div>
+          <div class="supplier-name">
+            <a href="#">chicandfabric.com</a>
+          </div>
+          <div class="supplier-kind">textile_supplier · pattern fabric retailer — Casamance, Coordonné, Güell Lamadrid · Spain</div>
+        </div>
+        <div style="flex-shrink:0;"><a href="#" class="supplier-edit">edit</a></div>
+      </div>
+      <div class="supplier-meta">
+        <span class="meta-pill"><span class="meta-label">Account</span> incl. 25%</span>
+        <span class="meta-pill"><span class="meta-label">VAT</span> ?</span>
+        <span class="meta-pill"><span class="meta-label">Ships SE</span> ?</span>
+        <span class="meta-pill"><span class="meta-label">Offers</span> 2</span>
+      </div>
+      <div class="supplier-notes">Spanish retailer carrying multiple EU fabric houses — not a single mill. Default pattern/printed fabric source: cheaper and better wear rating than Cathy Nordström, EU so no Brexit exposure. VAT/reverse-charge terms not yet confirmed.</div>
+    </div>
+
+    <div class="supplier-card">
+      <div class="supplier-head">
+        <div>
+          <div class="supplier-name">
+            <a href="#">Elwotools</a>
+          </div>
+          <div class="supplier-kind">textile_supplier · pneumatic tools · Sweden</div>
+        </div>
+        <div style="flex-shrink:0;"><a href="#" class="supplier-edit">edit</a></div>
+      </div>
+      <div class="supplier-meta">
+        <span class="meta-pill"><span class="meta-label">Account</span> incl. 25%</span>
+        <span class="meta-pill ships-yes"><span class="meta-label">Ships SE</span> yes</span>
+        <span class="meta-pill"><span class="meta-label">Offers</span> 1</span>
+      </div>
+      <div class="supplier-notes">Confirmed in-stock source for the Senco SFT10XP-AT staple gun, Swedish retailer/warranty. See research/consumables.md.</div>
+    </div>
+
+    <div class="supplier-card">
+      <div class="supplier-head">
+        <div>
+          <div class="supplier-name">
+            <a href="#">Engelska Tapetmagasinet</a>
+          </div>
+          <div class="supplier-kind">textile_supplier · designer fabric and wallpaper · Sweden</div>
+        </div>
+        <div style="flex-shrink:0;"><a href="#" class="supplier-edit">edit</a></div>
+      </div>
+      <div class="supplier-meta">
+        <span class="meta-pill"><span class="meta-label">Account</span> incl. 25%</span>
+        <span class="meta-pill ships-yes"><span class="meta-label">Ships SE</span> yes</span>
+        <span class="meta-pill"><span class="meta-label">Offers</span> 1</span>
+      </div>
+      <div class="supplier-notes">Swedish retailer for William Morris &amp; Co and other heritage-print houses. 6–9 working day delivery on this order.</div>
+    </div>
+
+    <div class="supplier-card">
+      <div class="supplier-head">
+        <div>
+          <div class="supplier-name">
+            <a href="#">Green Living Interiör</a>
+          </div>
+          <div class="supplier-kind">textile_supplier · cotton felt, jute webbing · Sweden</div>
+        </div>
+        <div style="flex-shrink:0;"><a href="#" class="supplier-edit">edit</a></div>
+      </div>
+      <div class="supplier-meta">
+        <span class="meta-pill"><span class="meta-label">Account</span> incl. 25%</span>
+        <span class="meta-pill ships-yes"><span class="meta-label">Ships SE</span> yes</span>
+        <span class="meta-pill"><span class="meta-label">Offers</span> 2</span>
+      </div>
+      <div class="supplier-notes">Cheapest cotton felt found (149 kr/m). Site also lists a 60 cm width — verify before ordering.</div>
+    </div>
+
+    <div class="supplier-card">
+      <div class="supplier-head">
+        <div>
+          <div class="supplier-name">
+            <a href="#">Kvadrat direct</a>
+            <span class="house-badge">House account</span>
+          </div>
+          <div class="supplier-kind">textile_supplier</div>
+        </div>
+        <div style="flex-shrink:0;"><a href="#" class="supplier-edit">edit</a></div>
+      </div>
+      <div class="supplier-meta">
+        <span class="meta-pill"><span class="meta-label">Account</span> ?</span>
+        <span class="meta-pill"><span class="meta-label">Ships SE</span> ?</span>
+        <span class="meta-pill"><span class="meta-label">Offers</span> 1</span>
+      </div>
+    </div>
+
+    <div class="supplier-card">
+      <div class="supplier-head">
+        <div>
+          <div class="supplier-name">
+            <a href="#">Möbelbiten</a>
+          </div>
+          <div class="supplier-kind">textile_supplier · foam and interior materials · Sweden</div>
+        </div>
+        <div style="flex-shrink:0;"><a href="#" class="supplier-edit">edit</a></div>
+      </div>
+      <div class="supplier-meta">
+        <span class="meta-pill"><span class="meta-label">Account</span> incl. 25%</span>
+        <span class="meta-pill ships-yes"><span class="meta-label">Ships SE</span> yes</span>
+        <span class="meta-pill"><span class="meta-label">Offers</span> 7</span>
+      </div>
+      <div class="supplier-notes">Working default for kallskum, cotton felt, wool wadding, scrim, jute webbing. Swedish-made, no login needed, ships domestically. Not the cheapest on every line (Östersjökompaniet and Fikstura both quoted lower) but the only one confirmed to actually deliver to Karlskrona without cross-border friction.</div>
+    </div>
+
+    <div class="supplier-card">
+      <div class="supplier-head">
+        <div>
+          <div class="supplier-name">
+            <a href="#">Mondial Tissus</a>
+          </div>
+          <div class="supplier-kind">textile_supplier · wool wadding · Sweden</div>
+        </div>
+        <div style="flex-shrink:0;"><a href="#" class="supplier-edit">edit</a></div>
+      </div>
+      <div class="supplier-meta">
+        <span class="meta-pill"><span class="meta-label">Account</span> incl. 25%</span>
+        <span class="meta-pill ships-yes"><span class="meta-label">Ships SE</span> yes</span>
+        <span class="meta-pill"><span class="meta-label">Offers</span> 1</span>
+      </div>
+      <div class="supplier-notes">150 cm wide, 120 g/m² — light, may need double layer.</div>
+    </div>
+
+    <div class="supplier-card">
+      <div class="supplier-head">
+        <div>
+          <div class="supplier-name">
+            <a href="#">Museiservice</a>
+          </div>
+          <div class="supplier-kind">textile_supplier · calico / lakansväv · Sweden</div>
+        </div>
+        <div style="flex-shrink:0;"><a href="#" class="supplier-edit">edit</a></div>
+      </div>
+      <div class="supplier-meta">
+        <span class="meta-pill"><span class="meta-label">Account</span> incl. 25%</span>
+        <span class="meta-pill ships-yes"><span class="meta-label">Ships SE</span> yes</span>
+        <span class="meta-pill"><span class="meta-label">Offers</span> 1</span>
+      </div>
+      <div class="supplier-notes">30 m roll = 2,400 kr (80 kr/m equiv). Bulk only.</div>
+    </div>
+
+    <div class="supplier-card">
+      <div class="supplier-head">
+        <div>
+          <div class="supplier-name">
+            <a href="#">Nevotex</a>
+          </div>
+          <div class="supplier-kind">textile_supplier · guns, staples, nails, foam, webbing, adhesive, tools · Sweden</div>
+        </div>
+        <div style="flex-shrink:0;"><a href="#" class="supplier-edit">edit</a></div>
+      </div>
+      <div class="supplier-meta">
+        <span class="meta-pill"><span class="meta-label">Account</span> incl. 25%</span>
+        <span class="meta-pill ships-yes"><span class="meta-label">Ships SE</span> yes</span>
+        <span class="meta-pill"><span class="meta-label">Offers</span> 1</span>
+      </div>
+      <div class="supplier-notes">Nässjö. One-invoice, one-delivery primary supplier candidate — already supplies DUX and other Swedish furniture makers. Trade login pending (data/tasks.json). See research/consumables.md.</div>
+    </div>
+
+    <div class="supplier-card">
+      <div class="supplier-head">
+        <div>
+          <div class="supplier-name">
+            <a href="#">Nordisk Textil</a>
+          </div>
+          <div class="supplier-kind">textile_supplier · jute webbing · Sweden</div>
+        </div>
+        <div style="flex-shrink:0;"><a href="#" class="supplier-edit">edit</a></div>
+      </div>
+      <div class="supplier-meta">
+        <span class="meta-pill"><span class="meta-label">Account</span> incl. 25%</span>
+        <span class="meta-pill ships-yes"><span class="meta-label">Ships SE</span> yes</span>
+        <span class="meta-pill"><span class="meta-label">Offers</span> 1</span>
+      </div>
+      <div class="supplier-notes">50 mm sadelgjord, 25 m roll.</div>
+    </div>
+
+    <div class="supplier-card">
+      <div class="supplier-head">
+        <div>
+          <div class="supplier-name">
+            <a href="#">Originellt.se</a>
+          </div>
+          <div class="supplier-kind">textile_supplier · cotton felt (bomullsvadd) · Sweden</div>
+        </div>
+        <div style="flex-shrink:0;"><a href="#" class="supplier-edit">edit</a></div>
+      </div>
+      <div class="supplier-meta">
+        <span class="meta-pill"><span class="meta-label">Account</span> incl. 25%</span>
+        <span class="meta-pill ships-yes"><span class="meta-label">Ships SE</span> yes</span>
+        <span class="meta-pill"><span class="meta-label">Offers</span> 1</span>
+      </div>
+      <div class="supplier-notes">100% bomull 450 g/m², 100 cm. research/material-suppliers.md §4.</div>
+    </div>
+
+    <div class="supplier-card">
+      <div class="supplier-head">
+        <div>
+          <div class="supplier-name">
+            <a href="#">Östersjökompaniet</a>
+          </div>
+          <div class="supplier-kind">textile_supplier · foam · Sweden</div>
+        </div>
+        <div style="flex-shrink:0;"><a href="#" class="supplier-edit">edit</a></div>
+      </div>
+      <div class="supplier-meta">
+        <span class="meta-pill"><span class="meta-label">Account</span> incl. 25%</span>
+        <span class="meta-pill ships-yes"><span class="meta-label">Ships SE</span> yes</span>
+        <span class="meta-pill"><span class="meta-label">Offers</span> 2</span>
+      </div>
+      <div class="supplier-notes">~12% cheaper than Möbelbiten on kallskum 38 kg/m³, same sheet size, in-stock 1–2 days. Page suggests a trade account may be required ("kan endast köpas med en säljplan") — pending confirmation, see data/tasks.json t-002.</div>
+    </div>
+
+    <div class="supplier-card">
+      <div class="supplier-head">
+        <div>
+          <div class="supplier-name">
+            <a href="#">PTV.se</a>
+          </div>
+          <div class="supplier-kind">textile_supplier · Gabriel fabrics · Sweden</div>
+        </div>
+        <div style="flex-shrink:0;"><a href="#" class="supplier-edit">edit</a></div>
+      </div>
+      <div class="supplier-meta">
+        <span class="meta-pill"><span class="meta-label">Account</span> incl. 25%</span>
+        <span class="meta-pill ships-yes"><span class="meta-label">Ships SE</span> yes</span>
+        <span class="meta-pill"><span class="meta-label">Offers</span> 1</span>
+      </div>
+      <div class="supplier-notes">Gabriel Savak Plain 2,660 kr/m inc VAT, min 1 m — verified live.</div>
+    </div>
+
+    <div class="supplier-card">
+      <div class="supplier-head">
+        <div>
+          <div class="supplier-name">
+            <a href="#">Schaumstoffonline.de</a>
+          </div>
+          <div class="supplier-kind">textile_supplier · cold foam cut to size · Germany</div>
+        </div>
+        <div style="flex-shrink:0;"><a href="#" class="supplier-edit">edit</a></div>
+      </div>
+      <div class="supplier-meta">
+        <span class="meta-pill"><span class="meta-label">Account</span> ?</span>
+        <span class="meta-pill"><span class="meta-label">Ships SE</span> ?</span>
+        <span class="meta-pill"><span class="meta-label">Offers</span> 1</span>
+      </div>
+      <div class="supplier-notes">RG40 Kaltschaum €7.38/m²/cm. ~87% cheaper per metre than Möbelbiten before freight.</div>
+    </div>
+
+    <div class="supplier-card">
+      <div class="supplier-head">
+        <div>
+          <div class="supplier-name">
+            <a href="#">Skandilock AB</a>
+          </div>
+          <div class="supplier-kind">textile_supplier · sheepskin · Sweden</div>
+        </div>
+        <div style="flex-shrink:0;"><a href="#" class="supplier-edit">edit</a></div>
+      </div>
+      <div class="supplier-meta">
+        <span class="meta-pill"><span class="meta-label">Account</span> incl. 25%</span>
+        <span class="meta-pill ships-yes"><span class="meta-label">Ships SE</span> yes</span>
+        <span class="meta-pill"><span class="meta-label">Offers</span> 1</span>
+      </div>
+      <div class="supplier-notes">Svenljunga. Custom seat cushions to order, supplies DUX and NORR11. Not yet quoted — see materials.json m-008.</div>
+    </div>
+
+  </div>
+
+  <!-- FABRIC HOUSES -->
+  <div class="houses-section">
+    <h2 class="houses-title">Fabric houses</h2>
+    <p class="houses-desc">Brands and mills. Prices live on the retailer offers, not here.</p>
+    <div class="houses-list">
+      <div class="house-row">
+        <span class="house-name">Casamance</span>
+        <span class="house-country">France</span>
+        <span class="house-fabrics">1 fabric</span>
+        <span class="house-notes"></span>
+        <div class="house-links"><a href="#">site</a><a href="#">edit</a></div>
+      </div>
+      <div class="house-row">
+        <span class="house-name">Cathy Nordström</span>
+        <span class="house-country">Sweden</span>
+        <span class="house-fabrics">1 fabric</span>
+        <span class="house-notes">Sells direct — also a supplier row (s-fabric-cathynordstrom). 20,000 Martindale on the linens: light domestic.</span>
+        <div class="house-links"><a href="#">site</a><a href="#">edit</a></div>
+      </div>
+      <div class="house-row">
+        <span class="house-name">Coordonné</span>
+        <span class="house-country">Spain</span>
+        <span class="house-fabrics">1 fabric</span>
+        <span class="house-notes"></span>
+        <div class="house-links"><a href="#">site</a><a href="#">edit</a></div>
+      </div>
+      <div class="house-row">
+        <span class="house-name">Gabriel</span>
+        <span class="house-country">Denmark</span>
+        <span class="house-fabrics">1 fabric</span>
+        <span class="house-notes"></span>
+        <div class="house-links"><a href="#">site</a><a href="#">edit</a></div>
+      </div>
+      <div class="house-row">
+        <span class="house-name">GP &amp; J Baker</span>
+        <span class="house-country">UK</span>
+        <span class="house-fabrics">0 fabrics</span>
+        <span class="house-notes"></span>
+        <div class="house-links"><a href="#">site</a><a href="#">edit</a></div>
+      </div>
+      <div class="house-row">
+        <span class="house-name">Güell Lamadrid</span>
+        <span class="house-country">Spain</span>
+        <span class="house-fabrics">0 fabrics</span>
+        <span class="house-notes"></span>
+        <div class="house-links"><a href="#">site</a><a href="#">edit</a></div>
+      </div>
+      <div class="house-row">
+        <span class="house-name">Kvadrat</span>
+        <span class="house-country">Denmark</span>
+        <span class="house-fabrics">0 fabrics</span>
+        <span class="house-notes"></span>
+        <div class="house-links"><a href="#">site</a><a href="#">edit</a></div>
+      </div>
+      <div class="house-row">
+        <span class="house-name">Manuel Canovas</span>
+        <span class="house-country">France</span>
+        <span class="house-fabrics">1 fabric</span>
+        <span class="house-notes">Distributed via Colefax &amp; Fowler (trade@colefax.com). Retailers sometimes file it under Colefax — check the vendor tag.</span>
+        <div class="house-links"><a href="#">site</a><a href="#">edit</a></div>
+      </div>
+      <div class="house-row">
+        <span class="house-name">William Morris &amp; Co</span>
+        <span class="house-country">UK</span>
+        <span class="house-fabrics">1 fabric</span>
+        <span class="house-notes"></span>
+        <div class="house-links"><a href="#">site</a><a href="#">edit</a></div>
+      </div>
+    </div>
+  </div>
+
+  <p class="footer-note">Live data from Supabase — edits are shared instantly with everyone signed in. Rules (allowances, tiers, thresholds) live in recipes.json and costing.js, versioned in git.</p>
+
+  </div>
+  </main>
+</div>
+<script>
+(function () {
+  var sidebar = document.getElementById('sidebar');
+  var btn = document.getElementById('sidebar-collapse-btn');
+  if (!sidebar || !btn) return;
+  function apply(collapsed) {
+    sidebar.classList.toggle('is-collapsed', collapsed);
+    btn.textContent = collapsed ? '›' : '‹';
+    btn.setAttribute('title', collapsed ? 'Expand sidebar' : 'Collapse sidebar');
+  }
+  var saved = null;
+  try { saved = localStorage.getItem('vs-sidebar-collapsed'); } catch (e) {}
+  apply(saved === '1');
+  btn.addEventListener('click', function () {
+    var next = !sidebar.classList.contains('is-collapsed');
+    apply(next);
+    try { localStorage.setItem('vs-sidebar-collapsed', next ? '1' : '0'); } catch (e) {}
+  });
+})();
+</script>
+
+</body>
+</html>
