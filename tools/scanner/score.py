@@ -80,10 +80,6 @@ def bad_listing_score(lot, model_prices):
         if lot["current_bid"] < lot["estimate_low"] * 0.5:
             score += 2  # starting well below its own estimate
 
-    dodsbo_terms = ["dödsbo", "flyttar", "måste bort"]
-    if any(term in title_lower for term in dodsbo_terms):
-        score += 1  # motivated seller, likely no research done
-
     return round(score, 1)
 
 

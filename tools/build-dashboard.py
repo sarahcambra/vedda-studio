@@ -179,10 +179,10 @@ def main():
         return "rate-stop"
 
     # ---- render ----------------------------------------------------------
-    def stat_block(label, value, sub="", note_cls=""):
+    def stat_block(label, value, sub="", note_cls="", value_cls=""):
         return (
-            f'<div class="stat"><span class="kicker">{esc(label)}</span>'
-            f'<div class="stat-value">{value}</div>'
+            f'<div class="stat"><span class="kicker">{label}</span>'
+            f'<div class="stat-value {value_cls}">{value}</div>'
             f'<div class="text-muted stat-sub {note_cls}">{sub}</div></div>'
         )
 
@@ -337,27 +337,66 @@ def main():
 
     def scan_ends_badge(value):
         """(label, urgency_class) for the badge overlaid on the lot image.
-        Hours-remaining phrasing close in, date further out — matches the
-        mockup's 'ENDS 2H' / 'ENDS 1D' style. urgency_class bands: urgent
-        (<6h, reads as --color-critical), soon (6-24h, --color-caution),
-        '' beyond that (neutral)."""
+        Matches the mockup's 'Ends 2h' / 'Ends 1d' style. urgency_class bands:
+        urgent (<10h, cognac), '' beyond that (dark charcoal), ended (grey)."""
         dt = parse_scan_ends_at(value)
         if not dt:
-            return "—", ""
+            return "", ""
         if dt.tzinfo is not None:
-            dt = dt.astimezone().replace(tzinfo=None)  # match fromtimestamp()'s naive-local convention below
+            dt = dt.astimezone().replace(tzinfo=None)
         hours = (dt - datetime.datetime.now()).total_seconds() / 3600
         if hours < 0:
-            return "ended", ""
-        if hours < 24:
-            label = f"{max(1, round(hours))}H"
-        else:
-            days = round(hours / 24)
-            label = f"{days}D" if days < 7 else dt.strftime("%d %b")
-        urgency = "urgent" if hours < 6 else "soon" if hours < 24 else ""
-        return label, urgency
+            return "Ended", "ended"
+        if hours < 10:
+            if hours < 1:
+                mins = max(1, int(hours * 60))
+                return f"Ends {mins}m", "urgent"
+            return f"Ends {max(1, round(hours))}h", "urgent"
+        days = round(hours / 24)
+        return f"Ends {days}d", ""
+
+    def hours_until_ends(value):
+        """None if no end date (untimed listing, e.g. Haraldssons) or unparsable."""
+        dt = parse_scan_ends_at(value)
+        if not dt:
+            return None
+        if dt.tzinfo is not None:
+            dt = dt.astimezone().replace(tzinfo=None)
+        return (dt - datetime.datetime.now()).total_seconds() / 3600
+
+    def is_opportunity(lot):
+        """'Underpriced' is defined directly: current bid at half the low
+        estimate or less. Sarah's call (2026-09-21) — simpler and more
+        literal than the composite bad-listing score. The flag only earns
+        its 'worth reading first' urgency once there's actually a deadline
+        forcing a decision — the final 48h before the auction ends (every
+        newly-imported lot was showing it from day one otherwise, which made
+        it meaningless noise). Listings with no end date at all (Haraldssons
+        has none — fetch_haraldssons.py always sets ends_at=None) have no
+        such window, so they flag from the moment they're imported instead."""
+        bid = lot.get("current_bid")
+        est_low = lot.get("estimate_low")
+        if bid is None or not est_low:
+            return False
+        if bid > est_low * 0.5:
+            return False
+        hours_left = hours_until_ends(lot.get("ends_at"))
+        return hours_left is None or hours_left <= 48
 
     SCAN_SRC_LABEL = {"auctionet": "Auctionet", "tradera": "Tradera", "bukowskis": "Bukowskis", "haraldssons": "Haraldssons", "siko": "Sikö"}
+    MODEL_TERMS_LOWER = {t.lower() for t in kw.get("models", [])}
+    DESIGNER_TERMS_LOWER = {t.lower() for t in kw.get("designers", [])}
+    MODEL_DESIGNER_LOWER = {k.lower(): v for k, v in kw.get("model_designers", {}).items() if k != "_comment" and v}
+    # BUY/MAYBE/NO sourcing signal per model, from model_database. PRESERVE and
+    # PASS both fold into "NO" for the badge — a fast glance shouldn't need to
+    # distinguish "don't touch, collector piece" from "don't touch, too
+    # expensive"; the nuance lives in model_database.notes if she needs it.
+    MODEL_STATUS_LOWER = {}
+    for _e in kw.get("model_database", []):
+        _m = (_e.get("model") or "").lower()
+        _status = _e.get("vedda_status")
+        if _m and _status:
+            MODEL_STATUS_LOWER[_m] = "BUY" if _status == "BUY" else "MAYBE" if _status == "MAYBE" else "NO"
 
     def scan_ends_sort_key(value):
         if not value:
@@ -373,79 +412,163 @@ def main():
 
     def scan_card(lot):
         lot_key = esc(f"{lot['source']}-{lot['lot_id']}")
-        is_flagged = (lot.get("bad_listing_score") or 0) >= 3
-        flag = '<span class="scanflag" title="Bad-listing score {0}">🚩</span>'.format(lot.get("bad_listing_score") or 0) if is_flagged else ""
+        is_flagged = is_opportunity(lot)
         img = (
             f'<img src="{esc(lot["image_url"])}" alt="" loading="lazy">'
             if lot.get("image_url")
-            else ''
+            else f'<div class="scanimg-placeholder"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#C9C0A9" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"></rect><circle cx="9" cy="10" r="1.5"></circle><path d="M21 16l-5.5-5.5a2 2 0 00-2.8 0L4 19"></path></svg><span>{esc(lot.get("title") or "No image")}</span></div>'
         )
         src = lot.get("source") or ""
         location = lot.get("location")
-        location_badge = f'<span class="tag tag-accent-2">{esc(location)}</span>' if location else ""
-        current_bid = lot.get("current_bid")
-        price_badge = (
-            f'<span class="scanprice">{money(current_bid)}</span>'
-            if current_bid is not None
-            else '<span class="scanprice scanprice-empty">price tbc</span>'
-        )
-        est_low, est_high = lot.get("estimate_low"), lot.get("estimate_high")
-        if est_low is not None or est_high is not None:
-            est_label = f"{money(est_low) if est_low is not None else '?'}–{money(est_high) if est_high is not None else '?'}"
-            within = ""
-            extra = ""
-            if current_bid is not None and est_low is not None and est_high is not None and est_high > est_low:
-                pct = max(0.0, min(1.0, (current_bid - est_low) / (est_high - est_low)))
-                within = (
-                    '<div class="estimate-range"><div class="estimate-track">'
-                    f'<div class="estimate-fill" style="width:{pct * 100:.1f}%"></div>'
-                    '</div></div>'
-                )
-                if current_bid > est_high:
-                    over_pct = (current_bid - est_high) / est_high * 100
-                    extra = f'<div class="scanestimate-note note-critical">{over_pct:.0f}% over high estimate</div>'
-            elif current_bid is None and (est_low is not None or est_high is not None):
-                extra = '<div class="scanestimate-note text-muted" style="font-style:italic;">Opening only</div>'
-            estimate_html = (
-                '<div class="scanrow"><span class="scanrow-label">Current bid</span>'
-                '<span class="scanrow-label scanrow-label-right">Estimate</span></div>'
-                f'<div class="scanrow"><span class="scanrow-value">{money(current_bid)}</span>'
-                f'<span class="scanrow-value scanrow-value-right">{est_label}</span></div>'
-                f'{within}{extra}'
+        location_badge = f'<span class="scandot">·</span><span class="scanlocation"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#726752" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11a7 7 0 0114 0c0 4.8-7 11-7 11z"></path><circle cx="12" cy="10" r="2.5"></circle></svg>{esc(location)}</span>' if location else ""
+
+        # Ends badge
+        ends_label, ends_class = scan_ends_badge(lot.get("ends_at"))
+        ends_badge = ""
+        if ends_label:
+            ends_badge = (
+                f'<span class="scanends-badge{" " + ends_class if ends_class else ""}" '
+                f'title="ends {esc(format_scan_ends_at(lot.get("ends_at")))}">'
+                f'<span class="scanends-dot"></span>'
+                f'{esc(ends_label)}</span>'
             )
+
+        # Tags — split the matched search terms into three kinds so a model
+        # name and a designer surname never get buried inside the same
+        # generic "teak chair" type tag. Sarah's call (2026-09-21): models
+        # are the gold find (rare, name-searched collectible pieces) and
+        # deserve their own badge; designer matches get a separate badge on
+        # the side, not folded into the type tag either.
+        tags_html = ""
+        model_badge_html = ""
+        designer_badge_html = ""
+        matched = lot.get("matched_keyword") or ""
+        terms = [t.strip() for t in matched.split(",") if t.strip()]
+        type_terms = [t for t in terms if t.lower() not in MODEL_TERMS_LOWER and t.lower() not in DESIGNER_TERMS_LOWER]
+        model_terms = [t for t in terms if t.lower() in MODEL_TERMS_LOWER]
+        designer_terms = [t for t in terms if t.lower() in DESIGNER_TERMS_LOWER]
+        if type_terms:
+            tags_html = "".join(f'<span class="scantag">{esc(t)}</span>' for t in type_terms)
+        if model_terms:
+            status = MODEL_STATUS_LOWER.get(model_terms[0].lower())
+            status_cls = f" scanbadge-model-{status.lower()}" if status else ""
+            status_title = f' title="Sourcing status: {status}"' if status else ""
+            model_badge_html = (
+                f'<span class="scanbadge scanbadge-model{status_cls}"{status_title}>'
+                '<svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2l2.9 6.3 6.9.9-5 4.9 1.2 6.9-6-3.3-6 3.3 1.2-6.9-5-4.9 6.9-.9z"></path></svg>'
+                f'{esc(model_terms[0])}</span>'
+            )
+        designer_label = MODEL_DESIGNER_LOWER.get(model_terms[0].lower()) if model_terms else None
+        if not designer_label and designer_terms:
+            designer_label = designer_terms[0]
+        if designer_label:
+            designer_badge_html = f'<span class="scanbadge scanbadge-designer">{esc(designer_label)}</span>'
+
+        # Banner for opportunity items — underpriced signal, not a risk warning
+        banner_html = ""
+        if is_flagged:
+            banner_html = (
+                f'<div class="scanbanner scanbanner-opportunity">'
+                f'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.9 6.3 6.9.9-5 4.9 1.2 6.9-6-3.3-6 3.3 1.2-6.9-5-4.9 6.9-.9z"></path></svg>'
+                f'Likely underpriced — worth reading first'
+                f'</div>'
+            )
+
+        # Bottom section: bid labels, values, bar, status, actions
+        current_bid = lot.get("current_bid")
+        est_low, est_high = lot.get("estimate_low"), lot.get("estimate_high")
+
+        if current_bid is not None:
+            bid_label = "Current bid"
+            bid_value = money(current_bid)
         else:
-            estimate_html = ""
-        ends_label, ends_urgency = scan_ends_badge(lot.get("ends_at"))
-        ends_badge = (
-            f'<span class="scanends-badge{(" " + ends_urgency) if ends_urgency else ""}" '
-            f'title="ends {esc(format_scan_ends_at(lot.get("ends_at")))}">'
-            f'⏱ ENDS {esc(ends_label)}</span>'
+            bid_label = "No bids yet"
+            bid_value = "Opening only"
+
+        if est_low is not None and est_high is not None:
+            est_text = f"{money(est_low)}–{money(est_high)}"
+        elif est_low is not None:
+            est_text = money(est_low)
+        elif est_high is not None:
+            est_text = f"Up to {money(est_high)}"
+        else:
+            est_text = "None given"
+
+        bar_html = ""
+        status_html = ""
+        if current_bid is not None and est_low is not None and est_high is not None and est_high > est_low:
+            pct = max(0.0, min(1.0, (current_bid - est_low) / (est_high - est_low)))
+            over = current_bid > est_high
+            fill_color = "#C1573B" if over else "#4B7A5D"
+            bar_html = (
+                f'<div class="scanbar">'
+                f'<div class="scanbar-fill" style="width:{pct * 100:.1f}%;background:{fill_color};"></div>'
+                f'</div>'
+            )
+            if over:
+                over_pct = (current_bid - est_high) / est_high * 100
+                status_html = f'<div class="scanstatus" style="color:#C1573B;">{over_pct:.0f}% over high estimate</div>'
+            else:
+                status_html = f'<div class="scanstatus" style="color:#4B7A5D;">Within estimate</div>'
+        elif current_bid is not None and est_low is not None:
+            # Only a single estimate value — show simple bar against that value
+            pct = max(0.0, min(1.0, current_bid / max(est_low, 1)))
+            over = current_bid > est_low
+            fill_color = "#C1573B" if over else "#4B7A5D"
+            bar_html = (
+                f'<div class="scanbar">'
+                f'<div class="scanbar-fill" style="width:{pct * 100:.1f}%;background:{fill_color};"></div>'
+                f'</div>'
+            )
+            if over:
+                status_html = f'<div class="scanstatus" style="color:#C1573B;">Over estimate</div>'
+            else:
+                status_html = f'<div class="scanstatus" style="color:#4B7A5D;">Under estimate</div>'
+
+        actions_html = (
+            f'<a class="scanlink" href="{esc(lot.get("url") or "#")}" target="_blank">'
+            f'View auction'
+            f'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3h7v7"></path><path d="M10 14L21 3"></path><path d="M21 14v6a1 1 0 01-1 1H4a1 1 0 01-1-1V4a1 1 0 011-1h6"></path></svg>'
+            f'</a>'
+            f'<div class="scanbtns">'
+            f'<button class="scanicon scanbtn scanbtn-discard" data-action="discard" type="button" aria-label="Discard">'
+            f'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"></path></svg>'
+            f'</button>'
+            f'<button class="scanicon scanbtn scanbtn-love" data-action="love" type="button" aria-label="Love">'
+            f'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.5s-7.5-4.6-10-9.3C.5 7.8 2.3 4.5 5.7 4.5c2 0 3.4 1 6.3 4 2.9-3 4.3-4 6.3-4 3.4 0 5.2 3.3 3.7 6.7-2.5 4.7-10 9.3-10 9.3z"></path></svg>'
+            f'</button>'
+            f'<button class="scanbought scanbtn scanbtn-bought" data-action="bought" type="button">'
+            f'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg>'
+            f'Bought'
+            f'</button>'
+            f'</div>'
         )
+
         return (
             f'<div class="scancard" data-lot-key="{lot_key}" data-source="{esc(src)}" '
             f'data-flagged="{"1" if is_flagged else "0"}" '
             f'data-ends="{esc(scan_ends_sort_key(lot.get("ends_at")))}" '
             f'data-bid="{current_bid if current_bid is not None else ""}" '
             f'data-first-seen="{esc(str(lot.get("first_seen") or ""))}">'
-            f'<div class="fig ar-square scanimgwrap">{img}{price_badge}{ends_badge}</div>'
-            '<div class="scanbody">'
-            f'<div class="scantop"><span class="tag tag-outline">{esc(SCAN_SRC_LABEL.get(src, src))}</span>{flag}'
-            f'{location_badge}</div>'
+            f'<div class="scanimgwrap">{img}{ends_badge}</div>'
+            f'<div class="scanbody">'
+            f'<div class="scantop"><span class="scansource">{esc(SCAN_SRC_LABEL.get(src, src))}</span>{location_badge}'
+            f'<span class="scantop-side">{model_badge_html}{designer_badge_html}</span></div>'
             f'<a class="scantitle" href="{esc(lot.get("url") or "#")}" target="_blank">{esc(lot.get("title") or "")}</a>'
-            f'<div class="text-muted scanmeta">matched "{esc(lot.get("matched_keyword") or "")}"</div>'
-            f'{estimate_html}'
-            '<div class="scanactions">'
-            f'<a class="btn-link" href="{esc(lot.get("url") or "#")}" target="_blank">View auction</a>'
-            f'<button class="btn btn-secondary scanbtn scanbtn-love" data-action="love" type="button">♡ Love</button>'
-            f'<button class="btn btn-secondary scanbtn scanbtn-bought" data-action="bought" type="button">$ Bought</button>'
-            f'<button class="btn btn-secondary scanbtn scanbtn-discard" data-action="discard" type="button">✕ Discard</button>'
-            '</div>'
-            '</div></div>'
+            f'<div class="scantags">{tags_html}</div>'
+            f'{banner_html}'
+            f'<div class="scan-bottom">'
+            f'<div class="scanbid-labels"><span>{bid_label}</span><span>Estimate</span></div>'
+            f'<div class="scanbid-values"><span class="scanbid-bid">{bid_value}</span><span class="scanbid-est">{est_text}</span></div>'
+            f'{bar_html}{status_html}'
+            f'<div class="scanactions">{actions_html}</div>'
+            f'</div>'
+            f'</div></div>'
         )
 
     scan_cards_html = "".join(scan_card(l) for l in scan_lots)
     scan_count = len(scan_lots)
-    scan_flagged_count = sum(1 for l in scan_lots if (l.get("bad_listing_score") or 0) >= 3)
+    scan_flagged_count = sum(1 for l in scan_lots if is_opportunity(l))
 
     warn = (
         '<div class="warn"><strong>Sample data.</strong> '
@@ -456,11 +579,21 @@ def main():
         else ""
     )
 
+    def sourcing_stat(label, value, is_flagged=False):
+        dot = '<span class="sourcing-stat-dot"></span>' if is_flagged else ''
+        value_color = ' style="color:#C1573B;"' if is_flagged else ''
+        return (
+            f'<div class="sourcing-stat">'
+            f'<div class="sourcing-stat-label">{dot}{label}</div>'
+            f'<div class="sourcing-stat-value"{value_color}>{value}</div>'
+            f'</div>'
+        )
+
     sourcing_stats_html = "".join([
-        stat_block("Scanned", str(scan_total), "lots archived"),
-        stat_block("To triage", '<span id="stat-triage">' + str(scan_count) + '</span>', "not yet decided"),
-        stat_block("Flagged", str(scan_flagged_count), "bad-listing score ≥ 3"),
-        stat_block("Loved", '<span id="stat-loved">0</span>', "saved for later"),
+        sourcing_stat("Scanned", str(scan_total)),
+        sourcing_stat("To triage", f'<span id="stat-triage">{scan_count}</span>'),
+        sourcing_stat("Opportunities", str(scan_flagged_count), is_flagged=True),
+        sourcing_stat("Loved", f'<span id="stat-loved">0</span>'),
     ])
 
     doc = render(
@@ -509,6 +642,7 @@ TEMPLATE = r"""<!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Vedda Studio — business dashboard</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,500;0,600;1,400&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
 <link rel="stylesheet" href="site/styles.css">
 <link rel="stylesheet" href="dashboard.css">
 </head>
@@ -520,11 +654,36 @@ TEMPLATE = r"""<!doctype html>
       <button class="sidebar-collapse" id="sidebar-collapse-btn" type="button" title="Collapse sidebar" aria-label="Collapse sidebar">‹</button>
     </div>
     <nav class="sidebar-nav" role="tablist">
-      <button class="sidebar-item is-active" role="tab" aria-selected="true" data-tab="sourcing" type="button">Sourcing</button>
-      <button class="sidebar-item" role="tab" aria-selected="false" data-tab="inventory" type="button">Inventory</button>
-      <button class="sidebar-item" role="tab" aria-selected="false" data-tab="restorations" type="button">Restorations</button>
-      <button class="sidebar-item" role="tab" aria-selected="false" data-tab="suppliers" type="button">Suppliers &amp; Materials</button>
-      <button class="sidebar-item" role="tab" aria-selected="false" data-tab="business" type="button">Business</button>
+      <button class="sidebar-item is-active" role="tab" aria-selected="true" data-tab="sourcing" type="button">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><path d="M21 21l-4.3-4.3"></path></svg>
+        Sourcing
+      </button>
+      <button class="sidebar-item" role="tab" aria-selected="false" data-tab="inventory" type="button">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8l-9-5-9 5 9 5 9-5z"></path><path d="M3 8v8l9 5 9-5V8"></path><path d="M12 13v8"></path></svg>
+        Inventory
+      </button>
+      <button class="sidebar-item" role="tab" aria-selected="false" data-tab="restorations" type="button">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 11-5.4 5.4L3 18v3h3l6.3-6.3a4 4 0 015.4-5.4z"></path></svg>
+        Restorations
+      </button>
+      <button class="sidebar-item" role="tab" aria-selected="false" data-tab="business" type="button">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l3 3v15H6z"></path><path d="M9 8h6M9 12h6M9 16h4"></path></svg>
+        Business
+      </button>
+      <div class="sidebar-divider"></div>
+      <span class="sidebar-label">Catalogue</span>
+      <a class="sidebar-item" href="docs/materials.html">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect></svg>
+        Materials
+      </a>
+      <a class="sidebar-item" href="docs/suppliers.html">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="1"></rect><path d="M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2"></path></svg>
+        Suppliers
+      </a>
+      <a class="sidebar-item" href="docs/costings.html">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"></path></svg>
+        Costings
+      </a>
     </nav>
     <div class="sidebar-foot text-muted" id="sidebar-foot" data-last-scan="{scan_last_seen_utc}" data-scan-cron-hour-utc="6">
       generated {generated}
@@ -536,18 +695,19 @@ TEMPLATE = r"""<!doctype html>
 
   <div class="tabpanel" id="tab-sourcing" data-tab-panel="sourcing">
     <section class="section-block">
-      <div class="statsrow statsrow-4">
-        {sourcing_stats}
+      <div class="sourcing-head">
+        <div>
+          <h1 class="sourcing-title">Today's pulls</h1>
+          <div class="sourcing-sources">Auctionet · Tradera · Bukowskis · Haraldssons</div>
+        </div>
+        <div class="sourcing-stats">
+          {sourcing_stats}
+        </div>
       </div>
-      <p class="text-muted">
-        Auctionet, Tradera, Bukowskis, Haraldssons — run once a day with <code>python3 tools/scanner/run.py</code>, then rebuild the dashboard to see fresh results here.
-        <strong>{scan_total} lots archived</strong>, {scan_count} shown here, ranked by bad-listing score (🚩 = ≥3, worth reading first). New and loved shown; discarded is out of the way.
-        Shared with everyone who opens this page.
-        <a href="#" id="scan-show-discarded" class="btn-link scan-discarded-link"><span id="scan-link-label">Show discarded</span> (<span id="scan-discarded-count">0</span>)</a>
-      </p>
       <div class="scantoolbar">
         <div class="tabnav" id="scan-state-tabs" role="tablist"></div>
-        <label class="scansort">Sort
+        <label class="scansort">
+          <span class="scansort-label">Sort</span>
           <select id="scan-sort">
             <option value="ending">Ending soonest</option>
             <option value="bid">Highest bid</option>
@@ -633,21 +793,6 @@ TEMPLATE = r"""<!doctype html>
     </section>
   </div>
 
-  <div class="tabpanel" id="tab-suppliers" data-tab-panel="suppliers" hidden>
-    <section class="section-block">
-      <h4>Materials, suppliers &amp; piece costing</h4>
-      <p class="text-muted">
-        These moved to the live app — shared with Amanda, editable, prices behind login.
-        Materials with every supplier offer side by side, the fabrics board, supplier accounts, and the costing builder
-        (recipes per item type, quantities and VAT computed, markup / floor / fabric-share / kr-hour checks).
-      </p>
-      <p>
-        <a class="btn btn-primary" href="docs/app/index.html">Open the app (local)</a>
-        <a class="btn btn-secondary" href="https://sarahcambra.github.io/vedda-studio/app/" target="_blank" rel="noopener">Open online</a>
-      </p>
-    </section>
-  </div>
-
   <footer>
     Generated by <code>tools/build-dashboard.py</code> from <code>data/*.json</code>.
     Edit the data, not this file.
@@ -658,7 +803,7 @@ TEMPLATE = r"""<!doctype html>
 <script>
 // tabs: click to switch, remember the last one open
 (function () {
-  var btns = document.querySelectorAll('.sidebar-item');
+  var btns = document.querySelectorAll('.sidebar-item[data-tab]');
   var panels = document.querySelectorAll('[data-tab-panel]');
   function show(name) {
     if (!document.getElementById('tab-' + name)) return;
@@ -723,22 +868,18 @@ TEMPLATE = r"""<!doctype html>
 })();
 
 // scan results: love/discard/bought state shared via Supabase — you and
-// Amanda see the same clicks. Default view: new + loved. Discarded is out
-// of the way, not a toggle — just a small link to check the discard pile.
+// Amanda see the same clicks.
 (function () {
   var cards = Array.prototype.slice.call(document.querySelectorAll('.scancard'));
   if (!cards.length) return;
-  var showDiscardedLink = document.getElementById('scan-show-discarded');
-  var discardedCountEl = document.getElementById('scan-discarded-count');
   var pagerEl = document.getElementById('scan-pager');
-  var discardedVisible = false;
   var sourceFilter = 'all';
   var stateFilter = 'all';
   var sortMode = 'ending';
   var PAGE_SIZE = 36;
   var currentPage = 1;
   var SOURCE_LABEL = { auctionet: 'Auctionet', tradera: 'Tradera', bukowskis: 'Bukowskis', haraldssons: 'Haraldssons' };
-  var STATE_TAB_LABEL = { all: 'All', new: 'New', flagged: 'Flagged', loved: 'Loved', dealt_with: 'Dealt with' };
+  var STATE_TAB_LABEL = { all: 'All', new: 'New', loved: 'Loved', discarded: 'Discarded', dealt_with: 'Dealt with' };
 
   var SUPABASE_URL = 'https://rnquevahynifwpyynrbd.supabase.co';
   var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJucXVldmFoeW5pZndweXlucmJkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk2MDQ5NDIsImV4cCI6MjEwNTE4MDk0Mn0.2xIZMYpxk-c6_xt7x8J0EkzRMWyRRRu4gy4kIEtLy1U';
@@ -787,23 +928,26 @@ TEMPLATE = r"""<!doctype html>
   function cardStateBucket(card) {
     var state = card.getAttribute('data-state') || 'new';
     if (state === 'loved') return 'loved';
-    if (state === 'bought' || state === 'discarded') return 'dealt_with';
-    if (card.getAttribute('data-flagged') === '1') return 'flagged';
+    if (state === 'bought') return 'dealt_with';
+    if (state === 'discarded') return 'discarded';
     return 'new';
   }
 
   function renderStateTabs() {
     var tabsEl = document.getElementById('scan-state-tabs');
     if (!tabsEl) return;
-    var counts = { all: 0, new: 0, flagged: 0, loved: 0, dealt_with: 0 };
+    var counts = { all: 0, new: 0, loved: 0, discarded: 0, dealt_with: 0 };
     cards.forEach(function (card) {
-      if (card.getAttribute('data-state') === 'discarded' && !discardedVisible) return;
       counts.all++;
       counts[cardStateBucket(card)]++;
     });
     var html = '';
-    ['all', 'new', 'flagged', 'loved', 'dealt_with'].forEach(function (key) {
-      html += '<button class="tabbtn' + (stateFilter === key ? ' is-active' : '') + '" data-state-tab="' + key + '" type="button">' + STATE_TAB_LABEL[key] + ' (' + counts[key] + ')</button>';
+    ['all', 'new', 'loved', 'discarded', 'dealt_with'].forEach(function (key) {
+      var badge = '';
+      if (key === 'dealt_with' && counts[key] > 0) {
+        badge = ' <span class="tab-count">' + counts[key] + '</span>';
+      }
+      html += '<button class="tabbtn' + (stateFilter === key ? ' is-active' : '') + '" data-state-tab="' + key + '" type="button">' + STATE_TAB_LABEL[key] + badge + '</button>';
     });
     tabsEl.innerHTML = html;
     tabsEl.querySelectorAll('[data-state-tab]').forEach(function (btn) {
@@ -816,7 +960,7 @@ TEMPLATE = r"""<!doctype html>
     var lovedCountEl = document.getElementById('stat-loved');
     if (lovedCountEl) lovedCountEl.textContent = counts.loved;
     var triageCountEl = document.getElementById('stat-triage');
-    if (triageCountEl) triageCountEl.textContent = counts.new + counts.flagged;
+    if (triageCountEl) triageCountEl.textContent = counts.new;
   }
 
   function sortEligible(eligible) {
@@ -842,20 +986,14 @@ TEMPLATE = r"""<!doctype html>
   }
 
   function applyFilters() {
-    var discardedCount = 0;
     var eligible = [];
     cards.forEach(function (card) {
-      var state = card.getAttribute('data-state') || 'new';
       var matchesSource = sourceFilter === 'all' || card.getAttribute('data-source') === sourceFilter;
       var matchesState = stateFilter === 'all' || cardStateBucket(card) === stateFilter;
-      if (state === 'discarded') {
-        discardedCount++;
-        if (discardedVisible && matchesSource && matchesState) eligible.push(card);
-      } else if (matchesSource && matchesState) {
+      if (matchesSource && matchesState) {
         eligible.push(card);
       }
     });
-    if (discardedCountEl) discardedCountEl.textContent = discardedCount;
     renderSourceTabs();
     renderStateTabs();
 
@@ -954,16 +1092,6 @@ TEMPLATE = r"""<!doctype html>
     });
   }
 
-  var linkLabel = document.getElementById('scan-link-label');
-  if (showDiscardedLink) {
-    showDiscardedLink.addEventListener('click', function (e) {
-      e.preventDefault();
-      discardedVisible = !discardedVisible;
-      if (linkLabel) linkLabel.textContent = discardedVisible ? 'Hide discarded' : 'Show discarded';
-      currentPage = 1;
-      applyFilters();
-    });
-  }
 
   loadStates().then(function (rows) {
     var byKey = {};

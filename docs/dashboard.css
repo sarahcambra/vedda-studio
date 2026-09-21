@@ -2,6 +2,43 @@
    everything else (colour, type, spacing, tags, tables, buttons) comes
    from site/styles.css — never redefine a token here. */
 
+/* ---------- dashboard design overrides — scoped to .layout only ----------
+   The public site (site/styles.css tokens) stays on its own brand system.
+   This block re-points the same token names to the newer, sharper palette
+   Sarah approved (dark-green sidebar, rust accent, Newsreader/IBM Plex,
+   near-flat 2px radius) — but only inside the dashboard's .layout wrapper,
+   so nothing on the public storefront pages changes. */
+@import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+.layout {
+  --color-bg: #FFFFFF;
+  --color-surface: #F1ECE1;
+  --color-text: #1C1B17;
+  --color-accent: #C1573B;
+  --color-accent-2: #4B7A5D;
+  --color-positive: #4B7A5D;
+  --color-caution: #B08D3E;
+  --color-critical: #C1573B;
+  --color-divider: #ECE6D8;
+  --font-heading: 'Newsreader', 'Times New Roman', serif;
+  --font-heading-weight: 500;
+  --font-body: 'IBM Plex Sans', 'Helvetica Neue', sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+  --radius-sm: 2px;
+  --radius-md: 2px;
+  --radius-lg: 2px;
+  --radius-full: 2px;
+  background: #F7F3EC;
+}
+.layout .label, .layout .kicker, .layout figcaption, .layout .card-kicker,
+.layout .card-meta, .layout .tag, .layout .table th, .layout .field > label,
+.layout .scanrow-label, .layout .sidebar-foot .foot-label,
+.layout .scanmeta, .layout .scanprice, .layout .scanends-badge {
+  font-family: var(--font-mono);
+}
+.layout .card-title, .layout h1, .layout h2, .layout h3, .layout h4, .layout h5,
+.layout .stat-value, .layout .scantitle, .layout .dialog-title { font-family: var(--font-heading); }
+
 .page { padding-top: var(--space-6); padding-bottom: var(--space-24); }
 .kicker { display: block; }
 
@@ -10,14 +47,14 @@
 
 /* ---------- sidebar layout ---------- */
 .layout {
-  display: grid; grid-template-columns: 220px 1fr; min-height: 100vh;
-  max-width: 1440px; margin: 0 auto;
+  display: grid; grid-template-columns: 240px 1fr; min-height: 100vh;
+  max-width: none; margin: 0 auto;
   transition: grid-template-columns var(--dur-1) var(--ease);
 }
 @media (max-width: 800px) { .layout { grid-template-columns: 1fr; } }
 .sidebar {
-  border-right: 1px solid var(--color-divider);
-  padding: var(--space-6) var(--space-4);
+  background: #172420; color: #F4F1E8; border-right: none;
+  padding: 28px 20px;
   display: flex; flex-direction: column;
   overflow: hidden;
   /* Grid items stretch to the row's full height by default — with 2000+
@@ -26,39 +63,51 @@
   position: sticky; top: 0; align-self: start; height: 100vh;
 }
 @media (max-width: 800px) { .sidebar { position: static; height: auto; } }
-.sidebar-brand-row { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); margin-bottom: var(--space-8); }
+.sidebar-brand-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 4px 4px 32px 4px; }
 .sidebar-brand {
-  font-family: var(--font-heading); font-size: 18px; letter-spacing: 0.02em;
-  white-space: nowrap; overflow: hidden;
+  font-family: var(--font-heading); font-weight: 600; font-size: 19px; letter-spacing: 0.02em; line-height: 1.15;
+  color: #F4F1E8; white-space: nowrap; overflow: hidden;
 }
 .sidebar-collapse {
-  flex: none; background: none; border: 1px solid var(--color-divider); cursor: pointer;
-  width: 24px; height: 24px; line-height: 1; color: color-mix(in srgb, var(--color-text) 62%, transparent);
-  font-size: 13px; padding: 0;
+  flex: none; background: none; border: 1px solid #2C3F35; cursor: pointer;
+  width: 28px; height: 28px; line-height: 1; color: #7E9284;
+  font-size: 13px; padding: 0; display: flex; align-items: center; justify-content: center;
 }
-.sidebar-collapse:hover { color: var(--color-text); border-color: var(--color-text); }
-.sidebar-nav { display: flex; flex-direction: column; gap: var(--space-1); }
+.sidebar-collapse:hover { color: #F4F1E8; border-color: #2C3F35; background: #22322A; }
+.sidebar-nav { display: flex; flex-direction: column; gap: 4px; }
 .sidebar-item {
+  display: flex; align-items: center; gap: 12px;
   background: none; border: none; text-align: left; cursor: pointer;
-  font-family: var(--font-body); font-size: 13px; font-weight: 500;
-  color: color-mix(in srgb, var(--color-text) 62%, transparent);
-  padding: var(--space-2) var(--space-3); border-left: 2px solid transparent;
+  font-family: var(--font-body); font-size: 13.5px; font-weight: 500;
+  color: #8FA396;
+  padding: 10px 12px; border-left: 3px solid transparent; border-radius: 2px;
   white-space: nowrap; overflow: hidden;
   transition: color var(--dur-1) var(--ease), border-color var(--dur-1) var(--ease), background var(--dur-1) var(--ease);
 }
-.sidebar-item:hover { color: var(--color-text); }
+.sidebar-item svg { flex: none; }
+.sidebar.is-collapsed .sidebar-item svg { margin: 0 auto; }
+.sidebar-item:hover { color: #F4F1E8; background: #22322A; }
 .sidebar-item.is-active {
-  color: var(--color-accent); border-left-color: var(--color-accent);
-  background: color-mix(in srgb, var(--color-accent) 6%, transparent);
+  color: #FAF7F0; border-left-color: #C1573B; background: #263B31;
 }
-.sidebar-foot { margin-top: auto; font-size: 11px; padding: var(--space-3); white-space: nowrap; }
-.main { padding: var(--space-6) var(--space-8); min-width: 0; }
-@media (max-width: 800px) { .main { padding: var(--space-6) var(--space-4); } }
+.sidebar-item[href] { text-decoration: none; }
+.sidebar-divider {
+  height: 1px; background: #263B31; margin: 10px 12px; border: none;
+}
+.sidebar-label {
+  font-family: var(--font-mono); font-size: 9.5px; letter-spacing: 0.08em; text-transform: uppercase;
+  color: #64766B; padding: 4px 12px; margin-top: 2px;
+}
+.sidebar-foot { margin-top: auto; font-size: 12px; color: #64766B; padding: 18px 0 0 0; white-space: normal; overflow-wrap: break-word; border-top: 1px solid #263B31; }
+.sidebar-foot div:first-child { font-family: var(--font-heading); font-size: 17px; font-weight: 500; color: #F4F1E8; margin-bottom: 6px; white-space: normal; line-height: 1.3; }
+.main { padding: 44px 48px 40px 48px; min-width: 0; }
+@media (max-width: 800px) { .main { padding: 24px 20px; } }
 
 /* Collapsed: icon-width rail, labels hidden (not just clipped — avoids
    reading as broken on narrow viewports where the media query above
    already drops to a single column). */
 .layout:has(.sidebar.is-collapsed) { grid-template-columns: 56px 1fr; }
+@media (max-width: 800px) { .layout:has(.sidebar.is-collapsed) { grid-template-columns: 1fr; } }
 .sidebar.is-collapsed .sidebar-brand,
 .sidebar.is-collapsed .sidebar-item,
 .sidebar.is-collapsed .sidebar-foot { display: none; }
@@ -68,24 +117,65 @@
 /* ---------- sourcing toolbar (state filter + sort) ---------- */
 .scantoolbar {
   display: flex; align-items: center; justify-content: space-between;
-  gap: var(--space-4); margin: var(--space-4) 0; flex-wrap: wrap;
+  gap: var(--space-4); margin-bottom: 26px; flex-wrap: wrap;
 }
-.scansort { font-size: 12px; color: color-mix(in srgb, var(--color-text) 62%, transparent); }
+.scansort {
+  display: inline-flex; align-items: center; gap: 9px; cursor: pointer;
+  border: 1px solid var(--color-divider); border-radius: var(--radius-sm);
+  padding: 9px 14px; background: var(--color-bg);
+  transition: background var(--dur-1) var(--ease), border-color var(--dur-1) var(--ease);
+}
+.scansort:hover { background: #F1ECE1; border-color: #DCD3BE; }
+.scansort::before {
+  content: ""; width: 14px; height: 14px; flex: none;
+  background: no-repeat center / contain url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239A927D' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7 4v16M7 20l-3-3M7 20l3-3M17 20V4M17 4l-3 3M17 4l3 3'/%3E%3C/svg%3E");
+}
+.scansort-label { font-size: 12px; color: #9A927D; }
 .scansort select {
-  font-family: var(--font-body); font-size: 12px; margin-left: var(--space-2);
-  background: transparent; border: 1px solid var(--color-divider); padding: var(--space-1) var(--space-2);
-  color: var(--color-text);
+  font-family: var(--font-body); font-size: 13px; font-weight: 600; color: var(--color-text);
+  background: transparent; border: none; padding: 0 20px 0 0; margin: 0;
+  appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23B3AB97' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right center; background-size: 13px;
 }
-.statsrow-4 { grid-template-columns: repeat(4, 1fr); }
-@media (max-width: 700px) { .statsrow-4 { grid-template-columns: repeat(2, 1fr); } }
+.scansort select:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+
+/* ---------- sourcing stat cards (mockup match) ---------- */
+.sourcing-stats {
+  display: flex; gap: 10px; flex-wrap: wrap;
+}
+.sourcing-stat {
+  width: 128px; padding: 14px 16px;
+  background: #FFFFFF; border: 1px solid #ECE6D8; border-radius: var(--radius-sm);
+}
+.sourcing-stat-label {
+  font-family: var(--font-mono); font-size: 9.5px; letter-spacing: 0.08em;
+  color: #9A927D; text-transform: uppercase; margin-bottom: 6px;
+  display: flex; align-items: center; gap: 5px;
+}
+.sourcing-stat-dot {
+  width: 5px; height: 5px; border-radius: 50%; background: #C1573B; display: inline-block;
+}
+.sourcing-stat-value {
+  font-family: var(--font-heading); font-size: 26px; font-weight: 500; line-height: 1.1;
+  color: var(--color-text); font-variant-numeric: tabular-nums;
+}
+.sourcing-head {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: var(--space-6); margin-bottom: 30px; flex-wrap: wrap;
+}
+.sourcing-title { font-family: var(--font-heading); font-weight: 500; font-size: 34px; letter-spacing: -0.01em; margin: 0 0 6px; }
+.sourcing-sources { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.06em; color: #9A927D; text-transform: uppercase; }
 
 /* ---------- estimate range bar ---------- */
 .scanrow { display: flex; justify-content: space-between; font-size: 11px; margin-top: var(--space-2); }
 .scanrow-label { color: color-mix(in srgb, var(--color-text) 55%, transparent); text-transform: uppercase; letter-spacing: 0.08em; font-size: 10px; }
 .scanrow-value { font-variant-numeric: tabular-nums; }
 .estimate-range { margin: var(--space-1) 0 var(--space-2); }
-.estimate-track { height: 3px; background: var(--color-divider); position: relative; }
-.estimate-fill { height: 100%; background: var(--color-accent); position: absolute; top: 0; left: 0; }
+.estimate-track { height: 4px; border-radius: var(--radius-sm); background: var(--color-divider); position: relative; }
+.estimate-fill { height: 100%; border-radius: var(--radius-sm); background: var(--color-positive); position: absolute; top: 0; left: 0; }
+.estimate-fill-over { background: var(--color-critical); }
+.scanestimate-ok { color: var(--color-positive); font-weight: 500; }
 
 .warn {
   border: 1px solid var(--color-caution); padding: var(--space-3) var(--space-4);
@@ -109,21 +199,33 @@
   margin: var(--space-1) 0 2px; font-variant-numeric: tabular-nums;
 }
 .stat-sub { font-size: 12.5px; }
+.stat-dot { display: inline-block; width: 5px; height: 5px; border-radius: 50%; background: var(--color-accent); margin-right: 5px; vertical-align: middle; }
+.stat-value-flag { color: var(--color-accent); }
 
 /* ---------- tabs ---------- */
-.tabnav { display: flex; gap: var(--space-6); }
+.tabnav {
+  display: inline-flex; align-items: center; gap: 2px;
+  background: var(--color-bg); border: 1px solid var(--color-divider);
+  border-radius: var(--radius-sm); padding: 4px;
+}
 .tabbtn {
-  background: none; border: none; padding: 0; cursor: pointer;
-  font-family: var(--font-body); font-size: 11px; font-weight: 500; letter-spacing: 0.16em; text-transform: uppercase;
-  color: color-mix(in srgb, var(--color-text) 62%, transparent);
-  border-bottom: 1px solid transparent; padding-bottom: var(--space-2);
-  transition: color var(--dur-1) var(--ease), border-color var(--dur-1) var(--ease);
+  background: none; border: none; cursor: pointer;
+  font-family: var(--font-body); font-size: 13px; font-weight: 500;
+  color: #8A8578;
+  border-radius: var(--radius-sm); padding: 7px 16px;
+  transition: color var(--dur-1) var(--ease), background var(--dur-1) var(--ease);
 }
 .tabbtn:hover { color: var(--color-text); }
-.tabbtn.is-active { color: var(--color-accent); border-bottom-color: var(--color-accent); }
+.tabbtn.is-active { color: #FAF7F0; background: #1C1B17; }
+.tab-count {
+  background: #F1ECE1; color: #8A8578; font-size: 11px;
+  font-family: var(--font-mono); padding: 1px 7px; border-radius: var(--radius-sm);
+  margin-left: 4px;
+}
 
 /* ---------- sections ---------- */
-.section-block { padding: var(--space-10) 0; border-bottom: 1px solid var(--color-divider); }
+.section-block { padding: 10px 0; border-bottom: 1px solid var(--color-divider); }
+.section-block:first-child { padding-top: 0; }
 .section-block:last-child { border-bottom: 0; }
 h4 { font-family: var(--font-heading); font-weight: 400; font-size: 20px; margin: 0 0 var(--space-1); }
 .text-muted { font-size: 13px; }
@@ -161,7 +263,26 @@ table.suptable td.supnotes-cell { max-width: 42ch; line-height: 1.5; }
 .matcat { margin-bottom: var(--space-10); }
 .matcat h4 { display: flex; align-items: baseline; gap: var(--space-3); }
 .matgrid { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--space-8) var(--space-6); align-items: stretch; }
-.matcard { display: flex; flex-direction: column; height: 100%; }
+.matcard, .costcard, .scancard {
+  background: var(--color-bg);
+  border: 1px solid var(--color-divider);
+  border-radius: var(--radius-md);
+  box-shadow: none;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  transition: box-shadow .18s ease, transform .18s ease, border-color .18s ease;
+}
+.scancard {
+  box-shadow: 0 1px 2px rgba(28,27,23,0.035);
+}
+.matcard:hover, .costcard:hover, .layout .scancard:hover {
+  box-shadow: 0 14px 32px -18px rgba(28,27,23,0.35);
+  transform: translateY(-2px);
+  border-color: #DCD3BE;
+}
+
 .matcard .card-price { margin-top: 2px; }
 .matcard .card-kicker {
   display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 2.7em;
@@ -179,7 +300,6 @@ table.suptable td.supnotes-cell { max-width: 42ch; line-height: 1.5; }
 /* ---------- piece costing cards: fixed regions, scrollable item rows,
    pinned totals + note, so all 4 cards read as one consistent size ---------- */
 .costgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: var(--space-8) var(--space-6); align-items: stretch; }
-.costcard { display: flex; flex-direction: column; height: 100%; }
 .costcard .card-title-sm { margin: var(--space-3) 0 var(--space-3); }
 .costtable td { font-size: 13.5px; }
 .costrows-scroll { max-height: 210px; overflow-y: auto; border-bottom: 1px solid var(--color-divider); padding-bottom: var(--space-1); }
@@ -224,17 +344,31 @@ tr.costtotal td { font-weight: 500; border-top: 1px solid var(--color-text); pad
 /* ---------- scan results: fixed image ratio + clamped title/meta so
    150 cards of varying title length still line up row to row ---------- */
 .scan-discarded-link { font-size: 12.5px; margin-left: var(--space-3); color: color-mix(in srgb, var(--color-text) 55%, transparent); border-bottom-color: color-mix(in srgb, var(--color-text) 30%, transparent); }
-.scangrid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-8) var(--space-6); align-items: stretch; }
+.scangrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; align-items: stretch; }
+@media (max-width: 1100px) { .scangrid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 640px) { .scangrid { grid-template-columns: 1fr; } }
-.scancard {
-  display: flex; flex-direction: column; transition: opacity var(--dur-1) var(--ease);
-  background: var(--color-bg); border: 1px solid var(--color-divider);
-  border-radius: var(--radius-md); padding: var(--space-4); overflow: hidden;
-}
 .scancard[data-state="discarded"] { opacity: .35; }
 .scanimgwrap {
-  position: relative; margin: calc(var(--space-4) * -1) calc(var(--space-4) * -1) var(--space-3);
-  width: calc(100% + var(--space-4) * 2);
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background: #F1ECE1;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.scanimgwrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.scanimg-placeholder {
+  width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 8px; padding: 0 28px; text-align: center; font-size: 26px; color: #C9C0A9;
+}
+.scanimg-placeholder span {
+  font-family: var(--font-heading); font-style: italic; font-size: 12px; line-height: 1.4;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
 }
 /* Sharper image rendering — auction thumbnails are small and stretchy */
 .scanimgwrap img,
@@ -253,49 +387,89 @@ tr.costtotal td { font-weight: 500; border-top: 1px solid var(--color-text); pad
    'soon' (<24h) and 'urgent' (<6h) reuse the existing caution/critical
    tokens — never a new color. */
 .scanends-badge {
-  position: absolute; top: var(--space-3); left: var(--space-3);
-  background: color-mix(in srgb, var(--color-text) 78%, transparent); color: var(--color-bg);
-  font-family: var(--font-body); font-size: 10.5px; font-weight: 500; letter-spacing: 0.08em;
-  padding: 5px 10px; white-space: nowrap; border-radius: var(--radius-full);
+  position: absolute; top: 12px; left: 12px;
+  background: #2B2A25; color: #FAF7F0;
+  font-family: var(--font-body); font-size: 10.5px; font-weight: 500;
+  letter-spacing: 0.08em; padding: 5px 11px; white-space: nowrap; border-radius: var(--radius-sm);
+  display: flex; align-items: center; gap: 5px;
 }
-.scanends-badge.soon { background: var(--color-caution); }
-.scanends-badge.urgent { background: var(--color-critical); }
-.scanbody { display: flex; flex-direction: column; gap: var(--space-2); flex: 1; }
-.scantop { display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; }
+.scanends-badge.urgent { background: #C1573B; color: #FFFFFF; }
+.scanends-badge.ended { background: #A9A296; color: #FFFFFF; }
+.scanbody {
+  padding: 18px 18px 16px 18px;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+.scantop { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; margin-bottom: 8px; }
+.scansource { font-size: 12px; font-weight: 600; color: var(--color-text); letter-spacing: 0.03em; }
+.scandot { color: #D8D0BC; }
+.scanlocation { font-size: 12px; color: #726752; }
+/* Model/designer match — split out of the generic type tag so a gold find
+   (a name-searched collectible model) and a known-designer attribution
+   each get their own badge instead of hiding inside "teak chair, Adam". */
+.scantop-side { margin-left: auto; display: flex; align-items: center; gap: 6px; }
+.scanbadge {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-family: var(--font-mono); font-size: 9.5px; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase;
+  padding: 4px 8px; border-radius: var(--radius-sm); white-space: nowrap;
+}
+.scanbadge-model { background: #FBF1DC; color: #8A6018; }
+/* Sourcing status from model_database — BUY/MAYBE/NO(PRESERVE+PASS folded together) */
+.scanbadge-model-buy { background: #E4EDE6; color: #3E5A46; }
+.scanbadge-model-maybe { background: #FBF1DC; color: #8A6018; }
+.scanbadge-model-no { background: #F1ECE1; color: #726752; }
+.scanbadge-designer { background: transparent; border: 1px solid var(--color-divider); color: #726752; }
 /* Quiet metadata mark — deliberately lighter than the action row below it */
 .scantop .tag { color: color-mix(in srgb, var(--color-text) 55%, transparent); }
 .scanflag { font-size: 13px; }
 .scanestimate-note { font-size: 11.5px; margin-top: 2px; }
 .scantitle {
-  font-family: var(--font-heading); font-size: 16px; font-weight: 400; color: var(--color-text); line-height: 1.3; border: 0;
-  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 2.6em;
-  margin-top: var(--space-1);
+  font-family: var(--font-heading); font-size: 16px; font-weight: 500; color: var(--color-text); line-height: 1.35; border: 0;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 43px;
+  margin-bottom: 10px;
 }
 .scantitle:hover { color: var(--color-accent); }
 .scanmeta {
   font-size: 12px; color: color-mix(in srgb, var(--color-text) 62%, transparent);
   display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden;
 }
-/* Actions read as text links, not boxed buttons — so they never compete
-   visually with the outlined source tag above them. Colour only appears
-   on hover/press and on the persisted loved/discarded state. */
+/* Actions: a text link to the auction, plus icon-only quick actions
+   (discard/love) and a labelled primary action (bought / put back). */
 .scanactions {
-  display: flex; gap: var(--space-6); margin-top: auto; padding-top: var(--space-3);
-  border-top: 1px solid var(--color-divider);
+  display: flex; align-items: center; justify-content: space-between;
+  margin-top: 4px;
 }
-.scanbtn {
-  flex: none; display: inline-flex; align-items: center; gap: 6px; cursor: pointer;
-  background: none; border: 0; padding: 2px 0; margin: 0;
-  font-family: var(--font-body); font-size: 11px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase;
-  color: color-mix(in srgb, var(--color-text) 62%, transparent);
-  border-bottom: 1px solid transparent; transition: color var(--dur-1) var(--ease), border-color var(--dur-1) var(--ease);
+.scanlink {
+  display: inline-flex; align-items: center; gap: 5px; cursor: pointer;
+  font-family: var(--font-body); font-size: 12.5px; font-weight: 500;
+  color: #6B6656; border: 0; text-decoration: none;
 }
-.scanbtn-love:hover { color: var(--color-positive); border-color: var(--color-positive); }
-.scanbtn-discard:hover { color: var(--color-critical); border-color: var(--color-critical); }
-.scancard[data-state="loved"] .scanbtn-love { color: var(--color-positive); border-color: var(--color-positive); }
-.scancard[data-state="discarded"] .scanbtn-discard { color: var(--color-critical); border-color: var(--color-critical); }
-.scancard[data-state="bought"] .scanbtn-bought { color: var(--color-accent); border-color: var(--color-accent); }
-.scancard[data-state="bought"] { border: 1px solid var(--color-accent); }
+.scanlink:hover { color: var(--color-accent); }
+.scanbtns { display: flex; align-items: center; gap: 6px; }
+.scanicon {
+  flex: none; display: inline-flex; align-items: center; justify-content: center;
+  width: 30px; height: 30px; cursor: pointer;
+  border: 1px solid var(--color-divider); border-radius: var(--radius-sm);
+  background: var(--color-bg); color: #726752;
+  transition: background var(--dur-1) var(--ease), border-color var(--dur-1) var(--ease), color var(--dur-1) var(--ease);
+}
+.scanicon:hover { background: #F1ECE1; border-color: #DCD3BE; color: var(--color-text); }
+.scanbtn-discard:hover { color: var(--color-critical); }
+.scancard[data-state="discarded"] .scanbtn-discard { border-color: var(--color-critical); color: var(--color-critical); }
+.scancard[data-state="loved"] .scanbtn-love {
+  border-color: #F0DCD3; background: #FBEAE6; color: var(--color-accent);
+}
+.scanbought {
+  display: inline-flex; align-items: center; gap: 6px; cursor: pointer;
+  padding: 6px 12px; border: 1px solid var(--color-divider); border-radius: var(--radius-sm);
+  background: var(--color-bg); color: #3E5A46;
+  font-family: var(--font-body); font-size: 12px; font-weight: 500;
+  transition: background var(--dur-1) var(--ease), border-color var(--dur-1) var(--ease);
+}
+.scanbought:hover { background: #F1ECE1; border-color: #DCD3BE; }
+.scancard[data-state="bought"] .scanbtn-bought { border-color: var(--color-accent-2); background: #E4EDE6; }
+.scancard[data-state="bought"] { border: 1px solid var(--color-accent-2); }
 
 /* Placeholder for asset paths not yet present (matches the DS component-demo pattern) */
 .fig img.img-missing {
@@ -311,3 +485,116 @@ tr.costtotal td { font-weight: 500; border-top: 1px solid var(--color-text); pad
 
 footer { margin-top: var(--space-16); color: color-mix(in srgb, var(--color-text) 55%, transparent); font-size: 12.5px; border-top: 1px solid var(--color-divider); padding-top: var(--space-4); }
 footer code { font-family: var(--font-body); }
+
+/* ---------- scan card additions (tags, banner, bid section) ---------- */
+.scantags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.scantag {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 4px 9px;
+  border-radius: var(--radius-sm);
+  background: #F1ECE1;
+  color: #6E6858;
+}
+
+.scanbanner {
+  display: flex;
+  gap: 7px;
+  align-items: flex-start;
+  padding: 9px 11px;
+  border-radius: var(--radius-sm);
+  background: #FBEAE6;
+  color: #A3402B;
+  font-size: 12px;
+  line-height: 1.4;
+  margin-bottom: 12px;
+}
+/* Opportunity signal reads as good news (underpriced), not a risk warning —
+   gold, not the rust/red used for over-estimate and discard states. */
+.scanbanner-opportunity {
+  background: #FBF1DC;
+  color: #8A6018;
+}
+.scanbanner svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.scan-bottom {
+  border-top: 1px solid #F1ECE1;
+  padding-top: 11px;
+  margin-top: auto;
+}
+
+.scanends-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  display: inline-block;
+}
+
+.scanbid {
+  border-top: 1px solid #F1ECE1;
+  padding-top: 11px;
+  margin-bottom: 4px;
+}
+.scanbid-labels {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.06em;
+  color: #736A57;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.scanbid-values {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 8px;
+}
+.scanbid-bid {
+  font-family: var(--font-heading);
+  font-size: 20px;
+  font-weight: 500;
+  color: var(--color-text);
+}
+.scanbid-est {
+  font-size: 12.5px;
+  color: #726752;
+}
+.scanbar {
+  position: relative;
+  height: 4px;
+  border-radius: var(--radius-sm);
+  background: #EEE8DA;
+  margin-bottom: 7px;
+}
+.scanbar-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  border-radius: var(--radius-sm);
+}
+.scanstatus {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.04em;
+  font-weight: 500;
+  margin-bottom: 12px;
+}
+
+/* external-link icon in scanlink */
+.scanlink svg {
+  flex: none;
+}

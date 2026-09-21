@@ -64,6 +64,7 @@ TEMPLATE = """<!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Vedda Studio — sourcing</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,500;0,600;1,400&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
 <link rel="stylesheet" href="site/styles.css">
 <link rel="stylesheet" href="dashboard.css">
 </head>
@@ -82,9 +83,8 @@ TEMPLATE = """<!doctype html>
     <h4>Scan results</h4>
     <p class="text-muted">
       Auctionet, Tradera, Bukowskis, Haraldssons.
-      <strong>{scan_total} lots archived</strong>, {scan_count} shown here, ranked by bad-listing score (🚩 = ≥3, worth reading first). New and loved shown; discarded is out of the way.
+      <strong>{scan_total} lots archived</strong>, {scan_count} shown here, ranked by underpriced signal (⭐ = likely underpriced, worth reading first). New and loved shown; discarded is out of the way.
       Shared with everyone who opens this page. <span id="scan-last-updated" data-last-scan="{scan_last_seen_utc}"></span>
-      <a href="#" id="scan-show-discarded" class="btn-link scan-discarded-link"><span id="scan-link-label">Show discarded</span> (<span id="scan-discarded-count">0</span>)</a>
     </p>
     <div class="tabnav" id="scan-source-tabs" role="tablist" style="margin-bottom:var(--space-6);"></div>
     <div class="scangrid" id="scan-grid">{scan_cards_html}</div>
@@ -120,10 +120,7 @@ TEMPLATE = """<!doctype html>
 (function () {
   var cards = Array.prototype.slice.call(document.querySelectorAll('.scancard'));
   if (!cards.length) return;
-  var showDiscardedLink = document.getElementById('scan-show-discarded');
-  var discardedCountEl = document.getElementById('scan-discarded-count');
   var pagerEl = document.getElementById('scan-pager');
-  var discardedVisible = false;
   var sourceFilter = 'all';
   var PAGE_SIZE = 36;
   var currentPage = 1;
@@ -174,20 +171,14 @@ TEMPLATE = """<!doctype html>
   }
 
   function applyFilters() {
-    var discardedCount = 0;
     var eligible = [];
     cards.forEach(function (card) {
-      var state = card.getAttribute('data-state') || 'new';
       var matchesSource = sourceFilter === 'all' || card.getAttribute('data-source') === sourceFilter;
-      if (state === 'discarded') {
-        discardedCount++;
-        if (discardedVisible && matchesSource) eligible.push(card);
-      } else if (matchesSource) {
+      if (matchesSource) {
         eligible.push(card);
       }
     });
     renderSourceTabs();
-    if (discardedCountEl) discardedCountEl.textContent = discardedCount;
 
     var pageCount = Math.max(1, Math.ceil(eligible.length / PAGE_SIZE));
     if (currentPage > pageCount) currentPage = pageCount;
@@ -268,17 +259,6 @@ TEMPLATE = """<!doctype html>
       });
     });
   });
-
-  var linkLabel = document.getElementById('scan-link-label');
-  if (showDiscardedLink) {
-    showDiscardedLink.addEventListener('click', function (e) {
-      e.preventDefault();
-      discardedVisible = !discardedVisible;
-      if (linkLabel) linkLabel.textContent = discardedVisible ? 'Hide discarded' : 'Show discarded';
-      currentPage = 1;
-      applyFilters();
-    });
-  }
 
   loadStates().then(function (rows) {
     var byKey = {};
@@ -403,93 +383,207 @@ def scan_ends_badge(value):
     rationale. Keep both in sync."""
     dt = parse_scan_ends_at(value)
     if not dt:
-        return "—", ""
+        return "", ""
     if dt.tzinfo is not None:
         dt = dt.astimezone().replace(tzinfo=None)
     hours = (dt - datetime.datetime.now()).total_seconds() / 3600
     if hours < 0:
-        return "ended", ""
-    if hours < 24:
-        label = f"{max(1, round(hours))}H"
-    else:
-        days = round(hours / 24)
-        label = f"{days}D" if days < 7 else dt.strftime("%d %b")
-    urgency = "urgent" if hours < 6 else "soon" if hours < 24 else ""
-    return label, urgency
+        return "Ended", "ended"
+    if hours < 10:
+        if hours < 1:
+            mins = max(1, int(hours * 60))
+            return f"Ends {mins}m", "urgent"
+        return f"Ends {max(1, round(hours))}h", "urgent"
+    days = round(hours / 24)
+    return f"Ends {days}d", ""
+
+
+def is_opportunity(lot):
+    """See tools/build-dashboard.py's twin of this function for the full
+    rationale. Keep both in sync."""
+    bid = lot.get("current_bid")
+    est_low = lot.get("estimate_low")
+    if bid is None or not est_low or bid > est_low * 0.5:
+        return False
+    dt = parse_scan_ends_at(lot.get("ends_at"))
+    if not dt:
+        return True
+    if dt.tzinfo is not None:
+        dt = dt.astimezone().replace(tzinfo=None)
+    hours_left = (dt - datetime.datetime.now()).total_seconds() / 3600
+    return hours_left <= 48
 
 
 SCAN_SRC_LABEL = {"auctionet": "Auctionet", "tradera": "Tradera", "bukowskis": "Bukowskis", "haraldssons": "Haraldssons", "siko": "Sikö"}
+
+
+def build_term_sets(kw):
+    model_designer_lower = {k.lower(): v for k, v in kw.get("model_designers", {}).items() if k != "_comment" and v}
+    model_status_lower = {}
+    for e in kw.get("model_database", []):
+        m = (e.get("model") or "").lower()
+        status = e.get("vedda_status")
+        if m and status:
+            model_status_lower[m] = "BUY" if status == "BUY" else "MAYBE" if status == "MAYBE" else "NO"
+    return {t.lower() for t in kw.get("models", [])}, {t.lower() for t in kw.get("designers", [])}, model_designer_lower, model_status_lower
+
+
+def scan_ends_sort_key(value):
+    if not value:
+        return ""
+    try:
+        if isinstance(value, str) and value.isdigit():
+            value = int(value)
+        if isinstance(value, (int, float)):
+            return datetime.datetime.fromtimestamp(value).isoformat()
+        return datetime.datetime.fromisoformat(value).isoformat()
+    except (ValueError, OSError, TypeError):
+        return ""
 
 
 def main():
     esc = html.escape
     kw = load_keywords()
     scan_lots, scan_total, scan_last_seen = load_scan_results()
+    MODEL_TERMS_LOWER, DESIGNER_TERMS_LOWER, MODEL_DESIGNER_LOWER, MODEL_STATUS_LOWER = build_term_sets(kw)
 
     def scan_card(lot):
         lot_key = esc(f"{lot['source']}-{lot['lot_id']}")
-        flag = '<span class="scanflag">🚩</span>' if (lot.get("bad_listing_score") or 0) >= 3 else ""
+        is_flagged = is_opportunity(lot)
         img = (
             f'<img src="{esc(lot["image_url"])}" alt="" loading="lazy">'
             if lot.get("image_url")
-            else ''
+            else f'<div class="scanimg-placeholder"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#C9C0A9" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"></rect><circle cx="9" cy="10" r="1.5"></circle><path d="M21 16l-5.5-5.5a2 2 0 00-2.8 0L4 19"></path></svg><span>{esc(lot.get("title") or "No image")}</span></div>'
         )
         src = lot.get("source") or ""
         location = lot.get("location")
-        location_badge = f'<span class="tag tag-accent-2">{esc(location)}</span>' if location else ""
-        current_bid = lot.get("current_bid")
-        price_badge = (
-            f'<span class="scanprice">{money(current_bid)}</span>'
-            if current_bid is not None
-            else '<span class="scanprice scanprice-empty">price tbc</span>'
-        )
-        est_low, est_high = lot.get("estimate_low"), lot.get("estimate_high")
-        if est_low is not None or est_high is not None:
-            est_label = f"{money(est_low) if est_low is not None else '?'}–{money(est_high) if est_high is not None else '?'}"
-            within = ""
-            extra = ""
-            if current_bid is not None and est_low is not None and est_high is not None and est_high > est_low:
-                pct = max(0.0, min(1.0, (current_bid - est_low) / (est_high - est_low)))
-                within = (
-                    '<div class="estimate-range"><div class="estimate-track">'
-                    f'<div class="estimate-fill" style="width:{pct * 100:.1f}%"></div>'
-                    '</div></div>'
-                )
-                if current_bid > est_high:
-                    over_pct = (current_bid - est_high) / est_high * 100
-                    extra = f'<div class="scanestimate-note note-critical">{over_pct:.0f}% over high estimate</div>'
-            elif current_bid is None and (est_low is not None or est_high is not None):
-                extra = '<div class="scanestimate-note text-muted" style="font-style:italic;">Opening only</div>'
-            estimate_html = (
-                '<div class="scanrow"><span class="scanrow-label">Current bid</span>'
-                '<span class="scanrow-label scanrow-label-right">Estimate</span></div>'
-                f'<div class="scanrow"><span class="scanrow-value">{money(current_bid)}</span>'
-                f'<span class="scanrow-value scanrow-value-right">{est_label}</span></div>'
-                f'{within}{extra}'
+        location_badge = f'<span class="scandot">·</span><span class="scanlocation"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#9A927D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11a7 7 0 0114 0c0 4.8-7 11-7 11z"></path><circle cx="12" cy="10" r="2.5"></circle></svg>{esc(location)}</span>' if location else ""
+
+        # Ends badge
+        ends_label, ends_class = scan_ends_badge(lot.get("ends_at"))
+        ends_badge = ""
+        if ends_label:
+            ends_badge = (
+                f'<span class="scanends-badge{" " + ends_class if ends_class else ""}" '
+                f'title="ends {esc(format_scan_ends_at(lot.get("ends_at")))}">'
+                f'<span class="scanends-dot"></span>'
+                f'{esc(ends_label)}</span>'
             )
+
+        # Tags — split into type / model / designer, see build-dashboard.py's
+        # twin of this block for the full rationale. Keep both in sync.
+        tags_html = ""
+        model_badge_html = ""
+        designer_badge_html = ""
+        matched = lot.get("matched_keyword") or ""
+        terms = [t.strip() for t in matched.split(",") if t.strip()]
+        type_terms = [t for t in terms if t.lower() not in MODEL_TERMS_LOWER and t.lower() not in DESIGNER_TERMS_LOWER]
+        model_terms = [t for t in terms if t.lower() in MODEL_TERMS_LOWER]
+        designer_terms = [t for t in terms if t.lower() in DESIGNER_TERMS_LOWER]
+        if type_terms:
+            tags_html = "".join(f'<span class="scantag">{esc(t)}</span>' for t in type_terms)
+        if model_terms:
+            status = MODEL_STATUS_LOWER.get(model_terms[0].lower())
+            status_cls = f" scanbadge-model-{status.lower()}" if status else ""
+            status_title = f' title="Sourcing status: {status}"' if status else ""
+            model_badge_html = (
+                f'<span class="scanbadge scanbadge-model{status_cls}"{status_title}>'
+                '<svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2l2.9 6.3 6.9.9-5 4.9 1.2 6.9-6-3.3-6 3.3 1.2-6.9-5-4.9 6.9-.9z"></path></svg>'
+                f'{esc(model_terms[0])}</span>'
+            )
+        designer_label = MODEL_DESIGNER_LOWER.get(model_terms[0].lower()) if model_terms else None
+        if not designer_label and designer_terms:
+            designer_label = designer_terms[0]
+        if designer_label:
+            designer_badge_html = f'<span class="scanbadge scanbadge-designer">{esc(designer_label)}</span>'
+
+        # Banner for opportunity items — underpriced signal, not a risk warning
+        banner_html = ""
+        if is_flagged:
+            banner_html = (
+                f'<div class="scanbanner scanbanner-opportunity">'
+                f'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.9 6.3 6.9.9-5 4.9 1.2 6.9-6-3.3-6 3.3 1.2-6.9-5-4.9 6.9-.9z"></path></svg>'
+                f'Likely underpriced — worth reading first'
+                f'</div>'
+            )
+
+        # Bottom section: bid labels, values, bar, status, actions
+        current_bid = lot.get("current_bid")
+        est_low, est_high = lot.get("estimate_low"), lot.get("estimate_high")
+
+        if current_bid is not None:
+            bid_label = "Current bid"
+            bid_value = money(current_bid)
         else:
-            estimate_html = ""
-        ends_label, ends_urgency = scan_ends_badge(lot.get("ends_at"))
-        ends_badge = (
-            f'<span class="scanends-badge{(" " + ends_urgency) if ends_urgency else ""}" '
-            f'title="ends {esc(format_scan_ends_at(lot.get("ends_at")))}">'
-            f'⏱ ENDS {esc(ends_label)}</span>'
+            bid_label = "No bids yet"
+            bid_value = "Opening only"
+
+        if est_low is not None and est_high is not None:
+            est_text = f"{money(est_low)}–{money(est_high)}"
+        elif est_low is not None:
+            est_text = money(est_low)
+        elif est_high is not None:
+            est_text = f"Up to {money(est_high)}"
+        else:
+            est_text = "None given"
+            est_text = "None given"
+
+        bar_html = ""
+        status_html = ""
+        if current_bid is not None and est_low is not None and est_high is not None and est_high > est_low:
+            pct = max(0.0, min(1.0, (current_bid - est_low) / (est_high - est_low)))
+            over = current_bid > est_high
+            fill_color = "#C1573B" if over else "#4B7A5D"
+            bar_html = (
+                f'<div class="scanbar">'
+                f'<div class="scanbar-fill" style="width:{pct * 100:.1f}%;background:{fill_color};"></div>'
+                f'</div>'
+            )
+            if over:
+                over_pct = (current_bid - est_high) / est_high * 100
+                status_html = f'<div class="scanstatus" style="color:#C1573B;">{over_pct:.0f}% over high estimate</div>'
+            else:
+                status_html = f'<div class="scanstatus" style="color:#4B7A5D;">Within estimate</div>'
+
+        actions_html = (
+            f'<a class="scanlink" href="{esc(lot.get("url") or "#")}" target="_blank">'
+            f'View auction'
+            f'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3h7v7"></path><path d="M10 14L21 3"></path><path d="M21 14v6a1 1 0 01-1 1H4a1 1 0 01-1-1V4a1 1 0 011-1h6"></path></svg>'
+            f'</a>'
+            f'<div class="scanbtns">'
+            f'<button class="scanicon scanbtn scanbtn-discard" data-action="discard" type="button" aria-label="Discard">'
+            f'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"></path></svg>'
+            f'</button>'
+            f'<button class="scanicon scanbtn scanbtn-love" data-action="love" type="button" aria-label="Love">'
+            f'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.5s-7.5-4.6-10-9.3C.5 7.8 2.3 4.5 5.7 4.5c2 0 3.4 1 6.3 4 2.9-3 4.3-4 6.3-4 3.4 0 5.2 3.3 3.7 6.7-2.5 4.7-10 9.3-10 9.3z"></path></svg>'
+            f'</button>'
+            f'<button class="scanbought scanbtn scanbtn-bought" data-action="bought" type="button">'
+            f'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg>'
+            f'Bought'
+            f'</button>'
+            f'</div>'
         )
+
         return (
-            f'<div class="scancard" data-lot-key="{lot_key}" data-source="{esc(src)}">'
-            f'<div class="fig ar-square scanimgwrap">{img}{price_badge}{ends_badge}</div>'
-            '<div class="scanbody">'
-            f'<div class="scantop"><span class="tag tag-outline">{esc(SCAN_SRC_LABEL.get(src, src))}</span>{flag}'
-            f'{location_badge}</div>'
+            f'<div class="scancard" data-lot-key="{lot_key}" data-source="{esc(src)}" '
+            f'data-flagged="{"1" if is_flagged else "0"}" '
+            f'data-ends="{esc(scan_ends_sort_key(lot.get("ends_at")))}" '
+            f'data-bid="{current_bid if current_bid is not None else ""}" '
+            f'data-first-seen="{esc(str(lot.get("first_seen") or ""))}">'
+            f'<div class="scanimgwrap">{img}{ends_badge}</div>'
+            f'<div class="scanbody">'
+            f'<div class="scantop"><span class="scansource">{esc(SCAN_SRC_LABEL.get(src, src))}</span>{location_badge}'
+            f'<span class="scantop-side">{model_badge_html}{designer_badge_html}</span></div>'
             f'<a class="scantitle" href="{esc(lot.get("url") or "#")}" target="_blank">{esc(lot.get("title") or "")}</a>'
-            f'<div class="text-muted scanmeta">matched "{esc(lot.get("matched_keyword") or "")}"</div>'
-            f'{estimate_html}'
-            '<div class="scanactions">'
-            f'<button class="btn btn-secondary scanbtn scanbtn-love" data-action="love" type="button">♡ Love</button>'
-            f'<button class="btn btn-secondary scanbtn scanbtn-bought" data-action="bought" type="button">$ Bought</button>'
-            f'<button class="btn btn-secondary scanbtn scanbtn-discard" data-action="discard" type="button">✕ Discard</button>'
-            '</div>'
-            '</div></div>'
+            f'<div class="scantags">{tags_html}</div>'
+            f'{banner_html}'
+            f'<div class="scan-bottom">'
+            f'<div class="scanbid-labels"><span>{bid_label}</span><span>Estimate</span></div>'
+            f'<div class="scanbid-values"><span class="scanbid-bid">{bid_value}</span><span class="scanbid-est">{est_text}</span></div>'
+            f'{bar_html}{status_html}'
+            f'<div class="scanactions">{actions_html}</div>'
+            f'</div>'
+            f'</div></div>'
         )
 
     scan_cards_html = "".join(scan_card(l) for l in scan_lots)

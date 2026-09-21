@@ -38,21 +38,20 @@ def is_excluded(title, exclude_terms):
 
 
 def is_seating(title, seating_words, non_seating_words):
-    """Auctionet titles put the primary object type first, before the first
-    comma — 'BYRÅ, 1900-talets mitt...' or 'BOKHYLLOR, ett par, teak...'.
-    Check that segment first (it's the actual type, not a mention elsewhere
-    in the description). Falls back to a whole-title scan if the leading
-    segment doesn't clearly say either way — better to keep a maybe than
-    silently drop something real."""
+    """Seats only — a table wins the exclusion even when chairs are bundled
+    in the same lot. Sarah's call (2026-09-21): a designer/model search like
+    'KERSTIN HÖRLIN-HOLMQUIST. Matbord med 4 stolar' was passing because
+    'stolar' (chairs) appeared somewhere in the title, even though the lot
+    is fundamentally a dining table (with chairs included) — not the
+    standalone seat she wants. Auctionet titles put the primary object type
+    first for anonymous/type-led listings ('BYRÅ, 1900-talets mitt...') but
+    designer-led titles don't follow that convention, so checking only the
+    leading segment missed these — now any non-seating word anywhere in the
+    title (table, cabinet, 'matgrupp' dining suite, etc.) excludes the lot,
+    full stop, regardless of what else is mentioned alongside it."""
     t = title.lower()
-    first_segment = t.split(",", 1)[0]
-    has_seating_lead = any(w in first_segment for w in seating_words)
-    has_non_seating_lead = any(w in first_segment for w in non_seating_words)
-    if has_seating_lead:
-        return True
-    if has_non_seating_lead:
+    if any(w in t for w in non_seating_words):
         return False
-    # ambiguous leading segment — fall back to anywhere in the title
     return any(w in t for w in seating_words)
 
 

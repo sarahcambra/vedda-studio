@@ -1,30 +1,163 @@
 {
   "_comment": "Search terms for the auction scanner. models = high-precision, low-volume, product names. designers = surnames — each with a plain-ASCII/no-hyphen variant too, since sellers on different platforms (Tradera vs Auctionet vs dba.dk) spell the same name differently: 'Carl-Axel Acking' on one, 'Carl Axel Acking' on another, diacritics dropped on a third. lazy_listing_terms = the alpha list, words a seller uses when they don't know what they have. no_designer_items = from research/itens.md section 2, style/wood/type searches without a designer name. woods = valuable/distinctive woods worth searching alone or combined with a seating type. exclude = negative filter, drop any lot whose title matches these. Source: research/itens.md, research/auction-scanner.md section 3, designer research 2026-09-16.",
   "models": [
-    "Bodö", "F60", "Mondo", "TeVe", "TeVe-Stolen", "Contour", "Adam", "Eva",
-    "Cavelli", "Sälen", "Salen", "Kandidaten", "Lamino", "Pernilla", "Colonial OW149",
-    "OW149", "Krobo", "Minerva", "AP26", "Fried Egg", "Sirocco", "Inca",
-    "Ari", "Vaxholmaren", "Profil", "USA 75", "model 519", "Bow Chair",
-    "Little Petra", "Lilla Sällskapet", "Lilla Sallskapet", "Lani"
+    "Bodö",
+    "F60",
+    "Mondo",
+    "TeVe",
+    "TeVe-Stolen",
+    "Contour",
+    "Adam",
+    "Eva",
+    "Cavelli",
+    "Sälen",
+    "Salen",
+    "Kandidaten",
+    "Lamino",
+    "Pernilla",
+    "Colonial OW149",
+    "OW149",
+    "Krobo",
+    "Minerva",
+    "AP26",
+    "Fried Egg",
+    "Sirocco",
+    "Inca",
+    "Ari",
+    "Vaxholmaren",
+    "Profil",
+    "USA 75",
+    "model 519",
+    "Bow Chair",
+    "Little Petra",
+    "Lilla Sällskapet",
+    "Lilla Sallskapet",
+    "Lani",
+    "Galaxy",
+    "Scandia Junior",
+    "Scandia Senior",
+    "Scandia Vipp",
+    "Siesta",
+    "Jetson",
+    "Maria",
+    "Hemmakväll",
+    "Samsas",
+    "Lilla Åland",
+    "Hunter",
+    "Arktis",
+    "Safari",
+    "Spanish Chair",
+    "Hunting Chair",
+    "J39",
+    "CH24",
+    "CH07",
+    "Papa Bear",
+    "Ox Chair",
+    "Egg",
+    "Swan",
+    "Series 7",
+    "Seal",
+    "Elizabeth",
+    "Pelican",
+    "Chieftain",
+    "NV-45",
+    "Egyptian Chair",
+    "Baker Sofa",
+    "PK22",
+    "PK80"
   ],
+  "model_designers": {
+    "_comment": "Every entry in models[] mapped to its designer, so the dashboard's designer badge always shows even when the listing title doesn't separately repeat the designer's name. Blank/omitted = no single named designer (collective/anonymous series or unclear attribution) — leave it off rather than guess. Source: Sarah, 2026-09-21.",
+    "Bodö": "Bruno Mathsson",
+    "F60": "Karl-Erik Ekselius",
+    "Mondo": "Bruno Mathsson",
+    "TeVe": "Alf Svensson",
+    "TeVe-Stolen": "Alf Svensson",
+    "Contour": "Alf Svensson",
+    "Adam": "Bruno Mathsson",
+    "Eva": "Bruno Mathsson",
+    "Cavelli": "Bengt Ruda",
+    "Sälen": "Yngve Ekström",
+    "Salen": "Yngve Ekström",
+    "Kandidaten": "Ib Kofod-Larsen",
+    "Lamino": "Yngve Ekström",
+    "Pernilla": "Bruno Mathsson",
+    "Colonial OW149": "Ole Wanscher",
+    "OW149": "Ole Wanscher",
+    "Krobo": "Torbjørn Afdal",
+    "Minerva": "Karl-Erik Ekselius",
+    "AP26": "Arne Vodder",
+    "Fried Egg": "Finn Juhl",
+    "Sirocco": "Arne Norell",
+    "Inca": "Arne Norell",
+    "Ari": "Arne Norell",
+    "Vaxholmaren": "Arne Norell",
+    "Profil": "Yngve Ekström",
+    "USA 75": "Yngve Ekström",
+    "model 519": "Yngve Ekström",
+    "Bow Chair": "Ib Kofod-Larsen",
+    "Little Petra": "Ib Kofod-Larsen",
+    "Lilla Sällskapet": "Carl Malmsten",
+    "Lilla Sallskapet": "Carl Malmsten",
+    "Lani": "Sven Ivar Dysthe",
+    "Galaxy": "Alf Svensson",
+    "Scandia Junior": "Hans Brattrud",
+    "Scandia Senior": "Hans Brattrud",
+    "Scandia Vipp": "Hans Brattrud",
+    "Siesta": "Ingmar Relling",
+    "Jetson": "Bruno Mathsson",
+    "Maria": "Bruno Mathsson",
+    "Hemmakväll": "Carl Malmsten",
+    "Samsas": "Carl Malmsten",
+    "Lilla Åland": "Carl Malmsten",
+    "Hunter": "Torbjørn Afdal",
+    "Arktis": "Hans Brattrud",
+    "Safari": "Kaare Klint",
+    "Spanish Chair": "Børge Mogensen",
+    "Hunting Chair": "Børge Mogensen",
+    "J39": "Børge Mogensen",
+    "CH24": "Hans Wegner",
+    "CH07": "Hans Wegner",
+    "Papa Bear": "Hans Wegner",
+    "Ox Chair": "Hans Wegner",
+    "Egg": "Arne Jacobsen",
+    "Swan": "Arne Jacobsen",
+    "Series 7": "Arne Jacobsen",
+    "Seal": "Ib Kofod-Larsen",
+    "Elizabeth": "Ib Kofod-Larsen",
+    "Pelican": "Finn Juhl",
+    "Chieftain": "Finn Juhl",
+    "NV-45": "Finn Juhl",
+    "Egyptian Chair": "Finn Juhl",
+    "Baker Sofa": "Finn Juhl",
+    "PK22": "Poul Kjærholm",
+    "PK80": "Poul Kjærholm"
+  },
   "designers": [
     "Sam Larsson",
     "Alf Svensson",
-    "Børge Mogensen", "Borge Mogensen",
-    "Niels Otto Møller", "Niels Otto Moller",
+    "Børge Mogensen",
+    "Borge Mogensen",
+    "Niels Otto Møller",
+    "Niels Otto Moller",
     "Arne Vodder",
     "Kai Kristiansen",
-    "Illum Wikkelsø", "Illum Wikkelso",
+    "Illum Wikkelsø",
+    "Illum Wikkelso",
     "Erik Buch",
-    "H.W. Klein", "HW Klein",
+    "H.W. Klein",
+    "HW Klein",
     "Poul Volther",
     "Hans Wegner",
-    "Poul Kjærholm", "Poul Kjaerholm",
+    "Poul Kjærholm",
+    "Poul Kjaerholm",
     "Finn Juhl",
     "Johannes Andersen",
-    "Svend Åge Eriksen", "Svend Age Eriksen",
+    "Svend Åge Eriksen",
+    "Svend Age Eriksen",
     "Josef Frank",
-    "Carl-Axel Acking", "Carl Axel Acking",
+    "Carl-Axel Acking",
+    "Carl Axel Acking",
     "Axel Larsson",
     "Elias Svedberg",
     "Carl Malmsten",
@@ -41,67 +174,3519 @@
     "Grete Jalk",
     "Nanna Ditzel",
     "Hans Olsen",
-    "Kerstin Hörlin-Holmquist", "Kerstin Horlin-Holmquist",
+    "Kerstin Hörlin-Holmquist",
+    "Kerstin Horlin-Holmquist",
     "Peter Hvidt",
-    "Orla Mølgaard-Nielsen", "Orla Molgaard-Nielsen",
+    "Orla Mølgaard-Nielsen",
+    "Orla Molgaard-Nielsen",
     "Folke Ohlsson",
-    "Torbjørn Afdal", "Torbjorn Afdal",
-    "Åke Axelsson", "Ake Axelsson",
-    "Yngve Ekström", "Yngve Ekstrom",
+    "Torbjørn Afdal",
+    "Torbjorn Afdal",
+    "Åke Axelsson",
+    "Ake Axelsson",
+    "Yngve Ekström",
+    "Yngve Ekstrom",
     "Arne Norell",
     "Ib Kofod-Larsen",
     "Svante Skogh",
     "Karl-Erik Ekselius",
-    "Søren Lund", "Soren Lund",
+    "Søren Lund",
+    "Soren Lund",
     "Jens Risom",
-    "Viggo Boesen"
+    "Viggo Boesen",
+    "Bengt Ruda",
+    "Hans Brattrud",
+    "Ingmar Relling",
+    "Sven Ivar Dysthe",
+    "Kaare Klint"
   ],
   "lazy_listing_terms": [
-    "retro fåtölj", "gammal fåtölj", "dansk fåtölj", "teakstol", "äldre fåtölj",
-    "loppis", "dödsbo", "flyttar", "måste bort", "retro stol", "70-tals",
-    "danish design", "teak chair", "ohne Angabe", "Dachboden", "Nachlass",
+    "retro fåtölj",
+    "gammal fåtölj",
+    "dansk fåtölj",
+    "teakstol",
+    "äldre fåtölj",
+    "loppis",
+    "dödsbo",
+    "flyttar",
+    "måste bort",
+    "retro stol",
+    "70-tals",
+    "danish design",
+    "teak chair",
+    "ohne Angabe",
+    "Dachboden",
+    "Nachlass",
     "retro Sessel",
-    "1800-talets", "1800-tal", "talets mitt", "1950-tal", "1950/60-tal", "1960-tal",
-    "Stolar 2 st", "Stolar 4 st", "Stolar ett par", "ett par",
-    "Fåtöljer ett par", "Ställbar fåtölj", "Soffgrupp", "Fåtölj", "Fåtöljer",
-    "Hallmöbel", "Karmstolar", "Karmstol", "Pallar", "Pall", "Canapé", "Schäslong"
+    "1800-talets",
+    "1800-tal",
+    "talets mitt",
+    "1950-tal",
+    "1950/60-tal",
+    "1960-tal",
+    "Stolar 2 st",
+    "Stolar 4 st",
+    "Stolar ett par",
+    "ett par",
+    "Fåtöljer ett par",
+    "Ställbar fåtölj",
+    "Soffgrupp",
+    "Fåtölj",
+    "Fåtöljer",
+    "Hallmöbel",
+    "Karmstolar",
+    "Karmstol",
+    "Pallar",
+    "Pall",
+    "Canapé",
+    "Schäslong",
+    "vintage armchair",
+    "vintage lounge chair",
+    "Danish armchair",
+    "Danish design chair",
+    "Scandinavian chair",
+    "Scandinavian armchair",
+    "teak armchair",
+    "vintage chair",
+    "designer armchair",
+    "easy chair",
+    "lounge chair",
+    "pair of chairs",
+    "pair of armchairs",
+    "estate sale",
+    "moving sale",
+    "dansk lænestol",
+    "dansk design stol",
+    "teak stol",
+    "lænestol",
+    "vintage stol",
+    "design lænestol",
+    "par stole"
   ],
   "no_designer_items": [
-    "Miranda chair of Sweden", "Miranda style", "Banquet stool",
-    "Armchair danish", "Emmafåtölj", "kids high chair oak", "danish designer",
-    "19th century armchair", "armchair Karl Johan style", "armchair la concha",
-    "birch chair", "birch armchair", "birch stool",
-    "burl chair", "burl armchair", "burl stool",
-    "beech chair", "beech armchair", "beech stool",
-    "mahogany chair", "mahogany armchair", "mahogany stool",
-    "teak chair set", "teak armchair", "teak stool",
-    "piano stool", "pianopall", "round stool",
-    "Swedish modern", "Swedish Grace", "Gripsholm chair", "ottoman",
+    "Miranda chair of Sweden",
+    "Miranda style",
+    "Banquet stool",
+    "Armchair danish",
+    "Emmafåtölj",
+    "kids high chair oak",
+    "danish designer",
+    "19th century armchair",
+    "armchair Karl Johan style",
+    "armchair la concha",
+    "birch chair",
+    "birch armchair",
+    "birch stool",
+    "burl chair",
+    "burl armchair",
+    "burl stool",
+    "beech chair",
+    "beech armchair",
+    "beech stool",
+    "mahogany chair",
+    "mahogany armchair",
+    "mahogany stool",
+    "teak chair set",
+    "teak armchair",
+    "teak stool",
+    "piano stool",
+    "pianopall",
+    "round stool",
+    "Swedish modern",
+    "Swedish Grace",
+    "Gripsholm chair",
+    "ottoman",
     "Swedish Biedermeier stool",
-    "Louis XV armchair", "Niels Kofoed chair",
-    "Art Deco armchair", "Rainer Daumiller Gubi", "antique bench",
-    "Alf Svensson armchair", "chaise longue", "canapé", "spindle bench",
-    "spisestol", "skammel", "tremmestol",
-    "liggstol", "daybed teak", "divan", "Svanhalsstolar"
+    "Louis XV armchair",
+    "Niels Kofoed chair",
+    "Art Deco armchair",
+    "Rainer Daumiller Gubi",
+    "antique bench",
+    "Alf Svensson armchair",
+    "chaise longue",
+    "canapé",
+    "spindle bench",
+    "spisestol",
+    "skammel",
+    "tremmestol",
+    "liggstol",
+    "daybed teak",
+    "divan",
+    "Svanhalsstolar"
   ],
   "woods": [
-    "jakaranda stol", "jakaranda fåtölj", "jakaranda chair",
-    "palisander stol", "palisander fåtölj",
-    "afrormosia chair", "afrormosia armchair", "afromosia stol",
-    "valnöt fåtölj", "walnut armchair",
-    "alm stol", "elm chair"
+    "jakaranda",
+    "palisander",
+    "afrormosia",
+    "afromosia",
+    "valnöt",
+    "walnut",
+    "alm",
+    "elm"
   ],
   "exclude": [
-    "chesterfield", "club armchair", "trasig", "broken", "butterfly chair"
+    "chesterfield",
+    "club armchair",
+    "trasig",
+    "broken",
+    "butterfly chair"
   ],
   "seating_only": true,
   "seating_type_words": [
-    "stol", "fåtölj", "pall", "bänk", "soffa", "karmstol", "fotpall",
-    "taburett", "chair", "armchair", "stool", "bench", "sofa", "ottoman"
+    "stol",
+    "fåtölj",
+    "pall",
+    "bänk",
+    "soffa",
+    "karmstol",
+    "fotpall",
+    "taburett",
+    "chair",
+    "armchair",
+    "stool",
+    "bench",
+    "sofa",
+    "ottoman"
   ],
   "non_seating_type_words": [
-    "bord", "skänk", "skåp", "hylla", "bokhylla", "byrå", "spegel", "lampa",
-    "matta", "tavla", "vas", "skulptur", "servis", "table", "cabinet",
-    "shelf", "mirror", "lamp", "rug", "painting", "vase", "sculpture"
-  ]
+    "bord",
+    "matgrupp",
+    "skänk",
+    "skåp",
+    "hylla",
+    "bokhylla",
+    "byrå",
+    "spegel",
+    "lampa",
+    "matta",
+    "tavla",
+    "vas",
+    "skulptur",
+    "servis",
+    "table",
+    "cabinet",
+    "dining set",
+    "shelf",
+    "mirror",
+    "lamp",
+    "rug",
+    "painting",
+    "vase",
+    "sculpture"
+  ],
+  "model_database": [
+    {
+      "model": "TeVe",
+      "designer": "Alf Svensson",
+      "manufacturer": null,
+      "country": "Sweden",
+      "production_period": null,
+      "vedda_status": "BUY",
+      "upholstery_strategy": "REUPHOLSTER",
+      "buy_max_sek": 4000,
+      "target_resale_sek": [
+        8000,
+        15000
+      ],
+      "refurbishment_cost_sek": [
+        3500,
+        4500
+      ],
+      "original_material_value": "LOW",
+      "collector_sensitivity": "LOW",
+      "findability": "MEDIUM",
+      "search_priority": "HIGH",
+      "search_terms": {
+        "official": [
+          "TeVe"
+        ],
+        "swedish": [
+          "TeVe fåtölj",
+          "TeVe stol",
+          "Alf Svensson TeVe",
+          "Te-Ve fåtölj",
+          "Te Ve stol"
+        ],
+        "english": [
+          "TeVe armchair",
+          "TeVe lounge chair",
+          "Alf Svensson TeVe",
+          "TeVe armchair"
+        ],
+        "danish": [
+          "TeVe lænestol"
+        ],
+        "norwegian": [
+          "TeVe lenestol"
+        ],
+        "no_diacritics": [],
+        "generic_seller_terms": [
+          "retro fåtölj",
+          "teakstol",
+          "dansk fåtölj",
+          "Alf Svensson fåtölj"
+        ]
+      },
+      "authentication_markers": [],
+      "condition_red_flags": [],
+      "notes": "Underidentified Swedish lounge chair, responds very well to reupholstery, strong margin. ATTRIBUTION NOTE: corrected from an earlier (wrong) attribution — TeVe is Alf Svensson, not a Bruno Mathsson model.",
+      "price_basis": "ESTIMATE — Sarah's working sourcing thresholds, 2026-09-21, not verified market data"
+    },
+    {
+      "model": "Contour",
+      "designer": "Alf Svensson",
+      "manufacturer": null,
+      "country": "Sweden",
+      "production_period": null,
+      "vedda_status": "BUY",
+      "upholstery_strategy": "REUPHOLSTER",
+      "buy_max_sek": 4000,
+      "target_resale_sek": [
+        8000,
+        15000
+      ],
+      "refurbishment_cost_sek": [
+        3500,
+        4500
+      ],
+      "original_material_value": "LOW",
+      "collector_sensitivity": "LOW",
+      "findability": "MEDIUM",
+      "search_priority": "HIGH",
+      "search_terms": {
+        "official": [
+          "Contour"
+        ],
+        "swedish": [
+          "Contour fåtölj",
+          "Contour stol",
+          "Alf Svensson Contour"
+        ],
+        "english": [
+          "Contour armchair",
+          "Contour lounge chair",
+          "Alf Svensson Contour"
+        ],
+        "danish": [
+          "Contour lænestol"
+        ],
+        "norwegian": [
+          "Contour lenestol"
+        ],
+        "no_diacritics": [],
+        "generic_seller_terms": [
+          "retro fåtölj",
+          "teakstol",
+          "dansk fåtölj",
+          "Alf Svensson fåtölj"
+        ]
+      },
+      "authentication_markers": [],
+      "condition_red_flags": [],
+      "notes": "Same Alf Svensson family as TeVe — excellent reupholstery response, low seller awareness. ATTRIBUTION NOTE: corrected — Contour is Alf Svensson, not a Bruno Mathsson model.",
+      "price_basis": "ESTIMATE — Sarah's working sourcing thresholds, 2026-09-21, not verified market data"
+    },
+    {
+      "model": "Galaxy",
+      "designer": "Alf Svensson",
+      "manufacturer": null,
+      "country": "Sweden",
+      "production_period": null,
+      "vedda_status": "BUY",
+      "upholstery_strategy": "REUPHOLSTER",
+      "buy_max_sek": 5000,
+      "target_resale_sek": [
+        8000,
+        15000
+      ],
+      "refurbishment_cost_sek": [
+        3500,
+        4500
+      ],
+      "original_material_value": "LOW",
+      "collector_sensitivity": "LOW",
+      "findability": "MEDIUM",
+      "search_priority": "HIGH",
+      "search_terms": {
+        "official": [
+          "Galaxy"
+        ],
+        "swedish": [
+          "Galaxy fåtölj",
+          "Galaxy stol",
+          "Alf Svensson Galaxy"
+        ],
+        "english": [
+          "Galaxy armchair",
+          "Galaxy lounge chair",
+          "Alf Svensson Galaxy"
+        ],
+        "danish": [
+          "Galaxy lænestol"
+        ],
+        "norwegian": [
+          "Galaxy lenestol"
+        ],
+        "no_diacritics": [],
+        "generic_seller_terms": [
+          "retro fåtölj",
+          "vintage armchair",
+          "dansk fåtölj",
+          "Scandinavian armchair",
+          "teak chair"
+        ]
+      },
+      "authentication_markers": [],
+      "condition_red_flags": [],
+      "notes": "Same family/strategy as TeVe and Contour.",
+      "price_basis": "ESTIMATE — Sarah's working sourcing thresholds, 2026-09-21, not verified market data"
+    },
+    {
+      "model": "Lamino",
+      "designer": "Yngve Ekström",
+      "manufacturer": null,
+      "country": "Sweden",
+      "production_period": null,
+      "vedda_status": "BUY",
+      "upholstery_strategy": "PARTIAL_RESTORE",
+      "buy_max_sek": 4000,
+      "target_resale_sek": [
+        7000,
+        12000
+      ],
+      "refurbishment_cost_sek": [
+        3500,
+        4500
+      ],
+      "original_material_value": "LOW",
+      "collector_sensitivity": "LOW",
+      "findability": "HIGH",
+      "search_priority": "HIGH",
+      "search_terms": {
+        "official": [
+          "Lamino"
+        ],
+        "swedish": [
+          "Lamino fåtölj",
+          "Lamino stol",
+          "Yngve Ekström Lamino"
+        ],
+        "english": [
+          "Lamino armchair",
+          "Lamino lounge chair",
+          "Yngve Ekström Lamino"
+        ],
+        "danish": [
+          "Lamino lænestol"
+        ],
+        "norwegian": [
+          "Lamino lenestol"
+        ],
+        "no_diacritics": [
+          "Yngve Ekstrom",
+          "Yngve Ekstrom Lamino"
+        ],
+        "generic_seller_terms": [
+          "retro fåtölj",
+          "vintage armchair",
+          "dansk fåtölj",
+          "Scandinavian armchair",
+          "teak chair"
+        ]
+      },
+      "authentication_markers": [],
+      "condition_red_flags": [],
+      "notes": "Very findable, strong resale, but original sheepskin/leather is a real part of the design — reupholster the wool/fabric versions freely, treat original sheepskin examples more carefully (partial restore, not a full fabric swap).",
+      "price_basis": "ESTIMATE — Sarah's working sourcing thresholds, 2026-09-21, not verified market data"
+    },
+    {
+      "model": "Profil",
+      "designer": "Yngve Ekström",
+      "manufacturer": null,
+      "country": "Sweden",
+      "production_period": null,
+      "vedda_status": "BUY",
+      "upholstery_strategy": "REUPHOLSTER",
+      "buy_max_sek": 5000,
+      "target_resale_sek": [
+        8000,
+        15000
+      ],
+      "refurbishment_cost_sek": [
+        3500,
+        4500
+      ],
+      "original_material_value": "LOW",
+      "collector_sensitivity": "LOW",
+      "findability": "MEDIUM",
+      "search_priority": "HIGH",
+      "search_terms": {
+        "official": [
+          "Profil"
+        ],
+        "swedish": [
+          "Profil fåtölj",
+          "Profil stol",
+          "Yngve Ekström Profil"
+        ],
+        "english": [
+          "Profil armchair",
+          "Profil lounge chair",
+          "Yngve Ekström Profil"
+        ],
+        "danish": [
+          "Profil lænestol"
+        ],
+        "norwegian": [
+          "Profil lenestol"
+        ],
+        "no_diacritics": [
+          "Yngve Ekstrom",
+          "Yngve Ekstrom Profil"
+        ],
+        "generic_seller_terms": [
+          "retro fåtölj",
+          "vintage armchair",
+          "dansk fåtölj",
+          "Scandinavian armchair",
+          "teak chair"
+        ]
+      },
+      "authentication_markers": [],
+      "condition_red_flags": [],
+      "notes": "Good margin, underidentified.",
+      "price_basis": "ESTIMATE — Sarah's working sourcing thresholds, 2026-09-21, not verified market data"
+    },
+    {
+      "model": "USA 75",
+      "designer": "Yngve Ekström",
+      "manufacturer": null,
+      "country": "Sweden",
+      "production_period": null,
+      "vedda_status": "BUY",
+      "upholstery_strategy": "REUPHOLSTER",
+      "buy_max_sek": 4000,
+      "target_resale_sek": [
+        7000,
+        12000
+      ],
+      "refurbishment_cost_sek": [
+        4000,
+        5500
+      ],
+      "original_material_value": "LOW",
+      "collector_sensitivity": "LOW",
+      "findability": "MEDIUM",
+      "search_priority": "HIGH",
+      "search_terms": {
+        "official": [
+          "USA 75"
+        ],
+        "swedish": [
+          "USA 75 fåtölj",
+          "USA 75 stol",
+          "Yngve Ekström USA 75"
+        ],
+        "english": [
+          "USA 75 armchair",
+          "USA 75 lounge chair",
+          "Yngve Ekström USA 75"
+        ],
+        "danish": [
+          "USA 75 lænestol"
+        ],
+        "norwegian": [
+          "USA 75 lenestol"
+        ],
+        "no_diacritics": [
+          "Yngve Ekstrom",
+          "Yngve Ekstrom USA 75"
+        ],
+        "generic_seller_terms": [
+          "retro fåtölj",
+          "vintage armchair",
+          "dansk fåtölj",
+          "Scandinavian armchair",
+          "teak chair"
+        ]
+      },
+      "authentication_markers": [],
+      "condition_red_flags": [],
+      "notes": "Reliable margin, moderate findability.",
+      "price_basis": "ESTIMATE — Sarah's working sourcing thresholds, 2026-09-21, not verified market data"
+    },
+    {
+      "model": "model 519",
+      "designer": "Yngve Ekström",
+      "manufacturer": null,
+      "country": "Sweden",
+      "production_period": null,
+      "vedda_status": "BUY",
+      "upholstery_strategy": "REUPHOLSTER",
+      "buy_max_sek": 4000,
+      "target_resale_sek": [
+        7000,
+        12000
+      ],
+      "refurbishment_cost_sek": [
+        4000,
+        5500
+      ],
+      "original_material_value": "LOW",
+      "collector_sensitivity": "LOW",
+      "findability": "MEDIUM",
+      "search_priority": "HIGH",
+      "search_terms": {
+        "official": [
+          "model 519",
+          "519",
+          "modell 519"
+        ],
+        "swedish": [
+          "model 519 fåtölj",
+          "model 519 stol",
+          "Yngve Ekström model 519"
+        ],
+        "english": [
+          "model 519 armchair",
+          "model 519 lounge chair",
+          "Yngve Ekström model 519"
+        ],
+        "danish": [
+          "model 519 lænestol"
+        ],
+        "norwegian": [
+          "model 519 lenestol"
+        ],
+        "no_diacritics": [
+          "Yngve Ekstrom",
+          "Yngve Ekstrom model 519"
+        ],
+        "generic_seller_terms": [
+          "retro fåtölj",
+          "vintage armchair",
+          "dansk fåtölj",
+          "Scandinavian armchair",
+          "teak chair"
+        ]
+      },
+      "authentication_markers": [],
+      "condition_red_flags": [],
+      "notes": "Same Ekström-family economics as USA 75.",
+      "price_basis": "ESTIMATE — Sarah's working sourcing thresholds, 2026-09-21, not verified market data"
+    },
+    {
+      "model": "Sälen",
+      "designer": "Yngve Ekström",
+      "manufacturer": null,
+      "country": "Sweden",
+      "production_period": null,
+      "vedda_status": "BUY",
+      "upholstery_strategy": "REUPHOLSTER",
+      "buy_max_sek": 3000,
+      "target_resale_sek": [
+        5000,
+        9000
+      ],
+      "refurbishment_cost_sek": [
+        4000,
+        5500
+      ],
+      "original_material_value": "LOW",
+      "collector_sensitivity": "LOW",
+      "findability": "HIGH",
+      "search_priority": "HIGH",
+      "search_terms": {
+        "official": [
+          "Sälen",
+          "Salen"
+        ],
+        "swedish": [
+          "Sälen fåtölj",
+          "Sälen stol",
+          "Yngve Ekström Sälen"
+        ],
+        "english": [
+          "Sälen armchair",
+          "Sälen lounge chair",
+          "Yngve Ekström Sälen"
+        ],
+        "danish": [
+          "Sälen lænestol"
+        ],
+        "norwegian": [
+          "Sälen lenestol"
+        ],
+        "no_diacritics": [
+          "Salen",
+          "Yngve Ekstrom",
+          "Yngve Ekstrom Sälen"
+        ],
+        "generic_seller_terms": [
+          "retro fåtölj",
+          "vintage armchair",
+          "dansk fåtölj",
+          "Scandinavian armchair",
+          "teak chair"
+        ]
+      },
+      "authentication_markers": [],
+      "condition_red_flags": [],
+      "notes": "Common, findable, dependable smaller-margin flip.",
+      "price_basis": "ESTIMATE — Sarah's working sourcing thresholds, 2026-09-21, not verified market data"
+    },
+    {
+      "model": "Pernilla",
+      "designer": "Bruno Mathsson",
+      "manufacturer": null,
+      "country": "Sweden",
+      "production_period": null,
+      "vedda_status": "BUY",
+      "upholstery_strategy": "PARTIAL_RESTORE",
+      "buy_max_sek": 5000,
+      "target_resale_sek": [
+        8000,
+        14000
+      ],
+      "refurbishment_cost_sek": [
+        4000,
+        5500
+      ],
+      "original_material_value": "LOW",
+      "collector_sensitivity": "LOW",
+      "findability": "MEDIUM",
+      "search_priority": "HIGH",
+      "search_terms": {
+        "official": [
+          "Pernilla"
+        ],
+        "swedish": [
+          "Pernilla fåtölj",
+          "Pernilla stol",
+          "Bruno Mathsson Pernilla"
+        ],
+        "english": [
+          "Pernilla armchair",
+          "Pernilla lounge chair",
+          "Bruno Mathsson Pernilla"
+        ],
+        "danish": [
+          "Pernilla lænestol"
+        ],
+        "norwegian": [
+          "Pernilla lenestol"
+        ],
+        "no_diacritics": [],
+        "generic_seller_terms": [
+          "retro fåtölj",
+          "vintage armchair",
+          "dansk fåtölj",
+          "Scandinavian armchair",
+          "teak chair"
+        ]
+      },
+      "authentication_markers": [],
+      "condition_red_flags": [],
+      "notes": "Sarah's table listed this as Yngve Ekström — corrected to Bruno Mathsson (Dux), matching a live Auctionet listing titled 'BRUNO MATHSSON. FÅTÖLJ, Pernilla' and Mathsson's known Eva/Mini/Miranda/Pernilla family. Frame is the value driver; treat as partial restore rather than a blind full reupholster on early/marked examples. ATTRIBUTION NOTE: corrected per Sarah's confirmation, 2026-09-21 — was wrongly Yngve Ekström.",
+      "price_basis": "ESTIMATE — Sarah's working sourcing thresholds, 2026-09-21, not verified market data"
+    },
+    {
+      "model": "Cavelli",
+      "designer": "Bengt Ruda",
+      "manufacturer": null,
+      "country": "Sweden",
+      "production_period": null,
+      "vedda_status": "BUY",
+      "upholstery_strategy": "REUPHOLSTER",
+      "buy_max_sek": 10000,
+      "target_resale_sek": [
+        20000,
+        20000
+      ],
+      "refurbishment_cost_sek": [
+        4000,
+        5500
+      ],
+      "original_material_value": "LOW",
+      "collector_sensitivity": "LOW",
+      "findability": "LOW",
+      "search_priority": "MEDIUM",
+      "search_terms": {
+        "official": [
+          "Cavelli"
+        ],
+        "swedish": [
+          "Cavelli fåtölj",
+          "Cavelli stol",
+          "Bengt Ruda Cavelli"
+        ],
+        "english": [
+          "Cavelli armchair",
+          "Cavelli lounge chair",
+          "Bengt Ruda Cavelli"
+        ],
+        "danish": [
+          "Cavelli lænestol"
+        ],
+        "norwegian": [
+          "Cavelli lenestol"
+        ],
+        "no_diacritics": [],
+        "generic_seller_terms": [
+          "retro fåtölj",
+          "vintage armchair",
+          "dansk fåtölj",
+          "Scandinavian armchair",
+          "teak chair"
+        ]
+      },
+      "authentication_markers": [],
+      "condition_red_flags": [],
+      "notes": "Rare, hard to find, but strong upside when it surfaces — high buy ceiling (up to 10k) justified by 20k+ resale. ATTRIBUTION NOTE: corrected — Cavelli is Bengt Ruda, not Gösta Jonsson/SMF as an earlier note guessed.",
+      "price_basis": "ESTIMATE — Sarah's working sourcing thresholds, 2026-09-21, not verified market data"
+    },
+    {
+      "model": "Krobo",
+      "designer": "Torbjørn Afdal",
+      "manufacturer": null,
+      "country": "Norway",
+      "production_period": null,
+      "vedda_status": "BUY",
+      "upholstery_strategy": "REUPHOLSTER",
+      "buy_max_sek": 2000,
+      "target_resale_sek": [
+        3000,
+        6000
+      ],
+      "refurbishment_cost_sek": [
+        4000,
+        5500
+      ],
+      "original_material_value": "LOW",
+      "collector_sensitivity": "LOW",
+      "findability": "HIGH",
+      "search_priority": "HIGH",
+      "search_terms": {
+        "official": [
+          "Krobo",
+          "Torbjorn Afdal Krobo"
+        ],
+        "swedish": [
+          "Krobo fåtölj",
+          "Krobo stol",
+          "Torbjørn Afdal Krobo"
+        ],
+        "english": [
+          "Krobo armchair",
+          "Krobo lounge chair",
+          "Torbjørn Afdal Krobo"
+        ],
+        "danish": [
+          "Krobo lænestol"
+        ],
+        "norwegian": [
+          "Krobo lenestol"
+        ],
+        "no_diacritics": [
+          "Torbjorn Afdal",
+          "Torbjorn Afdal Krobo"
+        ],
+        "generic_seller_terms": [
+          "retro fåtölj",
+          "vintage armchair",
+          "dansk fåtölj",
+          "Scandinavian armchair",
+          "teak chair"
+        ]
+      },
+      "authentication_markers": [],
+      "condition_red_flags": [],
+      "notes": "Low buy-in, findable, dependable smaller flip. CITES applies if rosewood/palisander and crossing borders (see CLAUDE.md).",
+      "price_basis": "ESTIMATE — Sarah's working sourcing thresholds, 2026-09-21, not verified market data"
+    },
+    {
+      "model": "Sirocco",
+      "designer": "Arne Norell",
+      "manufacturer": null,
+      "country": "Sweden",
+      "production_period": null,
+      "vedda_status": "BUY",
+      "upholstery_strategy": "REUPHOLSTER",
+      "buy_max_sek": 6000,
+      "target_resale_sek": [
+        8000,
+        15000
+      ],
+      "refurbishment_cost_sek": [
+        4000,
+        5500
+      ],
+      "original_material_value": "LOW",
+      "collector_sensitivity": "LOW",
+      "findability": "MEDIUM",
+      "search_priority": "HIGH",
+      "search_terms": {
+        "official": [
+          "Sirocco"
+        ],
+        "swedish": [
+          "Sirocco fåtölj",
+          "Sirocco stol",
+          "Arne Norell Sirocco"
+        ],
+        "english": [
+          "Sirocco armchair",
+          "Sirocco lounge chair",
+          "Arne Norell Sirocco"
+        ],
+        "danish": [
+          "Sirocco lænestol"
+        ],
+        "norwegian": [
+          "Sirocco lenestol"
+        ],
+        "no_diacritics": [],
+        "generic_seller_terms": [
+          "retro fåtölj",
+          "vintage armchair",
+          "dansk fåtölj",
+          "Scandinavian armchair",
+          "teak chair"
+        ]
+      },
+      "authentication_markers": [],
+      "condition_red_flags": [],
+      "notes": "Solid Norell-family margin and demand.",
+      "price_basis": "ESTIMATE — Sarah's working sourcing thresholds, 2026-09-21, not verified market data"
+    },
+    {
+      "model": "Inca",
+      "designer": "Arne Norell",
+      "manufacturer": null,
+      "country": "Sweden",
+      "production_period": null,
+      "vedda_status": "BUY",
+      "upholstery_strategy": "REUPHOLSTER",
+      "buy_max_sek": 5000,
+      "target_resale_sek": [
+        7000,
+        12000
+      ],
+      "refurbishment_cost_sek": [
+        4000,
+        5500
+      ],
+      "original_material_value": "LOW",
+      "collector_sensitivity": "LOW",
+      "findability": "MEDIUM",
+      "search_priority": "HIGH",
+      "search_terms": {
+        "official": [
+          "Inca"
+        ],
+        "swedish": [
+          "Inca fåtölj",
+          "Inca stol",
+          "Arne Norell Inca"
+        ],
+        "english": [
+          "Inca armchair",
+          "Inca lounge chair",
+          "Arne Norell Inca"
+        ],
+        "danish": [
+          "Inca lænestol"
+        ],
+        "norwegian": [
+          "Inca lenestol"
+        ],
+        "no_diacritics": [],
+        "generic_seller_terms": [
+          "retro fåtölj",
+          "vintage armchair",
+          "dansk fåtölj",
+          "Scandinavian armchair",
+          "teak chair"
+        ]
+      },
+      "authentication_markers": [],
+      "condition_red_flags": [],
+      "notes": "Same Norell-family economics as Sirocco.",
+      "price_basis": "ESTIMATE — Sarah's working sourcing thresholds, 2026-09-21, not verified market data"
+    },
+    {
+      "model": "Ari",
+      "designer": "Arne Norell",
+      "manufacturer": null,
+      "country": "Sweden",
+      "production_period": null,
+      "vedda_status": "BUY",
+      "upholstery_strategy": "REUPHOLSTER",
+      "buy_max_sek": 6000,
+      "target_resale_sek": [
+        8000,
+        15000
+      ],
+      "refurbishment_cost_sek": [
+        4000,
+        5500
+      ],
+      "original_material_value": "LOW",
+      "collector_sensitivity": "LOW",
+      "findability": "MEDIUM",
+      "search_priority": "HIGH",
+      "search_terms": {
+        "official": [
+          "Ari"
+        ],
+        "swedish": [
+          "Ari fåtölj",
+          "Ari stol",
+          "Arne Norell Ari"
+        ],
+        "english": [
+          "Ari armchair",
+          "Ari lounge chair",
+          "Arne Norell Ari"
+        ],
+        "danish": [
+          "Ari lænestol"
+        ],
+        "norwegian": [
+          "Ari lenestol"
+        ],
+        "no_diacritics": [],
+        "generic_seller_terms": [
+          "retro fåtölj",
+          "vintage armchair",
+          "dansk fåtölj",
+          "Scandinavian armchair",
+          "teak chair"
+        ]
+      },
+      "authentication_markers": [],
+      "condition_red_flags": [],
+      "notes": "Same Norell-family economics as Sirocco.",
+      "price_basis": "ESTIMATE — Sarah's working sourcing thresholds, 2026-09-21, not verified market data"
+    },
+    {
+      "model": "Vaxholmaren",
+      "designer": "Arne Norell",
+      "manufacturer": null,
+      "country": "Sweden",
+      "production_period": null,
+      "vedda_status": "BUY",
+      "upholstery_strategy": "REUPHOLSTER",
+      "buy_max_sek": 5000,
+      "target_resale_sek": [
+        8000,
+        15000
+      ],
+      "refurbishment_cost_sek": [
+        4000,
+        5500
+      ],
+      "original_material_value": "LOW",
+      "collector_sensitivity": "LOW",
+      "findability": "MEDIUM",
+      "search_priority": "HIGH",
+      "search_terms": {
+        "official": [
+          "Vaxholmaren"
+        ],
+        "swedish": [
+          "Vaxholmaren fåtölj",
+          "Vaxholmaren stol",
+          "Arne Norell Vaxholmaren"
+        ],
+        "english": [
+          "Vaxholmaren armchair",
+          "Vaxholmaren lounge chair",
+          "Arne Norell Vaxholmaren"
+        ],
+        "danish": [
+          "Vaxholmaren lænestol"
+        ],
+        "norwegian": [
+          "Vaxholmaren lenestol"
+        ],
+        "no_diacritics": [],
+        "generic_seller_terms": [
+          "retro fåtölj",
+          "vintage armchair",
+          "dansk fåtölj",
+          "Scandinavian armchair",
+          "teak chair"
+        ]
+      },
+      "authentication_markers": [],
+      "condition_red_flags": [],
+      "notes": "Same Norell-family economics as Sirocco.",
+      "price_basis": "ESTIMATE — Sarah's working sourcing thresholds, 2026-09-21, not verified market data"
+    },
+    {
+      "model": "Bow Chair",
+      "designer": "Ib Kofod-Larsen",
+      "manufacturer": null,
+      "country": "Denmark",
+      "production_period": null,
+      "vedda_status": "BUY",
+      "upholstery_strategy": "REUPHOLSTER",
+      "buy_max_sek": 5000,
+      "target_resale_sek": [
+        8000,
+        15000
+      ],
+      "refurbishment_cost_sek": [
+        4000,
+        5500
+      ],
+      "original_material_value": "LOW",
+      "collector_sensitivity": "LOW",
+      "findability": "MEDIUM",
+      "search_priority": "HIGH",
+      "search_terms": {
+        "official": [
+          "Bow Chair",
+          "Bow-Chair",
+          "Buekstol"
+        ],
+        "swedish": [
+          "Bow Chair fåtölj",
+          "Bow Chair stol",
+          "Ib Kofod-Larsen Bow Chair"
+        ],
+        "english": [
+          "Bow Chair armchair",
+          "Bow Chair lounge chair",
+          "Ib Kofod-Larsen Bow Chair"
+        ],
+        "danish": [
+          "Bow Chair lænestol"
+        ],
+        "norwegian": [
+          "Bow Chair lenestol"
+        ],
+        "no_diacritics": [],
+        "generic_seller_terms": [
+          "retro fåtölj",
+          "vintage armchair",
+          "dansk fåtölj",
+          "Scandinavian armchair",
+          "teak chair"
+        ]
+      },
+      "authentication_markers": [],
+      "condition_red_flags": [],
+      "notes": "Good margin, moderate findability.",
+      "price_basis": "ESTIMATE — Sarah's working sourcing thresholds, 2026-09-21, not verified market data"
+    },
+    {
+      "model": "Little Petra",
+      "designer": "Ib Kofod-Larsen",
+      "manufacturer": null,
+      "country": "Denmark",
+      "production_period": null,
+      "vedda_status": "BUY",
+      "upholstery_strategy": "REUPHOLSTER",
+      "buy_max_sek": 7000,
+      "target_resale_sek": [
+        10000,
+        18000
+      ],
+      "refurbishment_cost_sek": [
+        4000,
+        5500
+      ],
+      "original_material_value": "LOW",
+      "collector_sensitivity": "LOW",
+      "findability": "MEDIUM",
+      "search_priority": "HIGH",
+      "search_terms": {
+        "official": [
+          "Little Petra"
+        ],
+        "swedish": [
+          "Little Petra fåtölj",
+          "Little Petra stol",
+          "Ib Kofod-Larsen Little Petra"
+        ],
+        "english": [
+          "Little Petra armchair",
+          "Little Petra lounge chair",
+          "Ib Kofod-Larsen Little Petra"
+        ],
+        "danish": [
+          "Little Petra lænestol"
+        ],
+        "norwegian": [
+          "Little Petra lenestol"
+        ],
+        "no_diacritics": [],
+        "generic_seller_terms": [
+          "retro fåtölj",
+          "vintage armchair",
+          "dansk fåtölj",
+          "Scandinavian armchair",
+          "teak chair"
+        ]
+      },
+      "authentication_markers": [],
+      "condition_red_flags": [],
+      "notes": "Strong resale, worth the higher buy ceiling.",
+      "price_basis": "ESTIMATE — Sarah's working sourcing thresholds, 2026-09-21, not verified market data"
+    },
+    {
+      "model": "Kandidaten",
+      "designer": "Ib Kofod-Larsen",
+      "manufacturer": null,
+      "country": "Denmark/Sweden",
+      "production_period": null,
+      "vedda_status": "BUY",
+      "upholstery_strategy": "REUPHOLSTER",
+      "buy_max_sek": 6000,
+      "target_resale_sek": [
+        8000,
+        15000
+      ],
+      "refurbishment_cost_sek": [
+        4000,
+        5500
+      ],
+      "original_material_value": "LOW",
+      "collector_sensitivity": "LOW",
+      "findability": "MEDIUM",
+      "search_priority": "HIGH",
+      "search_terms": {
+        "official": [
+          "Kandidaten"
+        ],
+        "swedish": [
+          "Kandidaten fåtölj",
+          "Kandidaten stol",
+          "Ib Kofod-Larsen Kandidaten"
+        ],
+        "english": [
+          "Kandidaten armchair",
+          "Kandidaten lounge chair",
+          "Ib Kofod-Larsen Kandidaten"
+        ],
+        "danish": [
+          "Kandidaten lænestol"
+        ],
+        "norwegian": [
+          "Kandidaten lenestol"
+        ],
+        "no_diacritics": [],
+        "generic_seller_terms": [
+          "retro fåtölj",
+          "vintage armchair",
+          "dansk fåtölj",
+          "Scandinavian armchair",
+          "teak chair"
+        ]
+      },
+      "authentication_markers": [],
+      "condition_red_flags": [],
+      "notes": "Good margin. ATTRIBUTION NOTE: corrected — Kandidaten is Ib Kofod-Larsen, not an anonymous Swedish social-furniture series as previously assumed.",
+      "price_basis": "ESTIMATE — Sarah's working sourcing thresholds, 2026-09-21, not verified market data"
+    },
+    {
+      "model": "Scandia Junior",
+      "designer": "Hans Brattrud",
+      "manufacturer": null,
+      "country": "Norway",
+      "production_period": null,
+      "vedda_status": "BUY",
+      "upholstery_strategy": "REUPHOLSTER",
+      "buy_max_sek": 3000,
+      "target_resale_sek": [
+        5000,
+        9000
+      ],
+      "refurbishment_cost_sek": [
+        4000,
+        5500
+      ],
+      "original_material_value": "LOW",
+      "collector_sensitivity": "LOW",
+      "findability": "MEDIUM",
+      "search_priority": "HIGH",
+      "search_terms": {
+        "official": [
+          "Scandia Junior",
+          "Scandia"
+        ],
+        "swedish": [
+          "Scandia Junior fåtölj",
+          "Scandia Junior stol",
+          "Hans Brattrud Scandia Junior"
+        ],
+        "english": [
+          "Scandia Junior armchair",
+          "Scandia Junior lounge chair",
+          "Hans Brattrud Scandia Junior"
+        ],
+        "danish": [
+          "Scandia Junior lænestol"
+        ],
+        "norwegian": [
+          "Scandia Junior lenestol"
+        ],
+        "no_diacritics": [],
+        "generic_seller_terms": [
+          "retro fåtölj",
+          "vintage armchair",
+          "dansk fåtölj",
+          "Scandinavian armchair",
+          "teak chair"
+        ]
+      },
+      "authentication_markers": [],
+      "condition_red_flags": [],
+      "notes": "Reliable Brattrud-family flip. ATTRIBUTION NOTE: corrected — Scandia (all variants) is Hans Brattrud, not previously mapped.",
+      "price_basis": "ESTIMATE — Sarah's working sourcing thresholds, 2026-09-21, not verified market data"
+    },
+    {
+      "model": "Scandia Senior",
+      "designer": "Hans Brattrud",
+      "manufacturer": null,
+      "country": "Norway",
+      "production_period": null,
+      "vedda_status": "BUY",
+      "upholstery_strategy": "REUPHOLSTER",
+      "buy_max_sek": 5000,
+      "target_resale_sek": [
+        7000,
+        12000
+      ],
+      "refurbishment_cost_sek": [
+        4000,
+        5500
+      ],
+      "original_material_value": "LOW",
+      "collector_sensitivity": "LOW",
+      "findability": "MEDIUM",
+      "search_priority": "HIGH",
+      "search_terms": {
+        "official": [
+          "Scandia Senior"
+        ],
+        "swedish": [
+          "Scandia Senior fåtölj",
+          "Scandia Senior stol",
+          "Hans Brattrud Scandia Senior"
+        ],
+        "english": [
+          "Scandia Senior armchair",
+          "Scandia Senior lounge chair",
+          "Hans Brattrud Scandia Senior"
+        ],
+        "danish": [
+          "Scandia Senior lænestol"
+        ],
+        "norwegian": [
+          "Scandia Senior lenestol"
+        ],
+        "no_diacritics": [],
+        "generic_seller_terms": [
+          "retro fåtölj",
+          "vintage armchair",
+          "dansk fåtölj",
+          "Scandinavian armchair",
+          "teak chair"
+        ]
+      },
+      "authentication_markers": [],
+      "condition_red_flags": [],
+      "notes": "Same Brattrud-family economics as Scandia Junior.",
+      "price_basis": "ESTIMATE — Sarah's working sourcing thresholds, 2026-09-21, not verified market data"
+    },
+    {
+      "model": "Scandia Vipp",
+      "designer": "Hans Brattrud",
+      "manufacturer": null,
+      "country": "Norway",
+      "production_period": null,
+      "vedda_status": "BUY",
+      "upholstery_strategy": "REUPHOLSTER",
+      "buy_max_sek": 5000,
+      "target_resale_sek": [
+        7000,
+        12000
+      ],
+      "refurbishment_cost_sek": [
+        4000,
+        5500
+      ],
+      "original_material_value": "LOW",
+      "collector_sensitivity": "LOW",
+      "findability": "MEDIUM",
+      "search_priority": "HIGH",
+      "search_terms": {
+        "official": [
+          "Scandia Vipp"
+        ],
+        "swedish": [
+          "Scandia Vipp fåtölj",
+          "Scandia Vipp stol",
+          "Hans Brattrud Scandia Vipp"
+        ],
+        "english": [
+          "Scandia Vipp armchair",
+          "Scandia Vipp lounge chair",
+          "Hans Brattrud Scandia Vipp"
+        ],
+        "danish": [
+          "Scandia Vipp lænestol"
+        ],
+        "norwegian": [
+          "Scandia Vipp lenestol"
+        ],
+        "no_diacritics": [],
+        "generic_seller_terms": [
+          "retro fåtölj",
+          "vintage armchair",
+          "dansk fåtölj",
+          "Scandinavian armchair",
+          "teak chair"
+        ]
+      },
+      "authentication_markers": [],
+      "condition_red_flags": [],
+      "notes": "Same Brattrud-family economics as Scandia Junior.",
+      "price_basis": "ESTIMATE — Sarah's working sourcing thresholds, 2026-09-21, not verified market data"
+    },
+    {
+      "model": "Siesta",
+      "designer": "Ingmar Relling",
+      "manufacturer": null,
+      "country": "Norway",
+      "production_period": null,
+      "vedda_status": "BUY",
+      "upholstery_strategy": "PARTIAL_RESTORE",
+      "buy_max_sek": 3000,
+      "target_resale_sek": [
+        5000,
+        9000
+      ],
+      "refurbishment_cost_sek": [
+        5000,
+        7000
+      ],
+      "original_material_value": "LOW",
+      "collector_sensitivity": "LOW",
+      "findability": "HIGH",
+      "search_priority": "HIGH",
+      "search_terms": {
+        "official": [
+          "Siesta"
+        ],
+        "swedish": [
+          "Siesta fåtölj",
+          "Siesta stol",
+          "Ingmar Relling Siesta"
+        ],
+        "english": [
+          "Siesta armchair",
+          "Siesta lounge chair",
+          "Ingmar Relling Siesta"
+        ],
+        "danish": [
+          "Siesta lænestol"
+        ],
+        "norwegian": [
+          "Siesta lenestol"
+        ],
+        "no_diacritics": [],
+        "generic_seller_terms": [
+          "retro fåtölj",
+          "vintage armchair",
+          "dansk fåtölj",
+          "Scandinavian armchair",
+          "teak chair"
+        ]
+      },
+      "authentication_markers": [],
+      "condition_red_flags": [],
+      "notes": "Very findable and cheap to acquire; only fair reupholstery response so treat conservatively.",
+      "price_basis": "ESTIMATE — Sarah's working sourcing thresholds, 2026-09-21, not verified market data"
+    },
+    {
+      "model": "Lani",
+      "designer": "Sven Ivar Dysthe",
+      "manufacturer": null,
+      "country": "Norway",
+      "production_period": null,
+      "vedda_status": "BUY",
+      "upholstery_strategy": "REUPHOLSTER",
+      "buy_max_sek": 4000,
+      "target_resale_sek": [
+        6000,
+        12000
+      ],
+      "refurbishment_cost_sek": [
+        4000,
+        5500
+      ],
+      "original_material_value": "LOW",
+      "collector_sensitivity": "LOW",
+      "findability": "MEDIUM",
+      "search_priority": "HIGH",
+      "search_terms": {
+        "official": [
+          "Lani"
+        ],
+        "swedish": [
+          "Lani fåtölj",
+          "Lani stol",
+          "Sven Ivar Dysthe Lani"
+        ],
+        "english": [
+          "Lani armchair",
+          "Lani lounge chair",
+          "Sven Ivar Dysthe Lani"
+        ],
+        "danish": [
+          "Lani lænestol"
+        ],
+        "norwegian": [
+          "Lani lenestol"
+        ],
+        "no_diacritics": [],
+        "generic_seller_terms": [
+          "retro fåtölj",
+          "vintage armchair",
+          "dansk fåtölj",
+          "Scandinavian armchair",
+          "teak chair"
+        ]
+      },
+      "authentication_markers": [],
+      "condition_red_flags": [],
+      "notes": "Solid margin, underidentified in the Swedish/Norwegian market.",
+      "price_basis": "ESTIMATE — Sarah's working sourcing thresholds, 2026-09-21, not verified market data"
+    },
+    {
+      "model": "Minerva",
+      "designer": "Karl-Erik Ekselius",
+      "manufacturer": null,
+      "country": "Sweden",
+      "production_period": null,
+      "vedda_status": "BUY",
+      "upholstery_strategy": "REUPHOLSTER",
+      "buy_max_sek": 4000,
+      "target_resale_sek": [
+        6000,
+        12000
+      ],
+      "refurbishment_cost_sek": [
+        4000,
+        5500
+      ],
+      "original_material_value": "LOW",
+      "collector_sensitivity": "LOW",
+      "findability": "MEDIUM",
+      "search_priority": "HIGH",
+      "search_terms": {
+        "official": [
+          "Minerva"
+        ],
+        "swedish": [
+          "Minerva fåtölj",
+          "Minerva stol",
+          "Karl-Erik Ekselius Minerva"
+        ],
+        "english": [
+          "Minerva armchair",
+          "Minerva lounge chair",
+          "Karl-Erik Ekselius Minerva"
+        ],
+        "danish": [
+          "Minerva lænestol"
+        ],
+        "norwegian": [
+          "Minerva lenestol"
+        ],
+        "no_diacritics": [],
+        "generic_seller_terms": [
+          "retro fåtölj",
+          "vintage armchair",
+          "dansk fåtölj",
+          "Scandinavian armchair",
+          "teak chair"
+        ]
+      },
+      "authentication_markers": [],
+      "condition_red_flags": [],
+      "notes": "Same Ekselius-family upside as F60, smaller scale.",
+      "price_basis": "ESTIMATE — Sarah's working sourcing thresholds, 2026-09-21, not verified market data"
+    },
+    {
+      "model": "AP26",
+      "designer": "Arne Vodder",
+      "manufacturer": null,
+      "country": "Denmark",
+      "production_period": null,
+      "vedda_status": "BUY",
+      "upholstery_strategy": "REUPHOLSTER",
+      "buy_max_sek": 5000,
+      "target_resale_sek": [
+        8000,
+        15000
+      ],
+      "refurbishment_cost_sek": [
+        4000,
+        5500
+      ],
+      "original_material_value": "LOW",
+      "collector_sensitivity": "LOW",
+      "findability": "MEDIUM",
+      "search_priority": "HIGH",
+      "search_terms": {
+        "official": [
+          "AP26"
+        ],
+        "swedish": [
+          "AP26 fåtölj",
+          "AP26 stol",
+          "Arne Vodder AP26"
+        ],
+        "english": [
+          "AP26 armchair",
+          "AP26 lounge chair",
+          "Arne Vodder AP26"
+        ],
+        "danish": [
+          "AP26 lænestol"
+        ],
+        "norwegian": [
+          "AP26 lenestol"
+        ],
+        "no_diacritics": [],
+        "generic_seller_terms": [
+          "retro fåtölj",
+          "vintage armchair",
+          "dansk fåtölj",
+          "Scandinavian armchair",
+          "teak chair"
+        ]
+      },
+      "authentication_markers": [],
+      "condition_red_flags": [],
+      "notes": "Good Vodder-family margin.",
+      "price_basis": "ESTIMATE — Sarah's working sourcing thresholds, 2026-09-21, not verified market data"
+    },
+    {
+      "model": "Jetson",
+      "designer": "Bruno Mathsson",
+      "manufacturer": null,
+      "country": "Sweden",
+      "production_period": null,
+      "vedda_status": "MAYBE",
+      "upholstery_strategy": "PARTIAL_RESTORE",
+      "buy_max_sek": 5000,
+      "target_resale_sek": [
+        7000,
+        12000
+      ],
+      "refurbishment_cost_sek": [
+        5000,
+        7000
+      ],
+      "original_material_value": "LOW",
+      "collector_sensitivity": "LOW",
+      "findability": "MEDIUM",
+      "search_priority": "MEDIUM",
+      "search_terms": {
+        "official": [
+          "Jetson"
+        ],
+        "swedish": [
+          "Jetson fåtölj",
+          "Jetson stol",
+          "Bruno Mathsson Jetson"
+        ],
+        "english": [
+          "Jetson armchair",
+          "Jetson lounge chair",
+          "Bruno Mathsson Jetson"
+        ],
+        "danish": [
+          "Jetson lænestol"
+        ],
+        "norwegian": [
+          "Jetson lenestol"
+        ],
+        "no_diacritics": [],
+        "generic_seller_terms": [
+          "retro fåtölj",
+          "vintage armchair",
+          "dansk fåtölj",
+          "Scandinavian armchair",
+          "teak chair"
+        ]
+      },
+      "authentication_markers": [],
+      "condition_red_flags": [],
+      "notes": "Preserve the distinctive silhouette — treat as partial restore, not a full transformation.",
+      "price_basis": "ESTIMATE — Sarah's working sourcing thresholds, 2026-09-21, not verified market data"
+    },
+    {
+      "model": "Mondo",
+      "designer": "Bruno Mathsson",
+      "manufacturer": null,
+      "country": "Sweden",
+      "production_period": null,
+      "vedda_status": "MAYBE",
+      "upholstery_strategy": "REUPHOLSTER",
+      "buy_max_sek": 4000,
+      "target_resale_sek": [
+        6000,
+        10000
+      ],
+      "refurbishment_cost_sek": [
+        4000,
+        5500
+      ],
+      "original_material_value": "LOW",
+      "collector_sensitivity": "LOW",
+      "findability": "MEDIUM",
+      "search_priority": "MEDIUM",
+      "search_terms": {
+        "official": [
+          "Mondo"
+        ],
+        "swedish": [
+          "Mondo fåtölj",
+          "Mondo stol",
+          "Bruno Mathsson Mondo"
+        ],
+        "english": [
+          "Mondo armchair",
+          "Mondo lounge chair",
+          "Bruno Mathsson Mondo"
+        ],
+        "danish": [
+          "Mondo lænestol"
+        ],
+        "norwegian": [
+          "Mondo lenestol"
+        ],
+        "no_diacritics": [],
+        "generic_seller_terms": [
+          "retro fåtölj",
+          "vintage armchair",
+          "dansk fåtölj",
+          "Scandinavian armchair",
+          "teak chair"
+        ]
+      },
+      "authentication_markers": [],
+      "condition_red_flags": [],
+      "notes": "Reasonable margin, moderate demand.",
+      "price_basis": "ESTIMATE — Sarah's working sourcing thresholds, 2026-09-21, not verified market data"
+    },
+    {
+      "model": "F60",
+      "designer": "Karl-Erik Ekselius",
+      "manufacturer": null,
+      "country": "Sweden",
+      "production_period": null,
+      "vedda_status": "BUY",
+      "upholstery_strategy": "REUPHOLSTER",
+      "buy_max_sek": 4000,
+      "target_resale_sek": [
+        6000,
+        10000
+      ],
+      "refurbishment_cost_sek": [
+        4000,
+        5500
+      ],
+      "original_material_value": "LOW",
+      "collector_sensitivity": "LOW",
+      "findability": "MEDIUM",
+      "search_priority": "HIGH",
+      "search_terms": {
+        "official": [
+          "F60"
+        ],
+        "swedish": [
+          "F60 fåtölj",
+          "F60 stol",
+          "Karl-Erik Ekselius F60"
+        ],
+        "english": [
+          "F60 armchair",
+          "F60 lounge chair",
+          "Karl-Erik Ekselius F60"
+        ],
+        "danish": [
+          "F60 lænestol"
+        ],
+        "norwegian": [
+          "F60 lenestol"
+        ],
+        "no_diacritics": [],
+        "generic_seller_terms": [
+          "retro fåtölj",
+          "vintage armchair",
+          "dansk fåtölj",
+          "Scandinavian armchair",
+          "teak chair"
+        ]
+      },
+      "authentication_markers": [],
+      "condition_red_flags": [],
+      "notes": "Moved to BUY, not MAYBE — this is the headline example in CLAUDE.md's own buy filter (Ekselius karmstol ~800 kr vs Ekselius F60 ~9,763 kr), a proven, name-searched opportunity. ATTRIBUTION NOTE: corrected — F60 is Karl-Erik Ekselius, per CLAUDE.md's own pricing example. Sarah's MAYBE table had this as Bruno Mathsson; overridden per her confirmation, 2026-09-21.",
+      "price_basis": "ESTIMATE — Sarah's working sourcing thresholds, 2026-09-21, not verified market data"
+    },
+    {
+      "model": "Eva",
+      "designer": "Bruno Mathsson",
+      "manufacturer": null,
+      "country": "Sweden",
+      "production_period": null,
+      "vedda_status": "MAYBE",
+      "upholstery_strategy": "REUPHOLSTER",
+      "buy_max_sek": 3000,
+      "target_resale_sek": [
+        5000,
+        9000
+      ],
+      "refurbishment_cost_sek": [
+        4000,
+        5500
+      ],
+      "original_material_value": "LOW",
+      "collector_sensitivity": "LOW",
+      "findability": "MEDIUM",
+      "search_priority": "MEDIUM",
+      "search_terms": {
+        "official": [
+          "Eva"
+        ],
+        "swedish": [
+          "Eva fåtölj",
+          "Eva stol",
+          "Bruno Mathsson Eva"
+        ],
+        "english": [
+          "Eva armchair",
+          "Eva lounge chair",
+          "Bruno Mathsson Eva"
+        ],
+        "danish": [
+          "Eva lænestol"
+        ],
+        "norwegian": [
+          "Eva lenestol"
+        ],
+        "no_diacritics": [],
+        "generic_seller_terms": [
+          "retro fåtölj",
+          "vintage armchair",
+          "dansk fåtölj",
+          "Scandinavian armchair",
+          "teak chair"
+        ]
+      },
+      "authentication_markers": [],
+      "condition_red_flags": [],
+      "notes": "Reasonable smaller-margin flip.",
+      "price_basis": "ESTIMATE — Sarah's working sourcing thresholds, 2026-09-21, not verified market data"
+    },
+    {
+      "model": "Adam",
+      "designer": "Bruno Mathsson",
+      "manufacturer": null,
+      "country": "Sweden",
+      "production_period": null,
+      "vedda_status": "MAYBE",
+      "upholstery_strategy": "REUPHOLSTER",
+      "buy_max_sek": 3000,
+      "target_resale_sek": [
+        5000,
+        9000
+      ],
+      "refurbishment_cost_sek": [
+        4000,
+        5500
+      ],
+      "original_material_value": "LOW",
+      "collector_sensitivity": "LOW",
+      "findability": "MEDIUM",
+      "search_priority": "MEDIUM",
+      "search_terms": {
+        "official": [
+          "Adam"
+        ],
+        "swedish": [
+          "Adam fåtölj",
+          "Adam stol",
+          "Bruno Mathsson Adam"
+        ],
+        "english": [
+          "Adam armchair",
+          "Adam lounge chair",
+          "Bruno Mathsson Adam"
+        ],
+        "danish": [
+          "Adam lænestol"
+        ],
+        "norwegian": [
+          "Adam lenestol"
+        ],
+        "no_diacritics": [],
+        "generic_seller_terms": [
+          "retro fåtölj",
+          "vintage armchair",
+          "dansk fåtölj",
+          "Scandinavian armchair",
+          "teak chair"
+        ]
+      },
+      "authentication_markers": [],
+      "condition_red_flags": [],
+      "notes": "Same Mathsson-family economics as Eva.",
+      "price_basis": "ESTIMATE — Sarah's working sourcing thresholds, 2026-09-21, not verified market data"
+    },
+    {
+      "model": "Maria",
+      "designer": "Bruno Mathsson",
+      "manufacturer": null,
+      "country": "Sweden",
+      "production_period": null,
+      "vedda_status": "MAYBE",
+      "upholstery_strategy": "REUPHOLSTER",
+      "buy_max_sek": 3000,
+      "target_resale_sek": [
+        5000,
+        9000
+      ],
+      "refurbishment_cost_sek": [
+        4000,
+        5500
+      ],
+      "original_material_value": "LOW",
+      "collector_sensitivity": "LOW",
+      "findability": "MEDIUM",
+      "search_priority": "MEDIUM",
+      "search_terms": {
+        "official": [
+          "Maria"
+        ],
+        "swedish": [
+          "Maria fåtölj",
+          "Maria stol",
+          "Bruno Mathsson Maria"
+        ],
+        "english": [
+          "Maria armchair",
+          "Maria lounge chair",
+          "Bruno Mathsson Maria"
+        ],
+        "danish": [
+          "Maria lænestol"
+        ],
+        "norwegian": [
+          "Maria lenestol"
+        ],
+        "no_diacritics": [],
+        "generic_seller_terms": [
+          "retro fåtölj",
+          "vintage armchair",
+          "dansk fåtölj",
+          "Scandinavian armchair",
+          "teak chair"
+        ]
+      },
+      "authentication_markers": [],
+      "condition_red_flags": [],
+      "notes": "Same Mathsson-family economics as Eva.",
+      "price_basis": "ESTIMATE — Sarah's working sourcing thresholds, 2026-09-21, not verified market data"
+    },
+    {
+      "model": "Hemmakväll",
+      "designer": "Carl Malmsten",
+      "manufacturer": null,
+      "country": "Sweden",
+      "production_period": null,
+      "vedda_status": "MAYBE",
+      "upholstery_strategy": "REUPHOLSTER",
+      "buy_max_sek": 5000,
+      "target_resale_sek": [
+        7000,
+        12000
+      ],
+      "refurbishment_cost_sek": [
+        4000,
+        5500
+      ],
+      "original_material_value": "LOW",
+      "collector_sensitivity": "LOW",
+      "findability": "MEDIUM",
+      "search_priority": "MEDIUM",
+      "search_terms": {
+        "official": [
+          "Hemmakväll"
+        ],
+        "swedish": [
+          "Hemmakväll fåtölj",
+          "Hemmakväll stol",
+          "Carl Malmsten Hemmakväll"
+        ],
+        "english": [
+          "Hemmakväll armchair",
+          "Hemmakväll lounge chair",
+          "Carl Malmsten Hemmakväll"
+        ],
+        "danish": [
+          "Hemmakväll lænestol"
+        ],
+        "norwegian": [
+          "Hemmakväll lenestol"
+        ],
+        "no_diacritics": [
+          "Hemmakvall"
+        ],
+        "generic_seller_terms": [
+          "retro fåtölj",
+          "vintage armchair",
+          "dansk fåtölj",
+          "Scandinavian armchair",
+          "teak chair"
+        ]
+      },
+      "authentication_markers": [],
+      "condition_red_flags": [],
+      "notes": "Decent margin, Malmsten name carries some weight.",
+      "price_basis": "ESTIMATE — Sarah's working sourcing thresholds, 2026-09-21, not verified market data"
+    },
+    {
+      "model": "Samsas",
+      "designer": "Carl Malmsten",
+      "manufacturer": null,
+      "country": "Sweden",
+      "production_period": null,
+      "vedda_status": "MAYBE",
+      "upholstery_strategy": "REUPHOLSTER",
+      "buy_max_sek": 5000,
+      "target_resale_sek": [
+        7000,
+        15000
+      ],
+      "refurbishment_cost_sek": [
+        4000,
+        5500
+      ],
+      "original_material_value": "LOW",
+      "collector_sensitivity": "LOW",
+      "findability": "MEDIUM",
+      "search_priority": "MEDIUM",
+      "search_terms": {
+        "official": [
+          "Samsas"
+        ],
+        "swedish": [
+          "Samsas fåtölj",
+          "Samsas stol",
+          "Carl Malmsten Samsas"
+        ],
+        "english": [
+          "Samsas armchair",
+          "Samsas lounge chair",
+          "Carl Malmsten Samsas"
+        ],
+        "danish": [
+          "Samsas lænestol"
+        ],
+        "norwegian": [
+          "Samsas lenestol"
+        ],
+        "no_diacritics": [],
+        "generic_seller_terms": [
+          "retro fåtölj",
+          "vintage armchair",
+          "dansk fåtölj",
+          "Scandinavian armchair",
+          "teak chair"
+        ]
+      },
+      "authentication_markers": [],
+      "condition_red_flags": [],
+      "notes": "Wider resale range — worth tracking, price-dependent.",
+      "price_basis": "ESTIMATE — Sarah's working sourcing thresholds, 2026-09-21, not verified market data"
+    },
+    {
+      "model": "Lilla Sällskapet",
+      "designer": "Carl Malmsten",
+      "manufacturer": null,
+      "country": "Sweden",
+      "production_period": null,
+      "vedda_status": "MAYBE",
+      "upholstery_strategy": "REUPHOLSTER",
+      "buy_max_sek": 4000,
+      "target_resale_sek": [
+        6000,
+        12000
+      ],
+      "refurbishment_cost_sek": [
+        4000,
+        5500
+      ],
+      "original_material_value": "LOW",
+      "collector_sensitivity": "LOW",
+      "findability": "MEDIUM",
+      "search_priority": "MEDIUM",
+      "search_terms": {
+        "official": [
+          "Lilla Sällskapet",
+          "Lilla Sallskapet"
+        ],
+        "swedish": [
+          "Lilla Sällskapet fåtölj",
+          "Lilla Sällskapet stol",
+          "Carl Malmsten Lilla Sällskapet"
+        ],
+        "english": [
+          "Lilla Sällskapet armchair",
+          "Lilla Sällskapet lounge chair",
+          "Carl Malmsten Lilla Sällskapet"
+        ],
+        "danish": [
+          "Lilla Sällskapet lænestol"
+        ],
+        "norwegian": [
+          "Lilla Sällskapet lenestol"
+        ],
+        "no_diacritics": [
+          "Lilla Sallskapet"
+        ],
+        "generic_seller_terms": [
+          "retro fåtölj",
+          "vintage armchair",
+          "dansk fåtölj",
+          "Scandinavian armchair",
+          "teak chair"
+        ]
+      },
+      "authentication_markers": [],
+      "condition_red_flags": [],
+      "notes": "Decent margin. ATTRIBUTION NOTE: corrected — Lilla Sällskapet is Carl Malmsten, not an anonymous Swedish social-furniture series as previously assumed.",
+      "price_basis": "ESTIMATE — Sarah's working sourcing thresholds, 2026-09-21, not verified market data"
+    },
+    {
+      "model": "Lilla Åland",
+      "designer": "Carl Malmsten",
+      "manufacturer": null,
+      "country": "Sweden",
+      "production_period": null,
+      "vedda_status": "MAYBE",
+      "upholstery_strategy": "REUPHOLSTER",
+      "buy_max_sek": 2000,
+      "target_resale_sek": [
+        2000,
+        5000
+      ],
+      "refurbishment_cost_sek": [
+        5000,
+        7000
+      ],
+      "original_material_value": "LOW",
+      "collector_sensitivity": "LOW",
+      "findability": "MEDIUM",
+      "search_priority": "LOW",
+      "search_terms": {
+        "official": [
+          "Lilla Åland",
+          "Lilla Aland"
+        ],
+        "swedish": [
+          "Lilla Åland fåtölj",
+          "Lilla Åland stol",
+          "Carl Malmsten Lilla Åland"
+        ],
+        "english": [
+          "Lilla Åland armchair",
+          "Lilla Åland lounge chair",
+          "Carl Malmsten Lilla Åland"
+        ],
+        "danish": [
+          "Lilla Åland lænestol"
+        ],
+        "norwegian": [
+          "Lilla Åland lenestol"
+        ],
+        "no_diacritics": [
+          "Lilla Aland"
+        ],
+        "generic_seller_terms": [
+          "retro fåtölj",
+          "vintage armchair",
+          "dansk fåtölj",
+          "Scandinavian armchair",
+          "teak chair"
+        ]
+      },
+      "authentication_markers": [],
+      "condition_red_flags": [],
+      "notes": "Thin margin at the top of the buy range — only worth it cheap.",
+      "price_basis": "ESTIMATE — Sarah's working sourcing thresholds, 2026-09-21, not verified market data"
+    },
+    {
+      "model": "Colonial OW149",
+      "designer": "Ole Wanscher",
+      "manufacturer": null,
+      "country": "Denmark",
+      "production_period": null,
+      "vedda_status": "MAYBE",
+      "upholstery_strategy": "PARTIAL_RESTORE",
+      "buy_max_sek": 7000,
+      "target_resale_sek": [
+        10000,
+        18000
+      ],
+      "refurbishment_cost_sek": [
+        5000,
+        7000
+      ],
+      "original_material_value": "LOW",
+      "collector_sensitivity": "LOW",
+      "findability": "MEDIUM",
+      "search_priority": "MEDIUM",
+      "search_terms": {
+        "official": [
+          "Colonial OW149",
+          "OW149"
+        ],
+        "swedish": [
+          "Colonial OW149 fåtölj",
+          "Colonial OW149 stol",
+          "Ole Wanscher Colonial OW149"
+        ],
+        "english": [
+          "Colonial OW149 armchair",
+          "Colonial OW149 lounge chair",
+          "Ole Wanscher Colonial OW149"
+        ],
+        "danish": [
+          "Colonial OW149 lænestol"
+        ],
+        "norwegian": [
+          "Colonial OW149 lenestol"
+        ],
+        "no_diacritics": [],
+        "generic_seller_terms": [
+          "retro fåtölj",
+          "vintage armchair",
+          "dansk fåtölj",
+          "Scandinavian armchair",
+          "teak chair"
+        ]
+      },
+      "authentication_markers": [],
+      "condition_red_flags": [],
+      "notes": "Rattan/cane elements are part of the design — restore carefully rather than a blind full reupholster.",
+      "price_basis": "ESTIMATE — Sarah's working sourcing thresholds, 2026-09-21, not verified market data"
+    },
+    {
+      "model": "Fried Egg",
+      "designer": "Finn Juhl",
+      "manufacturer": null,
+      "country": "Denmark",
+      "production_period": null,
+      "vedda_status": "PRESERVE",
+      "upholstery_strategy": "PRESERVE_ORIGINAL",
+      "buy_max_sek": 12000,
+      "target_resale_sek": [
+        15000,
+        30000
+      ],
+      "refurbishment_cost_sek": null,
+      "original_material_value": "HIGH",
+      "collector_sensitivity": "HIGH",
+      "findability": "MEDIUM",
+      "search_priority": "MEDIUM",
+      "search_terms": {
+        "official": [
+          "Fried Egg"
+        ],
+        "swedish": [
+          "Fried Egg fåtölj",
+          "Fried Egg stol",
+          "Finn Juhl Fried Egg"
+        ],
+        "english": [
+          "Fried Egg armchair",
+          "Fried Egg lounge chair",
+          "Finn Juhl Fried Egg"
+        ],
+        "danish": [
+          "Fried Egg lænestol"
+        ],
+        "norwegian": [
+          "Fried Egg lenestol"
+        ],
+        "no_diacritics": [],
+        "generic_seller_terms": [
+          "retro fåtölj",
+          "vintage armchair",
+          "dansk fåtölj",
+          "Scandinavian armchair",
+          "teak chair"
+        ]
+      },
+      "authentication_markers": [],
+      "condition_red_flags": [],
+      "notes": "High acquisition cost and real collector value in original condition — search but flag PRESERVE, only reupholster if bought exceptionally cheap and condition forces it.",
+      "price_basis": "ESTIMATE — Sarah's working sourcing thresholds, 2026-09-21, not verified market data"
+    },
+    {
+      "model": "Hunter",
+      "designer": "Torbjørn Afdal",
+      "manufacturer": null,
+      "country": "Norway",
+      "production_period": null,
+      "vedda_status": "MAYBE",
+      "upholstery_strategy": "REUPHOLSTER",
+      "buy_max_sek": 5000,
+      "target_resale_sek": [
+        7000,
+        15000
+      ],
+      "refurbishment_cost_sek": [
+        4000,
+        5500
+      ],
+      "original_material_value": "LOW",
+      "collector_sensitivity": "LOW",
+      "findability": "MEDIUM",
+      "search_priority": "MEDIUM",
+      "search_terms": {
+        "official": [
+          "Hunter"
+        ],
+        "swedish": [
+          "Hunter fåtölj",
+          "Hunter stol",
+          "Torbjørn Afdal Hunter"
+        ],
+        "english": [
+          "Hunter armchair",
+          "Hunter lounge chair",
+          "Torbjørn Afdal Hunter"
+        ],
+        "danish": [
+          "Hunter lænestol"
+        ],
+        "norwegian": [
+          "Hunter lenestol"
+        ],
+        "no_diacritics": [
+          "Torbjorn Afdal",
+          "Torbjorn Afdal Hunter"
+        ],
+        "generic_seller_terms": [
+          "retro fåtölj",
+          "vintage armchair",
+          "dansk fåtölj",
+          "Scandinavian armchair",
+          "teak chair"
+        ]
+      },
+      "authentication_markers": [],
+      "condition_red_flags": [],
+      "notes": "Good margin, worth tracking.",
+      "price_basis": "ESTIMATE — Sarah's working sourcing thresholds, 2026-09-21, not verified market data"
+    },
+    {
+      "model": "Arktis",
+      "designer": "Hans Brattrud",
+      "manufacturer": null,
+      "country": "Norway",
+      "production_period": null,
+      "vedda_status": "MAYBE",
+      "upholstery_strategy": "REUPHOLSTER",
+      "buy_max_sek": 4000,
+      "target_resale_sek": [
+        5000,
+        10000
+      ],
+      "refurbishment_cost_sek": [
+        4000,
+        5500
+      ],
+      "original_material_value": "LOW",
+      "collector_sensitivity": "LOW",
+      "findability": "MEDIUM",
+      "search_priority": "MEDIUM",
+      "search_terms": {
+        "official": [
+          "Arktis"
+        ],
+        "swedish": [
+          "Arktis fåtölj",
+          "Arktis stol",
+          "Hans Brattrud Arktis"
+        ],
+        "english": [
+          "Arktis armchair",
+          "Arktis lounge chair",
+          "Hans Brattrud Arktis"
+        ],
+        "danish": [
+          "Arktis lænestol"
+        ],
+        "norwegian": [
+          "Arktis lenestol"
+        ],
+        "no_diacritics": [],
+        "generic_seller_terms": [
+          "retro fåtölj",
+          "vintage armchair",
+          "dansk fåtölj",
+          "Scandinavian armchair",
+          "teak chair"
+        ]
+      },
+      "authentication_markers": [],
+      "condition_red_flags": [],
+      "notes": "Same Brattrud-family economics.",
+      "price_basis": "ESTIMATE — Sarah's working sourcing thresholds, 2026-09-21, not verified market data"
+    },
+    {
+      "model": "Safari",
+      "designer": "Kaare Klint",
+      "manufacturer": null,
+      "country": "Denmark",
+      "production_period": null,
+      "vedda_status": "MAYBE",
+      "upholstery_strategy": "PARTIAL_RESTORE",
+      "buy_max_sek": 8000,
+      "target_resale_sek": [
+        10000,
+        18000
+      ],
+      "refurbishment_cost_sek": [
+        5000,
+        7000
+      ],
+      "original_material_value": "LOW",
+      "collector_sensitivity": "MEDIUM",
+      "findability": "LOW",
+      "search_priority": "LOW",
+      "search_terms": {
+        "official": [
+          "Safari"
+        ],
+        "swedish": [
+          "Safari fåtölj",
+          "Safari stol",
+          "Kaare Klint Safari"
+        ],
+        "english": [
+          "Safari armchair",
+          "Safari lounge chair",
+          "Kaare Klint Safari"
+        ],
+        "danish": [
+          "Safari lænestol"
+        ],
+        "norwegian": [
+          "Safari lenestol"
+        ],
+        "no_diacritics": [],
+        "generic_seller_terms": [
+          "retro fåtölj",
+          "vintage armchair",
+          "dansk fåtölj",
+          "Scandinavian armchair",
+          "teak chair"
+        ]
+      },
+      "authentication_markers": [],
+      "condition_red_flags": [],
+      "notes": "Canvas/leather safari-chair construction is part of the design language — restore carefully.",
+      "price_basis": "ESTIMATE — Sarah's working sourcing thresholds, 2026-09-21, not verified market data"
+    },
+    {
+      "model": "Spanish Chair",
+      "designer": "Børge Mogensen",
+      "manufacturer": null,
+      "country": "Denmark",
+      "production_period": null,
+      "vedda_status": "PRESERVE",
+      "upholstery_strategy": "PRESERVE_ORIGINAL",
+      "buy_max_sek": 10000,
+      "target_resale_sek": [
+        10000,
+        20000
+      ],
+      "refurbishment_cost_sek": null,
+      "original_material_value": "HIGH",
+      "collector_sensitivity": "HIGH",
+      "findability": "HIGH",
+      "search_priority": "MEDIUM",
+      "search_terms": {
+        "official": [
+          "Spanish Chair"
+        ],
+        "swedish": [
+          "Spanish Chair fåtölj",
+          "Spanish Chair stol",
+          "Børge Mogensen Spanish Chair"
+        ],
+        "english": [
+          "Spanish Chair armchair",
+          "Spanish Chair lounge chair",
+          "Børge Mogensen Spanish Chair"
+        ],
+        "danish": [
+          "Spanish Chair lænestol"
+        ],
+        "norwegian": [
+          "Spanish Chair lenestol"
+        ],
+        "no_diacritics": [
+          "Borge Mogensen",
+          "Borge Mogensen Spanish Chair"
+        ],
+        "generic_seller_terms": [
+          "retro fåtölj",
+          "vintage armchair",
+          "dansk fåtölj",
+          "Scandinavian armchair",
+          "teak chair"
+        ]
+      },
+      "authentication_markers": [],
+      "condition_red_flags": [],
+      "notes": "Original leather is the product. Search but only buy at an exceptionally low price; do not reupholster unless condition leaves no choice.",
+      "price_basis": "ESTIMATE — Sarah's working sourcing thresholds, 2026-09-21, not verified market data"
+    },
+    {
+      "model": "Hunting Chair",
+      "designer": "Børge Mogensen",
+      "manufacturer": null,
+      "country": "Denmark",
+      "production_period": null,
+      "vedda_status": "PRESERVE",
+      "upholstery_strategy": "PRESERVE_ORIGINAL",
+      "buy_max_sek": 8000,
+      "target_resale_sek": [
+        10000,
+        18000
+      ],
+      "refurbishment_cost_sek": null,
+      "original_material_value": "HIGH",
+      "collector_sensitivity": "HIGH",
+      "findability": "HIGH",
+      "search_priority": "MEDIUM",
+      "search_terms": {
+        "official": [
+          "Hunting Chair"
+        ],
+        "swedish": [
+          "Hunting Chair fåtölj",
+          "Hunting Chair stol",
+          "Børge Mogensen Hunting Chair"
+        ],
+        "english": [
+          "Hunting Chair armchair",
+          "Hunting Chair lounge chair",
+          "Børge Mogensen Hunting Chair"
+        ],
+        "danish": [
+          "Hunting Chair lænestol"
+        ],
+        "norwegian": [
+          "Hunting Chair lenestol"
+        ],
+        "no_diacritics": [
+          "Borge Mogensen",
+          "Borge Mogensen Hunting Chair"
+        ],
+        "generic_seller_terms": [
+          "retro fåtölj",
+          "vintage armchair",
+          "dansk fåtölj",
+          "Scandinavian armchair",
+          "teak chair"
+        ]
+      },
+      "authentication_markers": [],
+      "condition_red_flags": [],
+      "notes": "Same leather-sensitivity logic as the Spanish Chair.",
+      "price_basis": "ESTIMATE — Sarah's working sourcing thresholds, 2026-09-21, not verified market data"
+    },
+    {
+      "model": "J39",
+      "designer": "Børge Mogensen",
+      "manufacturer": null,
+      "country": "Denmark",
+      "production_period": null,
+      "vedda_status": "MAYBE",
+      "upholstery_strategy": "PARTIAL_RESTORE",
+      "buy_max_sek": 2000,
+      "target_resale_sek": [
+        2500,
+        5000
+      ],
+      "refurbishment_cost_sek": [
+        4000,
+        5500
+      ],
+      "original_material_value": "LOW",
+      "collector_sensitivity": "LOW",
+      "findability": "HIGH",
+      "search_priority": "LOW",
+      "search_terms": {
+        "official": [
+          "J39"
+        ],
+        "swedish": [
+          "J39 fåtölj",
+          "J39 stol",
+          "Børge Mogensen J39"
+        ],
+        "english": [
+          "J39 armchair",
+          "J39 lounge chair",
+          "Børge Mogensen J39"
+        ],
+        "danish": [
+          "J39 lænestol"
+        ],
+        "norwegian": [
+          "J39 lenestol"
+        ],
+        "no_diacritics": [
+          "Borge Mogensen",
+          "Borge Mogensen J39"
+        ],
+        "generic_seller_terms": [
+          "retro fåtölj",
+          "vintage armchair",
+          "dansk fåtölj",
+          "Scandinavian armchair",
+          "teak chair"
+        ]
+      },
+      "authentication_markers": [],
+      "condition_red_flags": [],
+      "notes": "Thin margin (mostly a wood/wicker seat, little upholstery to add value) but very cheap and very findable — a volume play, not a showpiece.",
+      "price_basis": "ESTIMATE — Sarah's working sourcing thresholds, 2026-09-21, not verified market data"
+    },
+    {
+      "model": "CH24",
+      "designer": "Hans Wegner",
+      "manufacturer": null,
+      "country": "Denmark",
+      "production_period": null,
+      "vedda_status": "PRESERVE",
+      "upholstery_strategy": "PRESERVE_ORIGINAL",
+      "buy_max_sek": 5000,
+      "target_resale_sek": [
+        5000,
+        10000
+      ],
+      "refurbishment_cost_sek": null,
+      "original_material_value": "HIGH",
+      "collector_sensitivity": "HIGH",
+      "findability": "HIGH",
+      "search_priority": "MEDIUM",
+      "search_terms": {
+        "official": [
+          "CH24",
+          "Wishbone Chair",
+          "Y-Chair"
+        ],
+        "swedish": [
+          "CH24 fåtölj",
+          "CH24 stol",
+          "Hans J. Wegner CH24"
+        ],
+        "english": [
+          "CH24 armchair",
+          "CH24 lounge chair",
+          "Hans J. Wegner CH24"
+        ],
+        "danish": [
+          "CH24 lænestol"
+        ],
+        "norwegian": [
+          "CH24 lenestol"
+        ],
+        "no_diacritics": [],
+        "generic_seller_terms": [
+          "retro fåtölj",
+          "vintage armchair",
+          "dansk fåtölj",
+          "Scandinavian armchair",
+          "teak chair"
+        ]
+      },
+      "authentication_markers": [],
+      "condition_red_flags": [],
+      "notes": "The Wishbone Chair — paper-cord seat is intrinsic to the design, not something Vedda should be reupholstering. Search as a recognisable, findable name; sell close to original.",
+      "price_basis": "ESTIMATE — Sarah's working sourcing thresholds, 2026-09-21, not verified market data"
+    },
+    {
+      "model": "CH07",
+      "designer": "Hans Wegner",
+      "manufacturer": null,
+      "country": "Denmark",
+      "production_period": null,
+      "vedda_status": "PRESERVE",
+      "upholstery_strategy": "PRESERVE_ORIGINAL",
+      "buy_max_sek": 20000,
+      "target_resale_sek": [
+        20000,
+        40000
+      ],
+      "refurbishment_cost_sek": null,
+      "original_material_value": "HIGH",
+      "collector_sensitivity": "HIGH",
+      "findability": "MEDIUM",
+      "search_priority": "LOW",
+      "search_terms": {
+        "official": [
+          "CH07",
+          "Shell Chair"
+        ],
+        "swedish": [
+          "CH07 fåtölj",
+          "CH07 stol",
+          "Hans J. Wegner CH07"
+        ],
+        "english": [
+          "CH07 armchair",
+          "CH07 lounge chair",
+          "Hans J. Wegner CH07"
+        ],
+        "danish": [
+          "CH07 lænestol"
+        ],
+        "norwegian": [
+          "CH07 lenestol"
+        ],
+        "no_diacritics": [],
+        "generic_seller_terms": [
+          "retro fåtölj",
+          "vintage armchair",
+          "dansk fåtölj",
+          "Scandinavian armchair",
+          "teak chair"
+        ]
+      },
+      "authentication_markers": [],
+      "condition_red_flags": [],
+      "notes": "The Shell Chair — high acquisition cost, real collector value. Only worth sourcing at an unusually low price.",
+      "price_basis": "ESTIMATE — Sarah's working sourcing thresholds, 2026-09-21, not verified market data"
+    },
+    {
+      "model": "Papa Bear",
+      "designer": "Hans Wegner",
+      "manufacturer": null,
+      "country": "Denmark",
+      "production_period": null,
+      "vedda_status": "PRESERVE",
+      "upholstery_strategy": "DO_NOT_TOUCH",
+      "buy_max_sek": 15000,
+      "target_resale_sek": [
+        15000,
+        30000
+      ],
+      "refurbishment_cost_sek": null,
+      "original_material_value": "HIGH",
+      "collector_sensitivity": "HIGH",
+      "findability": "MEDIUM",
+      "search_priority": "LOW",
+      "search_terms": {
+        "official": [
+          "Papa Bear"
+        ],
+        "swedish": [
+          "Papa Bear fåtölj",
+          "Papa Bear stol",
+          "Hans J. Wegner Papa Bear"
+        ],
+        "english": [
+          "Papa Bear armchair",
+          "Papa Bear lounge chair",
+          "Hans J. Wegner Papa Bear"
+        ],
+        "danish": [
+          "Papa Bear lænestol"
+        ],
+        "norwegian": [
+          "Papa Bear lenestol"
+        ],
+        "no_diacritics": [],
+        "generic_seller_terms": [
+          "retro fåtölj",
+          "vintage armchair",
+          "dansk fåtölj",
+          "Scandinavian armchair",
+          "teak chair"
+        ]
+      },
+      "authentication_markers": [],
+      "condition_red_flags": [],
+      "notes": "Per Sarah's explicit list — original design/material is itself the product. High acquisition threshold, do not reupholster.",
+      "price_basis": "ESTIMATE — Sarah's working sourcing thresholds, 2026-09-21, not verified market data"
+    },
+    {
+      "model": "Ox Chair",
+      "designer": "Hans Wegner",
+      "manufacturer": null,
+      "country": "Denmark",
+      "production_period": null,
+      "vedda_status": "PRESERVE",
+      "upholstery_strategy": "DO_NOT_TOUCH",
+      "buy_max_sek": 15000,
+      "target_resale_sek": [
+        15000,
+        30000
+      ],
+      "refurbishment_cost_sek": null,
+      "original_material_value": "HIGH",
+      "collector_sensitivity": "HIGH",
+      "findability": "MEDIUM",
+      "search_priority": "LOW",
+      "search_terms": {
+        "official": [
+          "Ox Chair"
+        ],
+        "swedish": [
+          "Ox Chair fåtölj",
+          "Ox Chair stol",
+          "Hans J. Wegner Ox Chair"
+        ],
+        "english": [
+          "Ox Chair armchair",
+          "Ox Chair lounge chair",
+          "Hans J. Wegner Ox Chair"
+        ],
+        "danish": [
+          "Ox Chair lænestol"
+        ],
+        "norwegian": [
+          "Ox Chair lenestol"
+        ],
+        "no_diacritics": [],
+        "generic_seller_terms": [
+          "retro fåtölj",
+          "vintage armchair",
+          "dansk fåtölj",
+          "Scandinavian armchair",
+          "teak chair"
+        ]
+      },
+      "authentication_markers": [],
+      "condition_red_flags": [],
+      "notes": "Same rationale as Papa Bear — do not reupholster.",
+      "price_basis": "ESTIMATE — Sarah's working sourcing thresholds, 2026-09-21, not verified market data"
+    },
+    {
+      "model": "Egg",
+      "designer": "Arne Jacobsen",
+      "manufacturer": null,
+      "country": "Denmark",
+      "production_period": null,
+      "vedda_status": "PRESERVE",
+      "upholstery_strategy": "DO_NOT_TOUCH",
+      "buy_max_sek": 25000,
+      "target_resale_sek": [
+        20000,
+        45000
+      ],
+      "refurbishment_cost_sek": null,
+      "original_material_value": "HIGH",
+      "collector_sensitivity": "HIGH",
+      "findability": "HIGH",
+      "search_priority": "LOW",
+      "search_terms": {
+        "official": [
+          "Egg"
+        ],
+        "swedish": [
+          "Egg fåtölj",
+          "Egg stol",
+          "Arne Jacobsen Egg"
+        ],
+        "english": [
+          "Egg armchair",
+          "Egg lounge chair",
+          "Arne Jacobsen Egg"
+        ],
+        "danish": [
+          "Egg lænestol"
+        ],
+        "norwegian": [
+          "Egg lenestol"
+        ],
+        "no_diacritics": [],
+        "generic_seller_terms": [
+          "retro fåtölj",
+          "vintage armchair",
+          "dansk fåtölj",
+          "Scandinavian armchair",
+          "teak chair"
+        ]
+      },
+      "authentication_markers": [],
+      "condition_red_flags": [],
+      "notes": "Per Sarah's explicit list — extremely high acquisition price already, thin/no margin, heavily traded. Search only for a badly-priced outlier.",
+      "price_basis": "ESTIMATE — Sarah's working sourcing thresholds, 2026-09-21, not verified market data"
+    },
+    {
+      "model": "Swan",
+      "designer": "Arne Jacobsen",
+      "manufacturer": null,
+      "country": "Denmark",
+      "production_period": null,
+      "vedda_status": "PRESERVE",
+      "upholstery_strategy": "DO_NOT_TOUCH",
+      "buy_max_sek": 15000,
+      "target_resale_sek": [
+        12000,
+        25000
+      ],
+      "refurbishment_cost_sek": null,
+      "original_material_value": "HIGH",
+      "collector_sensitivity": "HIGH",
+      "findability": "HIGH",
+      "search_priority": "LOW",
+      "search_terms": {
+        "official": [
+          "Swan"
+        ],
+        "swedish": [
+          "Swan fåtölj",
+          "Swan stol",
+          "Arne Jacobsen Swan"
+        ],
+        "english": [
+          "Swan armchair",
+          "Swan lounge chair",
+          "Arne Jacobsen Swan"
+        ],
+        "danish": [
+          "Swan lænestol"
+        ],
+        "norwegian": [
+          "Swan lenestol"
+        ],
+        "no_diacritics": [],
+        "generic_seller_terms": [
+          "retro fåtölj",
+          "vintage armchair",
+          "dansk fåtölj",
+          "Scandinavian armchair",
+          "teak chair"
+        ]
+      },
+      "authentication_markers": [],
+      "condition_red_flags": [],
+      "notes": "Same rationale as Egg.",
+      "price_basis": "ESTIMATE — Sarah's working sourcing thresholds, 2026-09-21, not verified market data"
+    },
+    {
+      "model": "Series 7",
+      "designer": "Arne Jacobsen",
+      "manufacturer": null,
+      "country": "Denmark",
+      "production_period": null,
+      "vedda_status": "MAYBE",
+      "upholstery_strategy": "PARTIAL_RESTORE",
+      "buy_max_sek": 2000,
+      "target_resale_sek": [
+        2000,
+        5000
+      ],
+      "refurbishment_cost_sek": [
+        5000,
+        7000
+      ],
+      "original_material_value": "LOW",
+      "collector_sensitivity": "LOW",
+      "findability": "HIGH",
+      "search_priority": "LOW",
+      "search_terms": {
+        "official": [
+          "Series 7"
+        ],
+        "swedish": [
+          "Series 7 fåtölj",
+          "Series 7 stol",
+          "Arne Jacobsen Series 7"
+        ],
+        "english": [
+          "Series 7 armchair",
+          "Series 7 lounge chair",
+          "Arne Jacobsen Series 7"
+        ],
+        "danish": [
+          "Series 7 lænestol"
+        ],
+        "norwegian": [
+          "Series 7 lenestol"
+        ],
+        "no_diacritics": [],
+        "generic_seller_terms": [
+          "retro fåtölj",
+          "vintage armchair",
+          "dansk fåtölj",
+          "Scandinavian armchair",
+          "teak chair"
+        ]
+      },
+      "authentication_markers": [],
+      "condition_red_flags": [],
+      "notes": "Cheap, very findable, thin margin — volume play only, not a showpiece.",
+      "price_basis": "ESTIMATE — Sarah's working sourcing thresholds, 2026-09-21, not verified market data"
+    },
+    {
+      "model": "Seal",
+      "designer": "Ib Kofod-Larsen",
+      "manufacturer": null,
+      "country": "Denmark",
+      "production_period": null,
+      "vedda_status": "MAYBE",
+      "upholstery_strategy": "PARTIAL_RESTORE",
+      "buy_max_sek": 8000,
+      "target_resale_sek": [
+        10000,
+        20000
+      ],
+      "refurbishment_cost_sek": [
+        5000,
+        7000
+      ],
+      "original_material_value": "LOW",
+      "collector_sensitivity": "LOW",
+      "findability": "MEDIUM",
+      "search_priority": "MEDIUM",
+      "search_terms": {
+        "official": [
+          "Seal"
+        ],
+        "swedish": [
+          "Seal fåtölj",
+          "Seal stol",
+          "Ib Kofod-Larsen Seal"
+        ],
+        "english": [
+          "Seal armchair",
+          "Seal lounge chair",
+          "Ib Kofod-Larsen Seal"
+        ],
+        "danish": [
+          "Seal lænestol"
+        ],
+        "norwegian": [
+          "Seal lenestol"
+        ],
+        "no_diacritics": [],
+        "generic_seller_terms": [
+          "retro fåtölj",
+          "vintage armchair",
+          "dansk fåtölj",
+          "Scandinavian armchair",
+          "teak chair"
+        ]
+      },
+      "authentication_markers": [],
+      "condition_red_flags": [],
+      "notes": "Decent margin, moderate findability.",
+      "price_basis": "ESTIMATE — Sarah's working sourcing thresholds, 2026-09-21, not verified market data"
+    },
+    {
+      "model": "Elizabeth",
+      "designer": "Ib Kofod-Larsen",
+      "manufacturer": null,
+      "country": "Denmark",
+      "production_period": null,
+      "vedda_status": "MAYBE",
+      "upholstery_strategy": "PARTIAL_RESTORE",
+      "buy_max_sek": 8000,
+      "target_resale_sek": [
+        10000,
+        20000
+      ],
+      "refurbishment_cost_sek": [
+        5000,
+        7000
+      ],
+      "original_material_value": "LOW",
+      "collector_sensitivity": "LOW",
+      "findability": "MEDIUM",
+      "search_priority": "MEDIUM",
+      "search_terms": {
+        "official": [
+          "Elizabeth"
+        ],
+        "swedish": [
+          "Elizabeth fåtölj",
+          "Elizabeth stol",
+          "Ib Kofod-Larsen Elizabeth"
+        ],
+        "english": [
+          "Elizabeth armchair",
+          "Elizabeth lounge chair",
+          "Ib Kofod-Larsen Elizabeth"
+        ],
+        "danish": [
+          "Elizabeth lænestol"
+        ],
+        "norwegian": [
+          "Elizabeth lenestol"
+        ],
+        "no_diacritics": [],
+        "generic_seller_terms": [
+          "retro fåtölj",
+          "vintage armchair",
+          "dansk fåtölj",
+          "Scandinavian armchair",
+          "teak chair"
+        ]
+      },
+      "authentication_markers": [],
+      "condition_red_flags": [],
+      "notes": "Same Kofod-Larsen economics as Seal.",
+      "price_basis": "ESTIMATE — Sarah's working sourcing thresholds, 2026-09-21, not verified market data"
+    },
+    {
+      "model": "Pelican",
+      "designer": "Finn Juhl",
+      "manufacturer": null,
+      "country": "Denmark",
+      "production_period": null,
+      "vedda_status": "PRESERVE",
+      "upholstery_strategy": "DO_NOT_TOUCH",
+      "buy_max_sek": 20000,
+      "target_resale_sek": [
+        20000,
+        40000
+      ],
+      "refurbishment_cost_sek": null,
+      "original_material_value": "HIGH",
+      "collector_sensitivity": "HIGH",
+      "findability": "LOW",
+      "search_priority": "LOW",
+      "search_terms": {
+        "official": [
+          "Pelican"
+        ],
+        "swedish": [
+          "Pelican fåtölj",
+          "Pelican stol",
+          "Finn Juhl Pelican"
+        ],
+        "english": [
+          "Pelican armchair",
+          "Pelican lounge chair",
+          "Finn Juhl Pelican"
+        ],
+        "danish": [
+          "Pelican lænestol"
+        ],
+        "norwegian": [
+          "Pelican lenestol"
+        ],
+        "no_diacritics": [],
+        "generic_seller_terms": [
+          "retro fåtölj",
+          "vintage armchair",
+          "dansk fåtölj",
+          "Scandinavian armchair",
+          "teak chair"
+        ]
+      },
+      "authentication_markers": [],
+      "condition_red_flags": [],
+      "notes": "Per Sarah's explicit list — original design/material is the product.",
+      "price_basis": "ESTIMATE — Sarah's working sourcing thresholds, 2026-09-21, not verified market data"
+    },
+    {
+      "model": "Chieftain",
+      "designer": "Finn Juhl",
+      "manufacturer": null,
+      "country": "Denmark",
+      "production_period": null,
+      "vedda_status": "PASS",
+      "upholstery_strategy": "DO_NOT_TOUCH",
+      "buy_max_sek": 20000,
+      "target_resale_sek": [
+        40000,
+        40000
+      ],
+      "refurbishment_cost_sek": null,
+      "original_material_value": "HIGH",
+      "collector_sensitivity": "HIGH",
+      "findability": "LOW",
+      "search_priority": "LOW",
+      "search_terms": {
+        "official": [
+          "Chieftain"
+        ],
+        "swedish": [
+          "Chieftain fåtölj",
+          "Chieftain stol",
+          "Finn Juhl Chieftain"
+        ],
+        "english": [
+          "Chieftain armchair",
+          "Chieftain lounge chair",
+          "Finn Juhl Chieftain"
+        ],
+        "danish": [
+          "Chieftain lænestol"
+        ],
+        "norwegian": [
+          "Chieftain lenestol"
+        ],
+        "no_diacritics": [],
+        "generic_seller_terms": [
+          "retro fåtölj",
+          "vintage armchair",
+          "dansk fåtölj",
+          "Scandinavian armchair",
+          "teak chair"
+        ]
+      },
+      "authentication_markers": [],
+      "condition_red_flags": [],
+      "notes": "Per Sarah's explicit note — not a Vedda acquisition at normal prices. Keep in the scanner only to catch a wildly mispriced outlier.",
+      "price_basis": "ESTIMATE — Sarah's working sourcing thresholds, 2026-09-21, not verified market data"
+    },
+    {
+      "model": "NV-45",
+      "designer": "Finn Juhl",
+      "manufacturer": null,
+      "country": "Denmark",
+      "production_period": null,
+      "vedda_status": "PRESERVE",
+      "upholstery_strategy": "DO_NOT_TOUCH",
+      "buy_max_sek": 20000,
+      "target_resale_sek": [
+        20000,
+        40000
+      ],
+      "refurbishment_cost_sek": null,
+      "original_material_value": "HIGH",
+      "collector_sensitivity": "HIGH",
+      "findability": "LOW",
+      "search_priority": "LOW",
+      "search_terms": {
+        "official": [
+          "NV-45"
+        ],
+        "swedish": [
+          "NV-45 fåtölj",
+          "NV-45 stol",
+          "Finn Juhl NV-45"
+        ],
+        "english": [
+          "NV-45 armchair",
+          "NV-45 lounge chair",
+          "Finn Juhl NV-45"
+        ],
+        "danish": [
+          "NV-45 lænestol"
+        ],
+        "norwegian": [
+          "NV-45 lenestol"
+        ],
+        "no_diacritics": [],
+        "generic_seller_terms": [
+          "retro fåtölj",
+          "vintage armchair",
+          "dansk fåtölj",
+          "Scandinavian armchair",
+          "teak chair"
+        ]
+      },
+      "authentication_markers": [],
+      "condition_red_flags": [],
+      "notes": "Per Sarah's explicit list.",
+      "price_basis": "ESTIMATE — Sarah's working sourcing thresholds, 2026-09-21, not verified market data"
+    },
+    {
+      "model": "Egyptian Chair",
+      "designer": "Finn Juhl",
+      "manufacturer": null,
+      "country": "Denmark",
+      "production_period": null,
+      "vedda_status": "PRESERVE",
+      "upholstery_strategy": "DO_NOT_TOUCH",
+      "buy_max_sek": 20000,
+      "target_resale_sek": [
+        20000,
+        40000
+      ],
+      "refurbishment_cost_sek": null,
+      "original_material_value": "HIGH",
+      "collector_sensitivity": "HIGH",
+      "findability": "LOW",
+      "search_priority": "LOW",
+      "search_terms": {
+        "official": [
+          "Egyptian Chair"
+        ],
+        "swedish": [
+          "Egyptian Chair fåtölj",
+          "Egyptian Chair stol",
+          "Finn Juhl Egyptian Chair"
+        ],
+        "english": [
+          "Egyptian Chair armchair",
+          "Egyptian Chair lounge chair",
+          "Finn Juhl Egyptian Chair"
+        ],
+        "danish": [
+          "Egyptian Chair lænestol"
+        ],
+        "norwegian": [
+          "Egyptian Chair lenestol"
+        ],
+        "no_diacritics": [],
+        "generic_seller_terms": [
+          "retro fåtölj",
+          "vintage armchair",
+          "dansk fåtölj",
+          "Scandinavian armchair",
+          "teak chair"
+        ]
+      },
+      "authentication_markers": [],
+      "condition_red_flags": [],
+      "notes": "Per Sarah's explicit list — added, not in either table.",
+      "price_basis": "ESTIMATE — Sarah's working sourcing thresholds, 2026-09-21, not verified market data"
+    },
+    {
+      "model": "Baker Sofa",
+      "designer": "Finn Juhl",
+      "manufacturer": null,
+      "country": "Denmark",
+      "production_period": null,
+      "vedda_status": "PRESERVE",
+      "upholstery_strategy": "DO_NOT_TOUCH",
+      "buy_max_sek": 20000,
+      "target_resale_sek": [
+        20000,
+        40000
+      ],
+      "refurbishment_cost_sek": null,
+      "original_material_value": "HIGH",
+      "collector_sensitivity": "HIGH",
+      "findability": "LOW",
+      "search_priority": "LOW",
+      "search_terms": {
+        "official": [
+          "Baker Sofa"
+        ],
+        "swedish": [
+          "Baker Sofa fåtölj",
+          "Baker Sofa stol",
+          "Finn Juhl Baker Sofa"
+        ],
+        "english": [
+          "Baker Sofa armchair",
+          "Baker Sofa lounge chair",
+          "Finn Juhl Baker Sofa"
+        ],
+        "danish": [
+          "Baker Sofa lænestol"
+        ],
+        "norwegian": [
+          "Baker Sofa lenestol"
+        ],
+        "no_diacritics": [],
+        "generic_seller_terms": [
+          "retro fåtölj",
+          "vintage armchair",
+          "dansk fåtölj",
+          "Scandinavian armchair",
+          "teak chair"
+        ]
+      },
+      "authentication_markers": [],
+      "condition_red_flags": [],
+      "notes": "Per Sarah's explicit list — added, not in either table. Note: a sofa, but kept as a named PRESERVE target since the existing scanner's seating_type_words already includes 'soffa'/'sofa'.",
+      "price_basis": "ESTIMATE — Sarah's working sourcing thresholds, 2026-09-21, not verified market data"
+    },
+    {
+      "model": "PK22",
+      "designer": "Poul Kjærholm",
+      "manufacturer": null,
+      "country": "Denmark",
+      "production_period": null,
+      "vedda_status": "PRESERVE",
+      "upholstery_strategy": "DO_NOT_TOUCH",
+      "buy_max_sek": 15000,
+      "target_resale_sek": [
+        15000,
+        30000
+      ],
+      "refurbishment_cost_sek": null,
+      "original_material_value": "HIGH",
+      "collector_sensitivity": "HIGH",
+      "findability": "MEDIUM",
+      "search_priority": "LOW",
+      "search_terms": {
+        "official": [
+          "PK22",
+          "PK 22"
+        ],
+        "swedish": [
+          "PK22 fåtölj",
+          "PK22 stol",
+          "Poul Kjærholm PK22"
+        ],
+        "english": [
+          "PK22 armchair",
+          "PK22 lounge chair",
+          "Poul Kjærholm PK22"
+        ],
+        "danish": [
+          "PK22 lænestol"
+        ],
+        "norwegian": [
+          "PK22 lenestol"
+        ],
+        "no_diacritics": [
+          "Poul Kjaerholm",
+          "Poul Kjaerholm PK22"
+        ],
+        "generic_seller_terms": [
+          "retro fåtölj",
+          "vintage armchair",
+          "dansk fåtölj",
+          "Scandinavian armchair",
+          "teak chair"
+        ]
+      },
+      "authentication_markers": [],
+      "condition_red_flags": [],
+      "notes": "Per Sarah's explicit list.",
+      "price_basis": "ESTIMATE — Sarah's working sourcing thresholds, 2026-09-21, not verified market data"
+    },
+    {
+      "model": "PK80",
+      "designer": "Poul Kjærholm",
+      "manufacturer": null,
+      "country": "Denmark",
+      "production_period": null,
+      "vedda_status": "PRESERVE",
+      "upholstery_strategy": "DO_NOT_TOUCH",
+      "buy_max_sek": 15000,
+      "target_resale_sek": [
+        15000,
+        30000
+      ],
+      "refurbishment_cost_sek": null,
+      "original_material_value": "HIGH",
+      "collector_sensitivity": "HIGH",
+      "findability": "LOW",
+      "search_priority": "LOW",
+      "search_terms": {
+        "official": [
+          "PK80",
+          "PK 80"
+        ],
+        "swedish": [
+          "PK80 fåtölj",
+          "PK80 stol",
+          "Poul Kjærholm PK80"
+        ],
+        "english": [
+          "PK80 armchair",
+          "PK80 lounge chair",
+          "Poul Kjærholm PK80"
+        ],
+        "danish": [
+          "PK80 lænestol"
+        ],
+        "norwegian": [
+          "PK80 lenestol"
+        ],
+        "no_diacritics": [
+          "Poul Kjaerholm",
+          "Poul Kjaerholm PK80"
+        ],
+        "generic_seller_terms": [
+          "retro fåtölj",
+          "vintage armchair",
+          "dansk fåtölj",
+          "Scandinavian armchair",
+          "teak chair"
+        ]
+      },
+      "authentication_markers": [],
+      "condition_red_flags": [],
+      "notes": "Per Sarah's explicit list — a daybed, kept since seating_type_words covers daybeds via 'bänk'/'bench' style entries.",
+      "price_basis": "ESTIMATE — Sarah's working sourcing thresholds, 2026-09-21, not verified market data"
+    },
+    {
+      "model": "PK61",
+      "designer": "Poul Kjærholm",
+      "manufacturer": null,
+      "country": "Denmark",
+      "production_period": null,
+      "vedda_status": "PRESERVE",
+      "upholstery_strategy": "DO_NOT_TOUCH",
+      "buy_max_sek": 10000,
+      "target_resale_sek": [
+        10000,
+        20000
+      ],
+      "refurbishment_cost_sek": null,
+      "original_material_value": "HIGH",
+      "collector_sensitivity": "HIGH",
+      "findability": "MEDIUM",
+      "search_priority": "LOW",
+      "search_terms": {
+        "official": [
+          "PK61",
+          "PK 61"
+        ],
+        "swedish": [
+          "PK61 fåtölj",
+          "PK61 stol",
+          "Poul Kjærholm PK61"
+        ],
+        "english": [
+          "PK61 armchair",
+          "PK61 lounge chair",
+          "Poul Kjærholm PK61"
+        ],
+        "danish": [
+          "PK61 lænestol"
+        ],
+        "norwegian": [
+          "PK61 lenestol"
+        ],
+        "no_diacritics": [
+          "Poul Kjaerholm",
+          "Poul Kjaerholm PK61"
+        ],
+        "generic_seller_terms": [
+          "retro fåtölj",
+          "vintage armchair",
+          "dansk fåtölj",
+          "Scandinavian armchair",
+          "teak chair"
+        ]
+      },
+      "authentication_markers": [],
+      "condition_red_flags": [],
+      "notes": "Per Sarah's explicit list — a table; NOT added to the seating scanner (seating_only would exclude it anyway). Kept in model_database for reference only, deliberately excluded from models[]/model_designers.",
+      "price_basis": "ESTIMATE — Sarah's working sourcing thresholds, 2026-09-21, not verified market data"
+    }
+  ],
+  "model_database_comment": "Rich per-model commercial/sourcing record — vedda_status (BUY/MAYBE/PRESERVE/PASS), upholstery_strategy, price thresholds, multilingual search_terms. Built 2026-09-21 from Sarah's BUY/MAYBE tables plus her explicit collector-sensitive PRESERVE/PASS list. All prices are working sourcing thresholds, not verified market data — see each entry's price_basis field. models[]/model_designers/designers above are kept in sync with this for the existing flat-list scanner (fetch_*.py) — the scanner does NOT yet search the multilingual search_terms objects per model; that requires a separate engine change (see Sarah's session notes 2026-09-21). PK61 (a table) is deliberately excluded from models[]/model_designers/designers — kept here for reference only, seating_only would drop it anyway."
 }
